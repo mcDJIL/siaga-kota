@@ -9,7 +9,7 @@ const NAV_ITEMS = [
   { label: 'Laporan Sampah', href: '/dashboard/laporan-sampah', icon: Trash2 },
   { label: 'Laporan Banjir', href: '/officer/reports/flood', icon: Waves },
   { label: 'Peta Aktivitas', href: '/officer/activity-map', icon: MapPin },
-  { label: 'Notifikasi', href: '/dashboard/notifikasi', icon: Bell },
+  { label: 'Notifikasi', href: '/officer/notifications', icon: Bell },
   { label: 'Profil', href: '/dashboard/profil', icon: User },
 ]
 
