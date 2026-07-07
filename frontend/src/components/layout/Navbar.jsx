@@ -9,7 +9,7 @@ const NAV_LINKS = [
   { label: 'Peta', href: '/map' },
   { label: 'Lapor', href: '/report' },
   { label: 'Edukasi', href: '/education' },
-  { label: 'Tentang', href: '#' },
+  { label: 'Tentang', href: '/about' },
 ]
 
 export function Navbar() {

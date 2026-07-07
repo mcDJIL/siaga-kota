@@ -8,6 +8,7 @@ import { EducationPage } from './features/education/pages/EducationPage'
 import { ArticleDetailPage } from './features/education/pages/ArticleDetailPage'
 import { QuizPage } from './features/education/pages/QuizPage'
 import { QuizResultPage } from './features/education/pages/QuizResultPage'
+import { AboutPage } from './features/about/pages/AboutPage'
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
           <Route path="/education/quiz" element={<QuizPage />} />
           <Route path="/education/quiz/:id" element={<QuizPage />} />
           <Route path="/education/quiz/:id/result" element={<QuizResultPage />} />
+          <Route path="/about" element={<AboutPage />} />
         </Routes>
       </LandingLayout>
     </BrowserRouter>
