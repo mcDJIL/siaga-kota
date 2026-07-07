@@ -8,7 +8,7 @@ const NAV_LINKS = [
   { label: 'Beranda', href: '/' },
   { label: 'Peta', href: '/map' },
   { label: 'Lapor', href: '/report' },
-  { label: 'Edukasi', href: '#' },
+  { label: 'Edukasi', href: '/education' },
   { label: 'Tentang', href: '#' },
 ]
 
