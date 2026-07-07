@@ -15,6 +15,7 @@ import { LoginPage } from './features/auth/pages/LoginPage'
 import { RegisterPage } from './features/auth/pages/RegisterPage'
 import { ForgotPasswordPage } from './features/auth/pages/ForgotPasswordPage'
 import { OfficerDashboardPage } from './features/dashboard/officer/pages/OfficerDashboardPage'
+import { OfficerWasteReportDetailPage } from './features/dashboard/officer/pages/OfficerWasteReportDetailPage'
 
 function App() {
   return (
@@ -28,6 +29,14 @@ function App() {
           element={
             <DashboardLayout>
               <OfficerDashboardPage />
+            </DashboardLayout>
+          }
+        />
+        <Route
+          path="/officer/reports/waste/:reportId"
+          element={
+            <DashboardLayout>
+              <OfficerWasteReportDetailPage />
             </DashboardLayout>
           }
         />
