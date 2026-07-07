@@ -1,11 +1,12 @@
 import { useState } from 'react'
+import { NavLink, Link } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { cn } from '../../lib/cn'
 
 const NAV_LINKS = [
-  { label: 'Beranda', href: '#', active: true },
-  { label: 'Peta', href: '#' },
+  { label: 'Beranda', href: '/' },
+  { label: 'Peta', href: '/map' },
   { label: 'Lapor', href: '#' },
   { label: 'Edukasi', href: '#' },
   { label: 'Tentang', href: '#' },
@@ -17,27 +18,30 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 flex h-20 items-center justify-center bg-bg-soft shadow-[0_1px_2px_0_rgba(0,0,0,0.05)]">
       <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between px-4 sm:px-8">
-        <a href="#" className="flex shrink-0 items-center gap-3">
+        <Link to="/" className="flex shrink-0 items-center gap-3">
           <img
             src="https://api.builder.io/api/v1/image/assets/TEMP/c889e05212b1ac5462ea4f1b8445f955b693f483?width=120"
             alt="Logo SiagaKota"
             className="h-[58px] w-[60px]"
           />
           <span className="font-logo text-xl text-text-muted">SiagaKota</span>
-        </a>
+        </Link>
 
         <nav className="hidden items-center gap-10 lg:flex" aria-label="Navigasi utama">
           {NAV_LINKS.map((link) => (
-            <a
+            <NavLink
               key={link.label}
-              href={link.href}
-              className={cn(
-                'pb-1 font-sans text-sm font-medium tracking-[0.14px]',
-                link.active ? 'border-b-2 border-brand-green text-brand-green' : 'text-text-muted hover:text-navy'
-              )}
+              to={link.href}
+              end={link.href === '/'}
+              className={({ isActive }) =>
+                cn(
+                  'pb-1 font-sans text-sm font-medium tracking-[0.14px]',
+                  isActive ? 'border-b-2 border-brand-green text-brand-green' : 'text-text-muted hover:text-navy'
+                )
+              }
             >
               {link.label}
-            </a>
+            </NavLink>
           ))}
         </nav>
 
@@ -64,16 +68,20 @@ export function Navbar() {
       {isMenuOpen && (
         <div className="absolute top-20 left-0 right-0 flex flex-col gap-1 border-t border-border-muted bg-bg-soft px-4 py-4 shadow-md lg:hidden">
           {NAV_LINKS.map((link) => (
-            <a
+            <NavLink
               key={link.label}
-              href={link.href}
-              className={cn(
-                'rounded-lg px-3 py-2 font-sans text-sm font-medium',
-                link.active ? 'bg-brand-green/10 text-brand-green' : 'text-text-muted hover:bg-navy/5'
-              )}
+              to={link.href}
+              end={link.href === '/'}
+              onClick={() => setIsMenuOpen(false)}
+              className={({ isActive }) =>
+                cn(
+                  'rounded-lg px-3 py-2 font-sans text-sm font-medium',
+                  isActive ? 'bg-brand-green/10 text-brand-green' : 'text-text-muted hover:bg-navy/5'
+                )
+              }
             >
               {link.label}
-            </a>
+            </NavLink>
           ))}
           <div className="mt-2 flex flex-col gap-2">
             <Button variant="ghost" size="sm" className="w-full">
