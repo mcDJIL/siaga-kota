@@ -56,18 +56,18 @@ class AuthController extends Controller
     /**
      * @group Auth
      * @unauthenticated
-     * @bodyParam login string required Email atau nomor telepon.
+     * @bodyParam email string required Email pengguna.
      * @bodyParam password string required Password akun.
      */
     public function login(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'login' => ['required', 'string'],
+            'email' => ['required', 'string'],
             'password' => ['required', 'string'],
         ]);
 
         $user = User::query()
-            ->where('email', $data['login'])
+            ->where('email', $data['email'])
             ->first();
 
         if (! $user || ! Hash::check($data['password'], $user->password)) {
