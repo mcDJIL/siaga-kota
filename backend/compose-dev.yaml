@@ -1,0 +1,66 @@
+services:
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile.dev
+        ports:
+            - '8000:8000'
+        env_file:
+            - .env
+        volumes:
+            - '.:/var/www/html'
+        working_dir: /var/www/html
+        command: php artisan serve --host=0.0.0.0 --port=8000
+        depends_on:
+            pgsql:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+        networks:
+            - siagakota
+    pgsql:
+        image: 'postgis/postgis:16-3.4-alpine'
+        ports:
+            - '${DB_PORT:-5432}:5432'
+        environment:
+            POSTGRES_DB: '${DB_DATABASE:-siagakota}'
+            POSTGRES_USER: '${DB_USERNAME:-siagakota}'
+            POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
+        volumes:
+            - 'pgsql-data:/var/lib/postgresql/data'
+        networks:
+            - siagakota
+        healthcheck:
+            test:
+                - CMD
+                - pg_isready
+                - '-q'
+                - '-d'
+                - '${DB_DATABASE:-siagakota}'
+                - '-U'
+                - '${DB_USERNAME:-siagakota}'
+            retries: 3
+            timeout: 5s
+    redis:
+        image: 'redis:alpine'
+        ports:
+            - '${REDIS_PORT:-6379}:6379'
+        volumes:
+            - 'redis-data:/data'
+        networks:
+            - siagakota
+        healthcheck:
+            test:
+                - CMD
+                - redis-cli
+                - ping
+            retries: 3
+            timeout: 5s
+networks:
+    siagakota:
+        driver: bridge
+volumes:
+    pgsql-data:
+        driver: local
+    redis-data:
+        driver: local

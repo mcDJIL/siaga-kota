@@ -13,6 +13,15 @@ class AuthController extends Controller
 {
     public function register(Request $request): JsonResponse
     {
+        /**
+         * @group Auth
+         * @unauthenticated
+         * @bodyParam name string required Nama pengguna.
+         * @bodyParam email string required Email pengguna.
+         * @bodyParam phone string required Nomor telepon pengguna.
+         * @bodyParam password string required Password minimal 8 karakter.
+         * @bodyParam password_confirmation string required Konfirmasi password.
+         */
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255'],
@@ -44,6 +53,12 @@ class AuthController extends Controller
         ], 201);
     }
 
+    /**
+     * @group Auth
+     * @unauthenticated
+     * @bodyParam login string required Email atau nomor telepon.
+     * @bodyParam password string required Password akun.
+     */
     public function login(Request $request): JsonResponse
     {
         $data = $request->validate([
@@ -82,6 +97,10 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * @group Auth
+     * @authenticated
+     */
     public function logout(Request $request): JsonResponse
     {
         $request->user()?->currentAccessToken()?->delete();
@@ -91,6 +110,10 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * @group Auth
+     * @authenticated
+     */
     public function me(Request $request): JsonResponse
     {
         $user = $request->user();
@@ -102,6 +125,10 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * @group Auth
+     * @authenticated
+     */
     public function updateMe(Request $request): JsonResponse
     {
         $user = $request->user();
