@@ -1,11 +1,11 @@
-import { useState } from 'react'
+import { LandingLayout } from './layouts/LandingLayout'
+import { LandingPage } from './features/landing/pages/LandingPage'
 
 function App() {
-
   return (
-    <>
-
-    </>
+    <LandingLayout>
+      <LandingPage />
+    </LandingLayout>
   )
 }
 
