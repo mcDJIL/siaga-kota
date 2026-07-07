@@ -28,3 +28,21 @@
 body {
   font-family: var(--font-sans);
 }
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  #officer-print-root,
+  #officer-print-root * {
+    visibility: visible;
+  }
+
+  #officer-print-root {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+}
