@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { LandingLayout } from './layouts/LandingLayout'
 import { AuthLayout } from './layouts/AuthLayout'
+import { DashboardLayout } from './layouts/DashboardLayout'
 import { LandingPage } from './features/landing/pages/LandingPage'
 import { PredictionPage } from './features/prediction/pages/PredictionPage'
 import { MapPage } from './features/map/pages/MapPage'
@@ -13,6 +14,7 @@ import { AboutPage } from './features/about/pages/AboutPage'
 import { LoginPage } from './features/auth/pages/LoginPage'
 import { RegisterPage } from './features/auth/pages/RegisterPage'
 import { ForgotPasswordPage } from './features/auth/pages/ForgotPasswordPage'
+import { OfficerDashboardPage } from './features/dashboard/officer/pages/OfficerDashboardPage'
 
 function App() {
   return (
@@ -21,6 +23,14 @@ function App() {
         <Route path="/login" element={<AuthLayout><LoginPage /></AuthLayout>} />
         <Route path="/register" element={<AuthLayout><RegisterPage /></AuthLayout>} />
         <Route path="/forgot-password" element={<AuthLayout><ForgotPasswordPage /></AuthLayout>} />
+        <Route
+          path="/dashboard"
+          element={
+            <DashboardLayout>
+              <OfficerDashboardPage />
+            </DashboardLayout>
+          }
+        />
         <Route
           path="*"
           element={
