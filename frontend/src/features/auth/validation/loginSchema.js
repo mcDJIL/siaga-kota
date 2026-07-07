@@ -1,0 +1,7 @@
+import { z } from 'zod'
+
+export const loginSchema = z.object({
+  identifier: z.string().min(1, 'Email atau username wajib diisi'),
+  password: z.string().min(1, 'Kata sandi wajib diisi'),
+  rememberMe: z.boolean().optional(),
+})
