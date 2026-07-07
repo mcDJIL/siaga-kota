@@ -46,10 +46,10 @@ export function Navbar() {
         </nav>
 
         <div className="hidden items-center gap-4 lg:flex">
-          <Button variant="ghost" size="sm">
+          <Button as={Link} to="/login" variant="ghost" size="sm">
             Login
           </Button>
-          <Button variant="navy" size="sm">
+          <Button as={Link} to="/register" variant="navy" size="sm">
             Daftar
           </Button>
         </div>
@@ -84,10 +84,10 @@ export function Navbar() {
             </NavLink>
           ))}
           <div className="mt-2 flex flex-col gap-2">
-            <Button variant="ghost" size="sm" className="w-full">
+            <Button as={Link} to="/login" variant="ghost" size="sm" className="w-full">
               Login
             </Button>
-            <Button variant="navy" size="sm" className="w-full">
+            <Button as={Link} to="/register" variant="navy" size="sm" className="w-full">
               Daftar
             </Button>
           </div>
