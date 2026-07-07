@@ -7,7 +7,7 @@ import { OFFICER_PROFILE } from '../../data/dashboardData'
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutGrid, end: true },
   { label: 'Laporan Sampah', href: '/dashboard/laporan-sampah', icon: Trash2 },
-  { label: 'Laporan Banjir', href: '/dashboard/laporan-banjir', icon: Waves },
+  { label: 'Laporan Banjir', href: '/officer/reports/flood', icon: Waves },
   { label: 'Peta Aktivitas', href: '/dashboard/peta-aktivitas', icon: MapPin },
   { label: 'Notifikasi', href: '/dashboard/notifikasi', icon: Bell },
   { label: 'Profil', href: '/dashboard/profil', icon: User },

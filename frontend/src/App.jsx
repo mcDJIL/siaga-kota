@@ -16,6 +16,7 @@ import { RegisterPage } from './features/auth/pages/RegisterPage'
 import { ForgotPasswordPage } from './features/auth/pages/ForgotPasswordPage'
 import { OfficerDashboardPage } from './features/dashboard/officer/pages/OfficerDashboardPage'
 import { OfficerWasteReportDetailPage } from './features/dashboard/officer/pages/OfficerWasteReportDetailPage'
+import { OfficerFloodReportsPage } from './features/dashboard/officer/pages/OfficerFloodReportsPage'
 
 function App() {
   return (
@@ -37,6 +38,14 @@ function App() {
           element={
             <DashboardLayout>
               <OfficerWasteReportDetailPage />
+            </DashboardLayout>
+          }
+        />
+        <Route
+          path="/officer/reports/flood"
+          element={
+            <DashboardLayout>
+              <OfficerFloodReportsPage />
             </DashboardLayout>
           }
         />

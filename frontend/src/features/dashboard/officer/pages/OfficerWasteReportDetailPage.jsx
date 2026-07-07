@@ -4,7 +4,7 @@ import { ReporterInformationCard } from '../../shared/report-detail/components/R
 import { ReportTimelineCard } from '../../shared/report-detail/components/ReportTimelineCard'
 import { ReportGallery } from '../../shared/report-detail/components/ReportGallery'
 import { HandlingForm } from '../../shared/report-detail/components/HandlingForm'
-import { PrintReportDialog } from '../../shared/report-detail/components/PrintReportDialog'
+import { PrintReportDialog } from '../../shared/print/PrintReportDialog'
 import { ReportPrintTemplate } from '../../shared/report-detail/components/ReportPrintTemplate'
 import { WASTE_REPORT_DETAIL } from '../data/reportDetail'
 import { WASTE_REPORT_TIMELINE } from '../data/timelineData'

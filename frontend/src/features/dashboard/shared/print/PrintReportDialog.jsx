@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { Printer, X } from 'lucide-react'
-import { Button } from '../../../../../components/ui/Button'
+import { Button } from '../../../../components/ui/Button'
 
 export function PrintReportDialog({ isOpen, onClose, onConfirm }) {
   return (
@@ -35,8 +35,7 @@ export function PrintReportDialog({ isOpen, onClose, onConfirm }) {
             </div>
 
             <p className="text-sm text-text-muted">
-              Laporan akan dicetak lengkap dengan informasi pelapor, status penanganan, foto kejadian, dan catatan
-              penanganan.
+              Laporan akan dicetak lengkap dengan informasi, status, dan data yang sedang ditampilkan.
             </p>
 
             <div className="flex flex-col gap-3 pt-2 sm:flex-row-reverse">
