@@ -14,10 +14,10 @@ const sizes = {
   block: 'w-full py-4 rounded-lg font-sans text-lg sm:text-xl font-medium tracking-[0.14px]',
 }
 
-export function Button({ variant = 'primary', size = 'md', className, children, ...props }) {
+export function Button({ as: Component = 'button', variant = 'primary', size = 'md', className, children, ...props }) {
   return (
-    <button
-      type="button"
+    <Component
+      type={Component === 'button' ? 'button' : undefined}
       className={cn(
         'inline-flex items-center justify-center gap-2 text-center shadow-sm transition-colors',
         variants[variant],
@@ -27,6 +27,6 @@ export function Button({ variant = 'primary', size = 'md', className, children, 
       {...props}
     >
       {children}
-    </button>
+    </Component>
   )
 }
