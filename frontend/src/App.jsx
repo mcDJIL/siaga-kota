@@ -19,6 +19,7 @@ import { OfficerWasteReportDetailPage } from './features/dashboard/officer/pages
 import { OfficerFloodReportsPage } from './features/dashboard/officer/pages/OfficerFloodReportsPage'
 import { OfficerActivityMapPage } from './features/dashboard/officer/pages/OfficerActivityMapPage'
 import { OfficerNotificationPage } from './features/dashboard/officer/pages/OfficerNotificationPage'
+import { OfficerProfilePage } from './features/dashboard/officer/pages/OfficerProfilePage'
 
 function App() {
   return (
@@ -64,6 +65,14 @@ function App() {
           element={
             <DashboardLayout>
               <OfficerNotificationPage />
+            </DashboardLayout>
+          }
+        />
+        <Route
+          path="/officer/profile"
+          element={
+            <DashboardLayout>
+              <OfficerProfilePage />
             </DashboardLayout>
           }
         />

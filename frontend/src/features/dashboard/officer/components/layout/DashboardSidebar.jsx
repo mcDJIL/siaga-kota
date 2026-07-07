@@ -10,7 +10,7 @@ const NAV_ITEMS = [
   { label: 'Laporan Banjir', href: '/officer/reports/flood', icon: Waves },
   { label: 'Peta Aktivitas', href: '/officer/activity-map', icon: MapPin },
   { label: 'Notifikasi', href: '/officer/notifications', icon: Bell },
-  { label: 'Profil', href: '/dashboard/profil', icon: User },
+  { label: 'Profil', href: '/officer/profile', icon: User },
 ]
 
 function SidebarContent() {
