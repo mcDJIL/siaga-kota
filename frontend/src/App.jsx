@@ -37,6 +37,7 @@ import { CITIZEN_NAV_ITEMS, CITIZEN_PROFILE } from './features/dashboard/citizen
 import { GovernmentDashboardPage } from './features/government/dashboard/pages/GovernmentDashboardPage'
 import { GOVERNMENT_NAV_ITEMS, GOVERNMENT_PROFILE } from './features/government/dashboard/data/dashboardData'
 import { GovernmentWasteReportPage } from './features/government/waste-reports/pages/GovernmentWasteReportPage'
+import { GovernmentFloodReportPage } from './features/government/flood-reports/pages/GovernmentFloodReportPage'
 
 function App() {
   return (
@@ -248,6 +249,19 @@ function App() {
                 logoutHref="/login"
               >
                 <GovernmentWasteReportPage />
+              </DashboardLayout>
+            }
+          />
+          <Route
+            path="/government/flood-reports"
+            element={
+              <DashboardLayout
+                navItems={GOVERNMENT_NAV_ITEMS}
+                profile={GOVERNMENT_PROFILE}
+                profileHref="/government/profile"
+                logoutHref="/login"
+              >
+                <GovernmentFloodReportPage />
               </DashboardLayout>
             }
           />
