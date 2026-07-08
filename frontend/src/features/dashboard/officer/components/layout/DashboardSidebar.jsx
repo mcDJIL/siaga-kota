@@ -13,7 +13,7 @@ const NAV_ITEMS = [
   { label: 'Profil', href: '/officer/profile', icon: User },
 ]
 
-function SidebarContent() {
+function SidebarContent({ navItems, profile }) {
   return (
     <div className="flex h-full flex-col bg-navy py-6">
       <div className="flex items-center gap-3 px-6 pb-8">
@@ -28,8 +28,8 @@ function SidebarContent() {
         </div>
       </div>
 
-      <nav className="flex flex-1 flex-col gap-2 px-2" aria-label="Navigasi dashboard petugas">
-        {NAV_ITEMS.map((item) => (
+      <nav className="flex flex-1 flex-col gap-2 px-2" aria-label="Navigasi dashboard">
+        {navItems.map((item) => (
           <NavLink
             key={item.label}
             to={item.href}
@@ -49,25 +49,25 @@ function SidebarContent() {
 
       <div className="flex items-center gap-3 border-t border-navy-lighter/10 px-6 pt-6">
         <img
-          src={OFFICER_PROFILE.avatar}
-          alt={OFFICER_PROFILE.name}
+          src={profile.avatar}
+          alt={profile.name}
           className="h-10 w-10 rounded-full border-2 border-[#D6E3FF] object-cover"
         />
         <div className="flex flex-col">
-          <span className="text-sm font-bold text-white">{OFFICER_PROFILE.name}</span>
-          <span className="text-[10px] tracking-[-0.5px] text-navy-lighter/50 uppercase">{OFFICER_PROFILE.role}</span>
+          <span className="text-sm font-bold text-white">{profile.name}</span>
+          <span className="text-[10px] tracking-[-0.5px] text-navy-lighter/50 uppercase">{profile.role}</span>
         </div>
       </div>
     </div>
   )
 }
 
-export function DashboardSidebar({ isOpen, onClose }) {
+export function DashboardSidebar({ isOpen, onClose, navItems = NAV_ITEMS, profile = OFFICER_PROFILE }) {
   return (
     <>
       <aside className="hidden w-64 shrink-0 lg:block">
         <div className="fixed top-0 left-0 h-screen w-64">
-          <SidebarContent />
+          <SidebarContent navItems={navItems} profile={profile} />
         </div>
       </aside>
 
@@ -96,7 +96,7 @@ export function DashboardSidebar({ isOpen, onClose }) {
               >
                 <X className="h-5 w-5" />
               </button>
-              <SidebarContent />
+              <SidebarContent navItems={navItems} profile={profile} />
             </motion.div>
           </motion.div>
         )}

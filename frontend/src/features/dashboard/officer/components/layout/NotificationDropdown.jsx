@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Bell } from 'lucide-react'
 import { NOTIFICATIONS } from '../../data/dashboardData'
 
-export function NotificationDropdown() {
+export function NotificationDropdown({ notifications = NOTIFICATIONS }) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
@@ -18,7 +18,7 @@ export function NotificationDropdown() {
         className="relative flex items-center justify-center rounded-full p-2 text-text-muted hover:bg-bg-blue-soft"
       >
         <Bell className="h-5 w-5" />
-        {NOTIFICATIONS.length > 0 && (
+        {notifications.length > 0 && (
           <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-[#BA1A1A]" aria-hidden="true" />
         )}
       </motion.button>
@@ -41,7 +41,7 @@ export function NotificationDropdown() {
             >
               <p className="px-3 py-2 text-sm font-semibold text-navy">Notifikasi</p>
               <div className="flex flex-col">
-                {NOTIFICATIONS.map((notification) => (
+                {notifications.map((notification) => (
                   <div key={notification.id} className="flex flex-col gap-0.5 rounded-lg px-3 py-2 hover:bg-bg-soft">
                     <span className="text-sm font-semibold text-text-body">{notification.title}</span>
                     <span className="text-xs text-text-muted">{notification.description}</span>

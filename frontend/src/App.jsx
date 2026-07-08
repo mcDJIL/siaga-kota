@@ -21,6 +21,8 @@ import { OfficerActivityMapPage } from './features/dashboard/officer/pages/Offic
 import { OfficerNotificationPage } from './features/dashboard/officer/pages/OfficerNotificationPage'
 import { OfficerProfilePage } from './features/dashboard/officer/pages/OfficerProfilePage'
 import { OfficerWasteReportsPage } from './features/dashboard/officer/pages/OfficerWasteReportsPage'
+import { CitizenDashboardPage } from './features/dashboard/citizen/pages/CitizenDashboardPage'
+import { CITIZEN_NAV_ITEMS, CITIZEN_PROFILE } from './features/dashboard/citizen/data/dashboardData'
 
 function App() {
   return (
@@ -29,6 +31,19 @@ function App() {
         <Route path="/login" element={<AuthLayout><LoginPage /></AuthLayout>} />
         <Route path="/register" element={<AuthLayout><RegisterPage /></AuthLayout>} />
         <Route path="/forgot-password" element={<AuthLayout><ForgotPasswordPage /></AuthLayout>} />
+        <Route
+          path="/citizen/dashboard"
+          element={
+            <DashboardLayout
+              navItems={CITIZEN_NAV_ITEMS}
+              profile={CITIZEN_PROFILE}
+              profileHref="/citizen/profile"
+              logoutHref="/login"
+            >
+              <CitizenDashboardPage />
+            </DashboardLayout>
+          }
+        />
         <Route
           path="/officer/dashboard"
           element={

@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { LogOut, Settings, User } from 'lucide-react'
 import { OFFICER_PROFILE } from '../../data/dashboardData'
 
-export function ProfileDropdown() {
+export function ProfileDropdown({ profile = OFFICER_PROFILE, profileHref = '/officer/profile', logoutHref = '/login' }) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
@@ -38,20 +38,20 @@ export function ProfileDropdown() {
               className="absolute right-0 z-50 mt-2 w-56 rounded-xl border border-border-muted/30 bg-white p-2 shadow-[0_10px_15px_-3px_rgba(0,0,0,0.10),0_4px_6px_-4px_rgba(0,0,0,0.10)]"
             >
               <div className="flex items-center gap-2 px-3 py-2">
-                <img src={OFFICER_PROFILE.avatar} alt={OFFICER_PROFILE.name} className="h-8 w-8 rounded-full object-cover" />
+                <img src={profile.avatar} alt={profile.name} className="h-8 w-8 rounded-full object-cover" />
                 <div className="flex flex-col">
-                  <span className="text-sm font-semibold text-navy">{OFFICER_PROFILE.name}</span>
-                  <span className="text-xs text-text-muted">{OFFICER_PROFILE.role}</span>
+                  <span className="text-sm font-semibold text-navy">{profile.name}</span>
+                  <span className="text-xs text-text-muted">{profile.role}</span>
                 </div>
               </div>
               <Link
-                to="/dashboard/profil"
+                to={profileHref}
                 className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-text-body hover:bg-bg-soft"
               >
                 <User className="h-4 w-4" />
                 Profil Saya
               </Link>
-              <Link to="/login" className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-[#BA1A1A] hover:bg-bg-soft">
+              <Link to={logoutHref} className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-[#BA1A1A] hover:bg-bg-soft">
                 <LogOut className="h-4 w-4" />
                 Keluar
               </Link>
