@@ -11,7 +11,7 @@ export const GOVERNMENT_NAV_ITEMS = [
   { label: 'Laporan Sampah', href: '/government/waste-reports', icon: Trash2 },
   { label: 'Laporan Banjir', href: '/government/flood-reports', icon: Waves },
   { label: 'Peta Aktivitas', href: '/government/activity-map', icon: MapPin },
-  { label: 'Prediksi AI', href: '/government/prediction', icon: Share2 },
+  { label: 'Prediksi AI', href: '/government/ai-prediction', icon: Share2 },
   { label: 'Manajemen Pengguna', href: '/government/users', icon: UserCog },
   { label: 'Pengumuman', href: '/government/announcements', icon: Megaphone },
   { label: 'Ekspor Data', href: '/government/export', icon: Upload },
