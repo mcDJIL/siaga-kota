@@ -2,7 +2,7 @@ const FOOTER_LINKS = ['Kebijakan Privasi', 'Syarat & Ketentuan', 'Bantuan']
 
 export function AuthFooter() {
   return (
-    <footer className="flex flex-col items-center gap-2 py-6">
+    <footer className="flex flex-col items-center gap-2 pb-6">
       <nav className="flex items-center gap-3" aria-label="Tautan bantuan">
         {FOOTER_LINKS.map((link, index) => (
           <span key={link} className="flex items-center gap-3">

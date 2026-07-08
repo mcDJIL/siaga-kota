@@ -5,7 +5,7 @@ export function AnimatedAuthSwitcher({ children }) {
   const location = useLocation()
 
   return (
-    <div className="relative flex w-full flex-1 items-center justify-center overflow-hidden px-4 py-12 sm:px-8">
+    <div className="relative flex w-full flex-1 items-center justify-center overflow-hidden px-4 py-6 sm:px-8">
       <AnimatePresence mode="wait">
         <motion.div
           key={location.pathname}
