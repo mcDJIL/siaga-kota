@@ -22,6 +22,7 @@ import { OfficerNotificationPage } from './features/dashboard/officer/pages/Offi
 import { OfficerProfilePage } from './features/dashboard/officer/pages/OfficerProfilePage'
 import { OfficerWasteReportsPage } from './features/dashboard/officer/pages/OfficerWasteReportsPage'
 import { CitizenDashboardPage } from './features/dashboard/citizen/pages/CitizenDashboardPage'
+import { CitizenWasteReportPage } from './features/dashboard/citizen/reports/waste/pages/CitizenWasteReportPage'
 import { CITIZEN_NAV_ITEMS, CITIZEN_PROFILE } from './features/dashboard/citizen/data/dashboardData'
 
 function App() {
@@ -41,6 +42,19 @@ function App() {
               logoutHref="/login"
             >
               <CitizenDashboardPage />
+            </DashboardLayout>
+          }
+        />
+        <Route
+          path="/citizen/reports/create/waste"
+          element={
+            <DashboardLayout
+              navItems={CITIZEN_NAV_ITEMS}
+              profile={CITIZEN_PROFILE}
+              profileHref="/citizen/profile"
+              logoutHref="/login"
+            >
+              <CitizenWasteReportPage />
             </DashboardLayout>
           }
         />
