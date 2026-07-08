@@ -1,9 +1,9 @@
 import { useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ErrorLayout } from '@/layouts/ErrorLayout'
-import { ErrorIllustration } from '@/components/common/ErrorIllustration'
-import { ErrorActionButtons } from '@/components/common/ErrorActionButtons'
-import { useErrorNavigation } from '@/hooks/useErrorNavigation'
+import { ErrorLayout } from '../../../layouts/ErrorLayout'
+import { ErrorIllustration } from '../../../components/common/ErrorIllustration'
+import { ErrorActionButtons } from '../../../components/common/ErrorActionButtons'
+import { useErrorNavigation } from '../../../hooks/useErrorNavigation'
 
 export function NotFoundPage() {
   const location = useLocation()

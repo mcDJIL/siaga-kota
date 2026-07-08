@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion'
-import { ErrorLayout } from '@/layouts/ErrorLayout'
-import { ErrorIllustration } from '@/components/common/ErrorIllustration'
-import { ErrorActionButtons } from '@/components/common/ErrorActionButtons'
-import { useErrorNavigation } from '@/hooks/useErrorNavigation'
+import { ErrorLayout } from '../../../layouts/ErrorLayout'
+import { ErrorIllustration } from '../../../components/common/ErrorIllustration'
+import { ErrorActionButtons } from '../../../components/common/ErrorActionButtons'
+import { useErrorNavigation } from '../../../hooks/useErrorNavigation'
 
 function generateErrorId() {
   return `ERR-500-${String(Math.floor(Math.random() * 999) + 1).padStart(3, '0')}`

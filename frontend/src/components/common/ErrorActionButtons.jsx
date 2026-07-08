@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/Button'
+import { Button } from '../ui/Button'
 
 export function ErrorActionButtons({ actions = [] }) {
   if (!actions || actions.length === 0) return null

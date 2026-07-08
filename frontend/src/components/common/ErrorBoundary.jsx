@@ -1,5 +1,5 @@
 import { Component } from 'react'
-import { InternalServerErrorPage } from '@/features/error/pages/InternalServerErrorPage'
+import { InternalServerErrorPage } from '../../features/error/pages/InternalServerErrorPage'
 
 export class ErrorBoundary extends Component {
   constructor(props) {
