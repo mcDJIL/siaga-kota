@@ -34,6 +34,16 @@ import { CitizenGamificationPage } from './features/gamification/citizen/gamific
 import { CitizenBadgeCollectionPage } from './features/gamification/citizen/gamification/pages/CitizenBadgeCollectionPage'
 import { CitizenProfilePage } from './features/profile/citizen/profile/pages/CitizenProfilePage'
 import { CITIZEN_NAV_ITEMS, CITIZEN_PROFILE } from './features/dashboard/citizen/data/dashboardData'
+import { GovernmentDashboardPage } from './features/government/dashboard/pages/GovernmentDashboardPage'
+import { GOVERNMENT_NAV_ITEMS, GOVERNMENT_PROFILE } from './features/government/dashboard/data/dashboardData'
+import { GovernmentWasteReportPage } from './features/government/waste-reports/pages/GovernmentWasteReportPage'
+import { GovernmentFloodReportPage } from './features/government/flood-reports/pages/GovernmentFloodReportPage'
+import { GovernmentActivityMapPage } from './features/government/activity-map/pages/GovernmentActivityMapPage'
+import { GovernmentAIPredictionPage } from './features/government/ai-prediction/pages/GovernmentAIPredictionPage'
+import { GovernmentUserManagementPage } from './features/government/user-management/pages/GovernmentUserManagementPage'
+import { GovernmentAnnouncementsPage } from './features/government/announcements/pages/GovernmentAnnouncementsPage'
+import { GovernmentExportDataPage } from './features/government/export-data/pages/GovernmentExportDataPage'
+import { GovernmentProfilePage } from './features/government/profile/pages/GovernmentProfilePage'
 
 function App() {
   return (
@@ -217,6 +227,125 @@ function App() {
             element={
               <DashboardLayout>
                 <OfficerProfilePage />
+              </DashboardLayout>
+            }
+          />
+
+          {/* Government Routes */}
+          <Route
+            path="/government/dashboard"
+            element={
+              <DashboardLayout
+                navItems={GOVERNMENT_NAV_ITEMS}
+                profile={GOVERNMENT_PROFILE}
+                profileHref="/government/profile"
+                logoutHref="/login"
+              >
+                <GovernmentDashboardPage />
+              </DashboardLayout>
+            }
+          />
+          <Route
+            path="/government/waste-reports"
+            element={
+              <DashboardLayout
+                navItems={GOVERNMENT_NAV_ITEMS}
+                profile={GOVERNMENT_PROFILE}
+                profileHref="/government/profile"
+                logoutHref="/login"
+              >
+                <GovernmentWasteReportPage />
+              </DashboardLayout>
+            }
+          />
+          <Route
+            path="/government/flood-reports"
+            element={
+              <DashboardLayout
+                navItems={GOVERNMENT_NAV_ITEMS}
+                profile={GOVERNMENT_PROFILE}
+                profileHref="/government/profile"
+                logoutHref="/login"
+              >
+                <GovernmentFloodReportPage />
+              </DashboardLayout>
+            }
+          />
+          <Route
+            path="/government/activity-map"
+            element={
+              <DashboardLayout
+                navItems={GOVERNMENT_NAV_ITEMS}
+                profile={GOVERNMENT_PROFILE}
+                profileHref="/government/profile"
+                logoutHref="/login"
+              >
+                <GovernmentActivityMapPage />
+              </DashboardLayout>
+            }
+          />
+          <Route
+            path="/government/ai-prediction"
+            element={
+              <DashboardLayout
+                navItems={GOVERNMENT_NAV_ITEMS}
+                profile={GOVERNMENT_PROFILE}
+                profileHref="/government/profile"
+                logoutHref="/login"
+              >
+                <GovernmentAIPredictionPage />
+              </DashboardLayout>
+            }
+          />
+          <Route
+            path="/government/user-management"
+            element={
+              <DashboardLayout
+                navItems={GOVERNMENT_NAV_ITEMS}
+                profile={GOVERNMENT_PROFILE}
+                profileHref="/government/profile"
+                logoutHref="/login"
+              >
+                <GovernmentUserManagementPage />
+              </DashboardLayout>
+            }
+          />
+          <Route
+            path="/government/announcements"
+            element={
+              <DashboardLayout
+                navItems={GOVERNMENT_NAV_ITEMS}
+                profile={GOVERNMENT_PROFILE}
+                profileHref="/government/profile"
+                logoutHref="/login"
+              >
+                <GovernmentAnnouncementsPage />
+              </DashboardLayout>
+            }
+          />
+          <Route
+            path="/government/export-data"
+            element={
+              <DashboardLayout
+                navItems={GOVERNMENT_NAV_ITEMS}
+                profile={GOVERNMENT_PROFILE}
+                profileHref="/government/profile"
+                logoutHref="/login"
+              >
+                <GovernmentExportDataPage />
+              </DashboardLayout>
+            }
+          />
+          <Route
+            path="/government/profile"
+            element={
+              <DashboardLayout
+                navItems={GOVERNMENT_NAV_ITEMS}
+                profile={GOVERNMENT_PROFILE}
+                profileHref="/government/profile"
+                logoutHref="/login"
+              >
+                <GovernmentProfilePage />
               </DashboardLayout>
             }
           />
