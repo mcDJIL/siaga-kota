@@ -41,6 +41,7 @@ import { GovernmentFloodReportPage } from './features/government/flood-reports/p
 import { GovernmentActivityMapPage } from './features/government/activity-map/pages/GovernmentActivityMapPage'
 import { GovernmentAIPredictionPage } from './features/government/ai-prediction/pages/GovernmentAIPredictionPage'
 import { GovernmentUserManagementPage } from './features/government/user-management/pages/GovernmentUserManagementPage'
+import { GovernmentAnnouncementsPage } from './features/government/announcements/pages/GovernmentAnnouncementsPage'
 
 function App() {
   return (
@@ -304,6 +305,19 @@ function App() {
                 logoutHref="/login"
               >
                 <GovernmentUserManagementPage />
+              </DashboardLayout>
+            }
+          />
+          <Route
+            path="/government/announcements"
+            element={
+              <DashboardLayout
+                navItems={GOVERNMENT_NAV_ITEMS}
+                profile={GOVERNMENT_PROFILE}
+                profileHref="/government/profile"
+                logoutHref="/login"
+              >
+                <GovernmentAnnouncementsPage />
               </DashboardLayout>
             }
           />
