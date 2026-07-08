@@ -14,7 +14,7 @@ export const GOVERNMENT_NAV_ITEMS = [
   { label: 'Prediksi AI', href: '/government/ai-prediction', icon: Share2 },
   { label: 'Manajemen Pengguna', href: '/government/user-management', icon: UserCog },
   { label: 'Pengumuman', href: '/government/announcements', icon: Megaphone },
-  { label: 'Ekspor Data', href: '/government/export', icon: Upload },
+  { label: 'Ekspor Data', href: '/government/export-data', icon: Upload },
   { label: 'Profil', href: '/government/profile', icon: User },
 ]
 
