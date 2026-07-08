@@ -9,7 +9,7 @@ export const GOVERNMENT_PROFILE = {
 export const GOVERNMENT_NAV_ITEMS = [
   { label: 'Dashboard', href: '/government/dashboard', icon: LayoutGrid, end: true },
   { label: 'Laporan Sampah', href: '/government/waste-reports', icon: Trash2 },
-  { label: 'Laporan Banjir', href: '/government/reports/flood', icon: Waves },
+  { label: 'Laporan Banjir', href: '/government/flood-reports', icon: Waves },
   { label: 'Peta Aktivitas', href: '/government/activity-map', icon: MapPin },
   { label: 'Prediksi AI', href: '/government/prediction', icon: Share2 },
   { label: 'Manajemen Pengguna', href: '/government/users', icon: UserCog },
