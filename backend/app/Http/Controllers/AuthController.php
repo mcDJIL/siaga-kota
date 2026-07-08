@@ -2,6 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserRole;
+use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\Auth\UpdateProfileRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -11,42 +16,39 @@ use Spatie\Permission\Models\Role;
 
 class AuthController extends Controller
 {
-    public function register(Request $request): JsonResponse
+    /**
+     * @group Auth
+     * @unauthenticated
+     * @bodyParam name string required Nama pengguna.
+     * @bodyParam email string required Email pengguna.
+     * @bodyParam phone string required Nomor telepon pengguna.
+     * @bodyParam password string required Password minimal 8 karakter.
+     * @bodyParam password_confirmation string required Konfirmasi password.
+     */
+    public function register(RegisterRequest $request): JsonResponse
     {
-        /**
-         * @group Auth
-         * @unauthenticated
-         * @bodyParam name string required Nama pengguna.
-         * @bodyParam email string required Email pengguna.
-         * @bodyParam phone string required Nomor telepon pengguna.
-         * @bodyParam password string required Password minimal 8 karakter.
-         * @bodyParam password_confirmation string required Konfirmasi password.
-         */
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255'],
-            'phone' => ['required', 'string', 'max:20', 'unique:users,phone'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-        ]);
-
-        Role::findOrCreate('warga', 'sanctum');
+        $data = $request->validated();
 
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'phone' => $data['phone'],
-            'password' => bcrypt($data['password']),
-            'role' => 'warga',
+            'password' => $data['password'],
+            'role' => UserRole::Warga->value,
+            'rw' => $data['rw'] ?? null,
+            'rt' => $data['rt'] ?? null,
+            'village_id' => $data['village_id'] ?? null,
             'active' => true,
+            'settings' => [],
         ]);
 
-        $user->assignRole('warga');
+        $user->assignRole(UserRole::Warga->value);
 
         $token = $user->createToken('auth-token')->plainTextToken;
 
         return response()->json([
             'data' => [
-                'user' => $this->userPayload($user),
+                'user' => new UserResource($user),
                 'token' => $token,
             ],
             'message' => 'Registrasi berhasil.',
@@ -59,12 +61,9 @@ class AuthController extends Controller
      * @bodyParam email string required Email pengguna.
      * @bodyParam password string required Password akun.
      */
-    public function login(Request $request): JsonResponse
+    public function login(LoginRequest $request): JsonResponse
     {
-        $data = $request->validate([
-            'email' => ['required', 'string'],
-            'password' => ['required', 'string'],
-        ]);
+        $data = $request->validated();
 
         $user = User::query()
             ->where('email', $data['email'])
@@ -90,7 +89,7 @@ class AuthController extends Controller
 
         return response()->json([
             'data' => [
-                'user' => $this->userPayload($user),
+                'user' => new UserResource($user),
                 'token' => $token,
             ],
             'message' => 'Login berhasil.',
@@ -116,11 +115,9 @@ class AuthController extends Controller
      */
     public function me(Request $request): JsonResponse
     {
-        $user = $request->user();
-
         return response()->json([
             'data' => [
-                'user' => $this->userPayload($user),
+                'user' => new UserResource($request->user()),
             ],
         ]);
     }
@@ -129,35 +126,21 @@ class AuthController extends Controller
      * @group Auth
      * @authenticated
      */
-    public function updateMe(Request $request): JsonResponse
+    public function updateMe(UpdateProfileRequest $request): JsonResponse
     {
-        $user = $request->user();
+        $data = $request->validated();
 
-        $data = $request->validate([
-            'name' => ['sometimes', 'required', 'string', 'max:255'],
-            'email' => [
-                'sometimes',
-                'required',
-                'string',
-                'email',
-                'max:255',
-                Rule::unique('users', 'email')->ignore($user->id),
-            ],
-            'phone' => [
-                'sometimes',
-                'required',
-                'string',
-                'max:20',
-                Rule::unique('users', 'phone')->ignore($user->id),
-            ],
-            'password' => ['sometimes', 'required', 'string', 'min:8', 'confirmed'],
-        ]);
+        unset($data['password_confirmation']);
 
-        $user->fill($data)->save();
+        if (! array_key_exists('password', $data)) {
+            unset($data['password']);
+        }
+
+        $request->user()->fill($data)->save();
 
         return response()->json([
             'data' => [
-                'user' => $this->userPayload($user),
+                'user' => new UserResource($request->user()->fresh()),
             ],
             'message' => 'Profil berhasil diperbarui.',
         ]);

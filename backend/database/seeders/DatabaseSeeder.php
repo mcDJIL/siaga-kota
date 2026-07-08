@@ -21,9 +21,29 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
         ]);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $citizen = User::factory()->create([
+            'name' => 'Warga Demo',
+            'email' => 'warga@example.com',
+            'phone' => '081234567890',
+            'role' => 'warga',
         ]);
+
+        $officer = User::factory()->create([
+            'name' => 'Petugas Demo',
+            'email' => 'petugas@example.com',
+            'phone' => '081234567891',
+            'role' => 'petugas',
+        ]);
+
+        $admin = User::factory()->create([
+            'name' => 'Admin Demo',
+            'email' => 'admin@example.com',
+            'phone' => '081234567892',
+            'role' => 'admin',
+        ]);
+
+        $citizen->assignRole('warga');
+        $officer->assignRole('petugas');
+        $admin->assignRole('admin');
     }
 }
