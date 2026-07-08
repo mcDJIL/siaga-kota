@@ -1,0 +1,38 @@
+export const HIGH_RISK_DISTRICTS = [
+  {
+    id: 'kaliwates',
+    name: 'Kaliwates',
+    label: 'Waste Density',
+    status: 'Critical',
+    riskScore: 88,
+    action: 'Immediate waste transport.',
+    position: [-8.1795, 113.6947],
+  },
+  {
+    id: 'sumbersari',
+    name: 'Sumbersari',
+    label: 'Flood Potential',
+    status: 'Monitor',
+    riskScore: 62,
+    action: 'Drainage inspection.',
+    position: [-8.1668, 113.7157],
+  },
+  {
+    id: 'patrang',
+    name: 'Patrang',
+    label: 'Combined Risk',
+    status: 'Critical',
+    riskScore: 91,
+    action: 'Flood monitoring.',
+    position: [-8.1523, 113.7024],
+  },
+  {
+    id: 'ajung',
+    name: 'Ajung',
+    label: 'Waste Accumulation',
+    status: 'Monitor',
+    riskScore: 55,
+    action: 'Deploy sanitation team.',
+    position: [-8.2117, 113.6698],
+  },
+]
