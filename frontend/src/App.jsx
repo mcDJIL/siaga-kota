@@ -72,7 +72,7 @@ function App() {
             }
           />
           <Route
-            path="/citizen/reports/create/waste"
+            path="/citizen/reports-waste"
             element={
               <DashboardLayout
                 navItems={CITIZEN_NAV_ITEMS}
@@ -85,7 +85,7 @@ function App() {
             }
           />
           <Route
-            path="/citizen/reports/create/flood"
+            path="/citizen/reports-flood"
             element={
               <DashboardLayout
                 navItems={CITIZEN_NAV_ITEMS}
