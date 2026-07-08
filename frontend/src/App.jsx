@@ -28,6 +28,7 @@ import { CitizenMapPage } from './features/map/citizen/map/pages/CitizenMapPage'
 import { CitizenReportTrackingPage } from './features/reports/citizen/reports/pages/CitizenReportTrackingPage'
 import { CitizenGamificationPage } from './features/gamification/citizen/gamification/pages/CitizenGamificationPage'
 import { CitizenBadgeCollectionPage } from './features/gamification/citizen/gamification/pages/CitizenBadgeCollectionPage'
+import { CitizenProfilePage } from './features/profile/citizen/profile/pages/CitizenProfilePage'
 import { CITIZEN_NAV_ITEMS, CITIZEN_PROFILE } from './features/dashboard/citizen/data/dashboardData'
 
 function App() {
@@ -125,6 +126,19 @@ function App() {
               logoutHref="/login"
             >
               <CitizenBadgeCollectionPage />
+            </DashboardLayout>
+          }
+        />
+        <Route
+          path="/citizen/profile"
+          element={
+            <DashboardLayout
+              navItems={CITIZEN_NAV_ITEMS}
+              profile={CITIZEN_PROFILE}
+              profileHref="/citizen/profile"
+              logoutHref="/login"
+            >
+              <CitizenProfilePage />
             </DashboardLayout>
           }
         />
