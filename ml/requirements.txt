@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+pydantic
+python-multipart
+numpy
+pandas
+scikit-learn
+xgboost
+joblib
+pytest
+httpx
+matplotlib
+seaborn
+requests
+python-dotenv
