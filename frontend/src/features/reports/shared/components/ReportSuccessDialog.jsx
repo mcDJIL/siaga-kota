@@ -8,11 +8,30 @@ export function ReportSuccessDialog({
   onClose,
   title = 'Laporan Terkirim',
   message,
-  historyLabel = 'Lihat Riwayat',
+  primaryLabel = 'Lihat Riwayat',
+  onPrimaryClick,
   historyHref = '/citizen/reports',
+  secondaryLabel = 'Dashboard',
+  onSecondaryClick,
   dashboardHref = '/citizen/dashboard',
 }) {
   const navigate = useNavigate()
+
+  function handlePrimaryClick() {
+    if (onPrimaryClick) {
+      onPrimaryClick()
+      return
+    }
+    navigate(historyHref)
+  }
+
+  function handleSecondaryClick() {
+    if (onSecondaryClick) {
+      onSecondaryClick()
+      return
+    }
+    navigate(dashboardHref)
+  }
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title} className="items-center text-center">
@@ -22,11 +41,11 @@ export function ReportSuccessDialog({
         </span>
         <p className="text-base text-text-muted">{message}</p>
         <div className="flex w-full flex-col gap-3 sm:flex-row">
-          <Button variant="ghost" className="flex-1" onClick={() => navigate(historyHref)}>
-            {historyLabel}
+          <Button variant="ghost" className="flex-1" onClick={handlePrimaryClick}>
+            {primaryLabel}
           </Button>
-          <Button variant="primary" className="flex-1" onClick={() => navigate(dashboardHref)}>
-            Dashboard
+          <Button variant="primary" className="flex-1" onClick={handleSecondaryClick}>
+            {secondaryLabel}
           </Button>
         </div>
       </div>
