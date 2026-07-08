@@ -43,6 +43,7 @@ import { GovernmentAIPredictionPage } from './features/government/ai-prediction/
 import { GovernmentUserManagementPage } from './features/government/user-management/pages/GovernmentUserManagementPage'
 import { GovernmentAnnouncementsPage } from './features/government/announcements/pages/GovernmentAnnouncementsPage'
 import { GovernmentExportDataPage } from './features/government/export-data/pages/GovernmentExportDataPage'
+import { GovernmentProfilePage } from './features/government/profile/pages/GovernmentProfilePage'
 
 function App() {
   return (
@@ -332,6 +333,19 @@ function App() {
                 logoutHref="/login"
               >
                 <GovernmentExportDataPage />
+              </DashboardLayout>
+            }
+          />
+          <Route
+            path="/government/profile"
+            element={
+              <DashboardLayout
+                navItems={GOVERNMENT_NAV_ITEMS}
+                profile={GOVERNMENT_PROFILE}
+                profileHref="/government/profile"
+                logoutHref="/login"
+              >
+                <GovernmentProfilePage />
               </DashboardLayout>
             }
           />
