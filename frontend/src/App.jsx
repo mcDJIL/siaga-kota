@@ -23,6 +23,7 @@ import { OfficerProfilePage } from './features/dashboard/officer/pages/OfficerPr
 import { OfficerWasteReportsPage } from './features/dashboard/officer/pages/OfficerWasteReportsPage'
 import { CitizenDashboardPage } from './features/dashboard/citizen/pages/CitizenDashboardPage'
 import { CitizenWasteReportPage } from './features/dashboard/citizen/reports/waste/pages/CitizenWasteReportPage'
+import { CitizenFloodReportPage } from './features/reports/citizen/flood/pages/CitizenFloodReportPage'
 import { CITIZEN_NAV_ITEMS, CITIZEN_PROFILE } from './features/dashboard/citizen/data/dashboardData'
 
 function App() {
@@ -55,6 +56,19 @@ function App() {
               logoutHref="/login"
             >
               <CitizenWasteReportPage />
+            </DashboardLayout>
+          }
+        />
+        <Route
+          path="/citizen/reports/create/flood"
+          element={
+            <DashboardLayout
+              navItems={CITIZEN_NAV_ITEMS}
+              profile={CITIZEN_PROFILE}
+              profileHref="/citizen/profile"
+              logoutHref="/login"
+            >
+              <CitizenFloodReportPage />
             </DashboardLayout>
           }
         />
