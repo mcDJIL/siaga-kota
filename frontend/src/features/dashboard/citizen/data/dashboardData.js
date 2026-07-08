@@ -19,7 +19,7 @@ export const CITIZEN_PROFILE = {
 
 export const CITIZEN_NAV_ITEMS = [
   { label: 'Dashboard', href: '/citizen/dashboard', icon: LayoutGrid, end: true },
-  { label: 'Laporan Sampah', href: '/citizen/reports/sampah', icon: Trash2 },
+  { label: 'Laporan Sampah', href: '/citizen/reports/create/waste', icon: Trash2 },
   { label: 'Laporan Banjir', href: '/citizen/reports/banjir', icon: Waves },
   { label: 'Peta Aktivitas', href: '/citizen/activity-map', icon: MapPin },
   { label: 'Pantau Laporan', href: '/citizen/reports', icon: ClipboardList },
