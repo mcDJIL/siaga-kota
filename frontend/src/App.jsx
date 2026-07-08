@@ -1,7 +1,11 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { ErrorBoundary } from './components/common/ErrorBoundary'
 import { LandingLayout } from './layouts/LandingLayout'
 import { AuthLayout } from './layouts/AuthLayout'
 import { DashboardLayout } from './layouts/DashboardLayout'
+import { ErrorLayout } from './layouts/ErrorLayout'
+import { NotFoundPage } from './features/error/pages/NotFoundPage'
+import { InternalServerErrorPage } from './features/error/pages/InternalServerErrorPage'
 import { LandingPage } from './features/landing/pages/LandingPage'
 import { PredictionPage } from './features/prediction/pages/PredictionPage'
 import { MapPage } from './features/map/pages/MapPage'
@@ -33,192 +37,199 @@ import { CITIZEN_NAV_ITEMS, CITIZEN_PROFILE } from './features/dashboard/citizen
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<AuthLayout><LoginPage /></AuthLayout>} />
-        <Route path="/register" element={<AuthLayout><RegisterPage /></AuthLayout>} />
-        <Route path="/forgot-password" element={<AuthLayout><ForgotPasswordPage /></AuthLayout>} />
-        <Route
-          path="/citizen/dashboard"
-          element={
-            <DashboardLayout
-              navItems={CITIZEN_NAV_ITEMS}
-              profile={CITIZEN_PROFILE}
-              profileHref="/citizen/profile"
-              logoutHref="/login"
-            >
-              <CitizenDashboardPage />
-            </DashboardLayout>
-          }
-        />
-        <Route
-          path="/citizen/reports/create/waste"
-          element={
-            <DashboardLayout
-              navItems={CITIZEN_NAV_ITEMS}
-              profile={CITIZEN_PROFILE}
-              profileHref="/citizen/profile"
-              logoutHref="/login"
-            >
-              <CitizenWasteReportPage />
-            </DashboardLayout>
-          }
-        />
-        <Route
-          path="/citizen/reports/create/flood"
-          element={
-            <DashboardLayout
-              navItems={CITIZEN_NAV_ITEMS}
-              profile={CITIZEN_PROFILE}
-              profileHref="/citizen/profile"
-              logoutHref="/login"
-            >
-              <CitizenFloodReportPage />
-            </DashboardLayout>
-          }
-        />
-        <Route
-          path="/citizen/map"
-          element={
-            <DashboardLayout
-              navItems={CITIZEN_NAV_ITEMS}
-              profile={CITIZEN_PROFILE}
-              profileHref="/citizen/profile"
-              logoutHref="/login"
-            >
-              <CitizenMapPage />
-            </DashboardLayout>
-          }
-        />
-        <Route
-          path="/citizen/reports"
-          element={
-            <DashboardLayout
-              navItems={CITIZEN_NAV_ITEMS}
-              profile={CITIZEN_PROFILE}
-              profileHref="/citizen/profile"
-              logoutHref="/login"
-            >
-              <CitizenReportTrackingPage />
-            </DashboardLayout>
-          }
-        />
-        <Route
-          path="/citizen/gamification"
-          element={
-            <DashboardLayout
-              navItems={CITIZEN_NAV_ITEMS}
-              profile={CITIZEN_PROFILE}
-              profileHref="/citizen/profile"
-              logoutHref="/login"
-            >
-              <CitizenGamificationPage />
-            </DashboardLayout>
-          }
-        />
-        <Route
-          path="/citizen/gamification/badges"
-          element={
-            <DashboardLayout
-              navItems={CITIZEN_NAV_ITEMS}
-              profile={CITIZEN_PROFILE}
-              profileHref="/citizen/profile"
-              logoutHref="/login"
-            >
-              <CitizenBadgeCollectionPage />
-            </DashboardLayout>
-          }
-        />
-        <Route
-          path="/citizen/profile"
-          element={
-            <DashboardLayout
-              navItems={CITIZEN_NAV_ITEMS}
-              profile={CITIZEN_PROFILE}
-              profileHref="/citizen/profile"
-              logoutHref="/login"
-            >
-              <CitizenProfilePage />
-            </DashboardLayout>
-          }
-        />
-        <Route
-          path="/officer/dashboard"
-          element={
-            <DashboardLayout>
-              <OfficerDashboardPage />
-            </DashboardLayout>
-          }
-        />
-        <Route
-          path="/officer/reports/waste"
-          element={
-            <DashboardLayout>
-              <OfficerWasteReportsPage />
-            </DashboardLayout>
-          }
-        />
-        <Route
-          path="/officer/reports/waste/:reportId"
-          element={
-            <DashboardLayout>
-              <OfficerWasteReportDetailPage />
-            </DashboardLayout>
-          }
-        />
-        <Route
-          path="/officer/reports/flood"
-          element={
-            <DashboardLayout>
-              <OfficerFloodReportsPage />
-            </DashboardLayout>
-          }
-        />
-        <Route
-          path="/officer/activity-map"
-          element={
-            <DashboardLayout>
-              <OfficerActivityMapPage />
-            </DashboardLayout>
-          }
-        />
-        <Route
-          path="/officer/notifications"
-          element={
-            <DashboardLayout>
-              <OfficerNotificationPage />
-            </DashboardLayout>
-          }
-        />
-        <Route
-          path="/officer/profile"
-          element={
-            <DashboardLayout>
-              <OfficerProfilePage />
-            </DashboardLayout>
-          }
-        />
-        <Route
-          path="*"
-          element={
-            <LandingLayout>
-              <Routes>
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/prediction" element={<PredictionPage />} />
-                <Route path="/map" element={<MapPage />} />
-                <Route path="/report" element={<ReportPage />} />
-                <Route path="/education" element={<EducationPage />} />
-                <Route path="/education/article/:slug" element={<ArticleDetailPage />} />
-                <Route path="/education/quiz" element={<QuizPage />} />
-                <Route path="/education/quiz/:id" element={<QuizPage />} />
-                <Route path="/education/quiz/:id/result" element={<QuizResultPage />} />
-                <Route path="/about" element={<AboutPage />} />
-              </Routes>
-            </LandingLayout>
-          }
-        />
-      </Routes>
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <Routes>
+          {/* Public Pages */}
+          <Route path="/" element={<LandingLayout><LandingPage /></LandingLayout>} />
+          <Route path="/prediction" element={<LandingLayout><PredictionPage /></LandingLayout>} />
+          <Route path="/map" element={<LandingLayout><MapPage /></LandingLayout>} />
+          <Route path="/report" element={<LandingLayout><ReportPage /></LandingLayout>} />
+          <Route path="/education" element={<LandingLayout><EducationPage /></LandingLayout>} />
+          <Route path="/education/article/:slug" element={<LandingLayout><ArticleDetailPage /></LandingLayout>} />
+          <Route path="/education/quiz" element={<LandingLayout><QuizPage /></LandingLayout>} />
+          <Route path="/education/quiz/:id" element={<LandingLayout><QuizPage /></LandingLayout>} />
+          <Route path="/education/quiz/:id/result" element={<LandingLayout><QuizResultPage /></LandingLayout>} />
+          <Route path="/about" element={<LandingLayout><AboutPage /></LandingLayout>} />
+
+          {/* Authentication */}
+          <Route path="/login" element={<AuthLayout><LoginPage /></AuthLayout>} />
+          <Route path="/register" element={<AuthLayout><RegisterPage /></AuthLayout>} />
+          <Route path="/forgot-password" element={<AuthLayout><ForgotPasswordPage /></AuthLayout>} />
+
+          {/* Citizen Routes */}
+          <Route
+            path="/citizen/dashboard"
+            element={
+              <DashboardLayout
+                navItems={CITIZEN_NAV_ITEMS}
+                profile={CITIZEN_PROFILE}
+                profileHref="/citizen/profile"
+                logoutHref="/login"
+              >
+                <CitizenDashboardPage />
+              </DashboardLayout>
+            }
+          />
+          <Route
+            path="/citizen/reports/create/waste"
+            element={
+              <DashboardLayout
+                navItems={CITIZEN_NAV_ITEMS}
+                profile={CITIZEN_PROFILE}
+                profileHref="/citizen/profile"
+                logoutHref="/login"
+              >
+                <CitizenWasteReportPage />
+              </DashboardLayout>
+            }
+          />
+          <Route
+            path="/citizen/reports/create/flood"
+            element={
+              <DashboardLayout
+                navItems={CITIZEN_NAV_ITEMS}
+                profile={CITIZEN_PROFILE}
+                profileHref="/citizen/profile"
+                logoutHref="/login"
+              >
+                <CitizenFloodReportPage />
+              </DashboardLayout>
+            }
+          />
+          <Route
+            path="/citizen/map"
+            element={
+              <DashboardLayout
+                navItems={CITIZEN_NAV_ITEMS}
+                profile={CITIZEN_PROFILE}
+                profileHref="/citizen/profile"
+                logoutHref="/login"
+              >
+                <CitizenMapPage />
+              </DashboardLayout>
+            }
+          />
+          <Route
+            path="/citizen/reports"
+            element={
+              <DashboardLayout
+                navItems={CITIZEN_NAV_ITEMS}
+                profile={CITIZEN_PROFILE}
+                profileHref="/citizen/profile"
+                logoutHref="/login"
+              >
+                <CitizenReportTrackingPage />
+              </DashboardLayout>
+            }
+          />
+          <Route
+            path="/citizen/gamification"
+            element={
+              <DashboardLayout
+                navItems={CITIZEN_NAV_ITEMS}
+                profile={CITIZEN_PROFILE}
+                profileHref="/citizen/profile"
+                logoutHref="/login"
+              >
+                <CitizenGamificationPage />
+              </DashboardLayout>
+            }
+          />
+          <Route
+            path="/citizen/gamification/badges"
+            element={
+              <DashboardLayout
+                navItems={CITIZEN_NAV_ITEMS}
+                profile={CITIZEN_PROFILE}
+                profileHref="/citizen/profile"
+                logoutHref="/login"
+              >
+                <CitizenBadgeCollectionPage />
+              </DashboardLayout>
+            }
+          />
+          <Route
+            path="/citizen/profile"
+            element={
+              <DashboardLayout
+                navItems={CITIZEN_NAV_ITEMS}
+                profile={CITIZEN_PROFILE}
+                profileHref="/citizen/profile"
+                logoutHref="/login"
+              >
+                <CitizenProfilePage />
+              </DashboardLayout>
+            }
+          />
+
+          {/* Officer Routes */}
+          <Route
+            path="/officer/dashboard"
+            element={
+              <DashboardLayout>
+                <OfficerDashboardPage />
+              </DashboardLayout>
+            }
+          />
+          <Route
+            path="/officer/reports/waste"
+            element={
+              <DashboardLayout>
+                <OfficerWasteReportsPage />
+              </DashboardLayout>
+            }
+          />
+          <Route
+            path="/officer/reports/waste/:reportId"
+            element={
+              <DashboardLayout>
+                <OfficerWasteReportDetailPage />
+              </DashboardLayout>
+            }
+          />
+          <Route
+            path="/officer/reports/flood"
+            element={
+              <DashboardLayout>
+                <OfficerFloodReportsPage />
+              </DashboardLayout>
+            }
+          />
+          <Route
+            path="/officer/activity-map"
+            element={
+              <DashboardLayout>
+                <OfficerActivityMapPage />
+              </DashboardLayout>
+            }
+          />
+          <Route
+            path="/officer/notifications"
+            element={
+              <DashboardLayout>
+                <OfficerNotificationPage />
+              </DashboardLayout>
+            }
+          />
+          <Route
+            path="/officer/profile"
+            element={
+              <DashboardLayout>
+                <OfficerProfilePage />
+              </DashboardLayout>
+            }
+          />
+
+          {/* Error Routes */}
+          <Route path="/not-found" element={<ErrorLayout><NotFoundPage /></ErrorLayout>} />
+          <Route path="/error" element={<ErrorLayout><InternalServerErrorPage /></ErrorLayout>} />
+
+          {/* Catch-all: redirect unknown routes to /not-found */}
+          <Route path="*" element={<Navigate to="/not-found" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </ErrorBoundary>
   )
 }
 
