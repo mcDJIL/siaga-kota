@@ -26,6 +26,8 @@ import { CitizenWasteReportPage } from './features/dashboard/citizen/reports/was
 import { CitizenFloodReportPage } from './features/reports/citizen/flood/pages/CitizenFloodReportPage'
 import { CitizenMapPage } from './features/map/citizen/map/pages/CitizenMapPage'
 import { CitizenReportTrackingPage } from './features/reports/citizen/reports/pages/CitizenReportTrackingPage'
+import { CitizenGamificationPage } from './features/gamification/citizen/gamification/pages/CitizenGamificationPage'
+import { CitizenBadgeCollectionPage } from './features/gamification/citizen/gamification/pages/CitizenBadgeCollectionPage'
 import { CITIZEN_NAV_ITEMS, CITIZEN_PROFILE } from './features/dashboard/citizen/data/dashboardData'
 
 function App() {
@@ -97,6 +99,32 @@ function App() {
               logoutHref="/login"
             >
               <CitizenReportTrackingPage />
+            </DashboardLayout>
+          }
+        />
+        <Route
+          path="/citizen/gamification"
+          element={
+            <DashboardLayout
+              navItems={CITIZEN_NAV_ITEMS}
+              profile={CITIZEN_PROFILE}
+              profileHref="/citizen/profile"
+              logoutHref="/login"
+            >
+              <CitizenGamificationPage />
+            </DashboardLayout>
+          }
+        />
+        <Route
+          path="/citizen/gamification/badges"
+          element={
+            <DashboardLayout
+              navItems={CITIZEN_NAV_ITEMS}
+              profile={CITIZEN_PROFILE}
+              profileHref="/citizen/profile"
+              logoutHref="/login"
+            >
+              <CitizenBadgeCollectionPage />
             </DashboardLayout>
           }
         />
