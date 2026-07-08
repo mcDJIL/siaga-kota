@@ -1,0 +1,60 @@
+import { Droplet, Trash2, TreePine } from 'lucide-react'
+
+export const CITIZEN_REPORTS = [
+  {
+    id: 'SK-2410',
+    title: 'Saluran Air Tersumbat',
+    category: 'banjir',
+    date: '24 Okt, 14:20',
+    status: 'processing',
+    thumbnail: 'https://api.builder.io/api/v1/image/assets/TEMP/6791421280f99de4d88431481733885ec7d06b50?width=80',
+  },
+  {
+    id: 'SK-2409',
+    title: 'Tumpukan Sampah Liar',
+    category: 'kebersihan',
+    date: '23 Okt, 09:15',
+    status: 'completed',
+    thumbnail: 'https://api.builder.io/api/v1/image/assets/TEMP/b9e12bcd85160b3b63e71efbc09b8bb4be395354?width=80',
+  },
+  {
+    id: 'SK-2408',
+    title: 'Genangan Air Tinggi',
+    category: 'banjir',
+    date: '22 Okt, 18:45',
+    status: 'pending',
+    thumbnail: 'https://api.builder.io/api/v1/image/assets/TEMP/b9d2be50308e731537ae1b5a27c67f551fd42701?width=80',
+  },
+  {
+    id: 'SK-2407',
+    title: 'Pohon Tumbang',
+    category: 'kebersihan',
+    date: '21 Okt, 10:20',
+    status: 'completed',
+    icon: TreePine,
+  },
+  {
+    id: 'SK-2406',
+    title: 'Drainase Mampet',
+    category: 'banjir',
+    date: '20 Okt, 15:45',
+    status: 'processing',
+    icon: Droplet,
+  },
+  {
+    id: 'SK-2405',
+    title: 'Sampah Menumpuk',
+    category: 'kebersihan',
+    date: '19 Okt, 08:30',
+    status: 'pending',
+    icon: Trash2,
+  },
+  {
+    id: 'SK-2404',
+    title: 'Sampah Menumpuk',
+    category: 'kebersihan',
+    date: '19 Okt, 08:30',
+    status: 'completed',
+    icon: Trash2,
+  },
+]
