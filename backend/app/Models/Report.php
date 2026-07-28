@@ -84,12 +84,14 @@ class Report extends Model
      */
     public function getLatitudeAttribute(): ?float
     {
-        if (! $this->location) {
+        $location = $this->attributes['location'] ?? null;
+
+        if (! $location || $location instanceof \Illuminate\Database\Query\Expression) {
             return null;
         }
 
         // Parse "POINT(lng lat)" format dari PostGIS
-        if (preg_match('/POINT\(([^ ]+) ([^ ]+)\)/', $this->location, $matches)) {
+        if (preg_match('/POINT\(([^ ]+) ([^ ]+)\)/', $location, $matches)) {
             return (float) $matches[2];
         }
 
@@ -101,11 +103,13 @@ class Report extends Model
      */
     public function getLongitudeAttribute(): ?float
     {
-        if (! $this->location) {
+        $location = $this->attributes['location'] ?? null;
+
+        if (! $location || $location instanceof \Illuminate\Database\Query\Expression) {
             return null;
         }
 
-        if (preg_match('/POINT\(([^ ]+) ([^ ]+)\)/', $this->location, $matches)) {
+        if (preg_match('/POINT\(([^ ]+) ([^ ]+)\)/', $location, $matches)) {
             return (float) $matches[1];
         }
 

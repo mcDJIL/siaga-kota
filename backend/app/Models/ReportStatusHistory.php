@@ -20,7 +20,7 @@ class ReportStatusHistory extends Model
 {
     use HasFactory, HasUlids;
 
-    public $timestamps = false;
+    const UPDATED_AT = null;
 
     protected function casts(): array
     {

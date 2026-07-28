@@ -31,7 +31,7 @@ return new class extends Migration
 
             $table->text('note')->nullable();
 
-            $table->timestamp('created_at');
+            $table->timestamps();
 
             $table->index('report_id');
             $table->index('created_at');
