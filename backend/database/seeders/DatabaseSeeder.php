@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Department;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -19,7 +20,17 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             RoleSeeder::class,
+            DepartmentSeeder::class,
+            ReportCategorySeeder::class,
         ]);
+
+        $cleaningDepartment = Department::query()
+            ->where('slug', 'dinas-kebersihan')
+            ->first();
+
+        $bpbdDepartment = Department::query()
+            ->where('slug', 'bpbd')
+            ->first();
 
         $citizen = User::factory()->create([
             'name' => 'Warga Demo',
@@ -33,6 +44,9 @@ class DatabaseSeeder extends Seeder
             'email' => 'petugas@example.com',
             'phone' => '081234567891',
             'role' => 'petugas',
+            'employee_id' => 'SK-2026-001',
+            'position' => 'Koordinator Lapangan',
+            'department_id' => $cleaningDepartment?->id,
         ]);
 
         $admin = User::factory()->create([
@@ -40,6 +54,9 @@ class DatabaseSeeder extends Seeder
             'email' => 'admin@example.com',
             'phone' => '081234567892',
             'role' => 'admin',
+            'employee_id' => 'SK-2026-ADM',
+            'position' => 'Administrator Pemerintah Daerah',
+            'department_id' => $bpbdDepartment?->id,
         ]);
 
         $citizen->assignRole('warga');

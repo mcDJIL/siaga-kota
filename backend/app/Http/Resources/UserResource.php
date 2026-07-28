@@ -23,6 +23,16 @@ class UserResource extends JsonResource
             'rw' => $this->rw,
             'rt' => $this->rt,
             'village_id' => $this->village_id,
+            'employee_id' => $this->employee_id,
+            'position' => $this->position,
+            'department' => $this->whenLoaded('department', fn() => [
+                'id' => $this->department->id,
+                'name' => $this->department->name,
+                'slug' => $this->department->slug,
+                'type' => $this->department->type->value,
+            ]),
+            'avatar_path' => $this->avatar_path,
+            'settings' => $this->settings,
             'active' => $this->active,
         ];
     }

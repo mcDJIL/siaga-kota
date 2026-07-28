@@ -85,6 +85,8 @@ class AuthController extends Controller
             'last_login_at' => now(),
         ])->save();
 
+        $user->load('department');
+        
         $token = $user->createToken('auth-token')->plainTextToken;
 
         return response()->json([
@@ -115,9 +117,11 @@ class AuthController extends Controller
      */
     public function me(Request $request): JsonResponse
     {
+        $user = $request->user()->load('department');
+
         return response()->json([
             'data' => [
-                'user' => new UserResource($request->user()),
+                'user' => new UserResource($user),
             ],
         ]);
     }
