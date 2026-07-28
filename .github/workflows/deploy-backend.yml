@@ -1,0 +1,84 @@
+name: Deploy Backend Production
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+      - '.github/workflows/deploy-backend.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to Production VPS
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          port: ${{ secrets.VPS_PORT }}
+          script: |
+            set -e
+            
+            echo "🚀 Starting deployment..."
+            
+            # Navigate to app directory
+            cd /opt/siagakota/backend
+            
+            # Pull latest changes
+            echo "📥 Pulling latest code..."
+            git fetch origin
+            git reset --hard origin/main
+            
+            # Build new images
+            echo "🐳 Building production images..."
+            docker compose -f compose.prod.yml build --no-cache
+            
+            # Stop containers gracefully
+            echo "⏹️ Stopping old containers..."
+            docker compose -f compose.prod.yml down
+            
+            # Start containers
+            echo "▶️ Starting new containers..."
+            docker compose -f compose.prod.yml up -d
+            
+            # Wait for healthy
+            echo "⏳ Waiting for containers to be healthy..."
+            sleep 15
+            
+            # Run migrations
+            echo "🗄️ Running migrations..."
+            docker compose -f compose.prod.yml exec -T app php artisan migrate --force
+            
+            # Clear & cache config
+            echo "⚡ Optimizing application..."
+            docker compose -f compose.prod.yml exec -T app php artisan optimize:clear
+            docker compose -f compose.prod.yml exec -T app php artisan config:cache
+            docker compose -f compose.prod.yml exec -T app php artisan route:cache
+            docker compose -f compose.prod.yml exec -T app php artisan view:cache
+            
+            # Restart queue workers
+            echo "🔄 Restarting Horizon..."
+            docker compose -f compose.prod.yml restart horizon
+            
+            echo "✅ Deployment completed!"
+            
+            # Show status
+            docker compose -f compose.prod.yml ps
+            
+            # Show logs (last 20 lines)
+            docker compose -f compose.prod.yml logs --tail=20 app
+
+      - name: Notification
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ Deployment SUCCESS"
+          else
+            echo "❌ Deployment FAILED"
+          fi
