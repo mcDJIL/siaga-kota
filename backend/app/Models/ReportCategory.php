@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ReportPriority;
+use App\Models\Report;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 
 export function HeroSection() {
   return (
-    <section className="relative overflow-hidden bg-linear-to-br from-navy via-navy to-navy-light bg-[url('../assets/images/hero.webp')] px-4 py-20 sm:px-8 sm:py-28">
+    <section className="relative overflow-hidden bg-linear-to-br from-navy via-navy to-navy-light px-4 py-20 sm:px-8 sm:py-28">
       <div className="absolute inset-0 bg-navy/50" aria-hidden="true" />
       <motion.div
         initial={{ opacity: 0 }}
