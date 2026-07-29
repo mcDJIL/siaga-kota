@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DistrictLookupController;
+use App\Http\Controllers\FloodPredictionController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -19,7 +21,8 @@ Route::prefix('v1')->group(function (): void {
     Route::middleware(['auth:sanctum', 'role:warga', 'throttle:warga'])
         ->prefix('public')
         ->group(function (): void {
-            // route warga nanti di langkah fitur berikutnya
+            Route::get('districts', [DistrictLookupController::class, 'index']);
+            Route::post('flood-prediction', [FloodPredictionController::class, 'predict']);
         });
 
     Route::middleware(['auth:sanctum', 'role:petugas', 'throttle:petugas'])
