@@ -28,7 +28,7 @@ jobs:
             echo "🚀 Starting deployment..."
             
             # Navigate to app directory
-            cd /opt/siagakota/backend
+            cd /opt/siaga-kota/backend
             
             # Pull latest changes
             echo "📥 Pulling latest code..."
