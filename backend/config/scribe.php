@@ -105,14 +105,16 @@ return [
     // How is your API authenticated? This information will be used in the displayed docs, generated examples and response calls.
     'auth' => [
         // Set this to true if ANY endpoints in your API use authentication.
-        'enabled' => true,
+        'enabled' => env('SCRIBE_AUTH_ENABLED', false),
 
         // Set this to true if your API should be authenticated by default. If so, you must also set `enabled` (above) to true.
         // You can then use @unauthenticated or @authenticated on individual endpoints to change their status from the default.
         'default' => false,
 
         // Where is the auth value meant to be sent in a request?
-        'in' => AuthIn::BEARER->value,
+        'in' => class_exists(\Knuckles\Scribe\Config\AuthIn::class) 
+        ? \Knuckles\Scribe\Config\AuthIn::BEARER 
+        : 'bearer',
 
         // The name of the auth parameter (e.g. token, key, apiKey) or header (e.g. Authorization, Api-Key).
         'name' => 'Authorization',

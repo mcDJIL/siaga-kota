@@ -8,6 +8,7 @@
     "require": {
         "php": "^8.3",
         "barryvdh/laravel-dompdf": "^3.1",
+        "knuckleswtf/scribe": "^5.11",
         "laravel/framework": "^13.8",
         "laravel/horizon": "^5.47",
         "laravel/reverb": "^1.10",
@@ -17,7 +18,6 @@
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
-        "knuckleswtf/scribe": "^5.11",
         "laravel/boost": "^2.4",
         "laravel/pail": "^1.2.5",
         "laravel/pao": "^1.0.6",
