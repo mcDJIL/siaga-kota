@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 import { compressImage } from '../../../../../../utils/compressImage'
 
 const MAX_IMAGES = 3
-const ACCEPTED_TYPES = { 'image/jpeg': ['.jpg', '.jpeg'], 'image/png': ['.png'], 'image/webp': ['.webp'] }
+const ACCEPTED_TYPES = { 'image/jpeg': ['.jpg', '.jpeg'], 'image/png': ['.png'] }
 
 export function PhotoDropzone({ value = [], onChange }) {
   const [previews, setPreviews] = useState([])

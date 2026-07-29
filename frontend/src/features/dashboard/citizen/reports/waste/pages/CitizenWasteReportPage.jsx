@@ -2,40 +2,60 @@ import { useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
+import { submitReport } from '../../../../../../services/report.service'
 import { WasteReportForm } from '../components/WasteReportForm'
 import { LocationCard } from '../components/LocationCard'
 import { ReportTipsCard } from '../components/ReportTipsCard'
 import { ReportSuccessDialog } from '../components/ReportSuccessDialog'
 import { wasteReportSchema } from '../validation/wasteReportSchema'
+import { CATEGORY_ID } from '../data/wasteCategories'
 
 export function CitizenWasteReportPage() {
   const [isSuccessOpen, setIsSuccessOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   const methods = useForm({
     resolver: zodResolver(wasteReportSchema),
+    mode: 'onChange',
     defaultValues: {
       title: '',
-      category: '',
+      wasteType: '',
       description: '',
+      address: '',
       latitude: -6.1944,
       longitude: 106.8229,
       images: [],
     },
   })
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
+    setIsLoading(true)
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1200))
+      const payload = {
+        category_id: CATEGORY_ID,
+        waste_type: values.wasteType,
+        title: values.title,
+        description: values.description,
+        address: values.address,
+        latitude: values.latitude,
+        longitude: values.longitude,
+        images: values.images,
+      }
+
+      await submitReport(payload)
       toast.success('Laporan berhasil dikirim.')
       setIsSuccessOpen(true)
       methods.reset()
-    } catch {
-      toast.error('Gagal mengirim laporan.')
+    } catch (err) {
+      const errorMsg = err?.response?.message || err?.message || 'Gagal mengirim laporan.'
+      toast.error(errorMsg)
+    } finally {
+      setIsLoading(false)
     }
   }
 
   const onInvalid = () => {
-    toast.error('Harap lengkapi semua data.')
+    toast.error('Harap lengkapi semua data yang diperlukan.')
   }
 
   return (

@@ -10,7 +10,6 @@ export function DashboardLayout({
   notifications,
   searchPlaceholder,
   profileHref,
-  logoutHref,
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
@@ -31,7 +30,6 @@ export function DashboardLayout({
           notifications={notifications}
           profile={profile}
           profileHref={profileHref}
-          logoutHref={logoutHref}
         />
         <main className="flex-1">{children}</main>
         <footer className="flex flex-col items-center justify-between gap-2 border-t border-border-muted bg-bg-blue-soft px-4 py-6 sm:flex-row sm:px-8">

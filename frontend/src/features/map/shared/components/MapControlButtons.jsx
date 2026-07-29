@@ -7,7 +7,7 @@ export function MapControlButtons({ map, layers, onToggleLayer, onLocationError 
   const [isLayerSwitcherOpen, setIsLayerSwitcherOpen] = useState(false)
 
   return (
-    <div className="pointer-events-auto flex flex-col gap-2">
+    <div className="pointer-events-auto flex flex-col gap-2 z-50">
       <button
         type="button"
         aria-label="Perbesar peta"

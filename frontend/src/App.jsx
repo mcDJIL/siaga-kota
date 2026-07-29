@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { ErrorBoundary } from './components/common/ErrorBoundary'
+import ProtectedRoute from './components/common/ProtectedRoute'
 import { LandingLayout } from './layouts/LandingLayout'
 import { AuthLayout } from './layouts/AuthLayout'
 import { DashboardLayout } from './layouts/DashboardLayout'
@@ -47,8 +48,8 @@ import { GovernmentProfilePage } from './features/government/profile/pages/Gover
 
 function App() {
   return (
-    <ErrorBoundary>
-      <BrowserRouter>
+    <BrowserRouter>
+      <ErrorBoundary>
         <Routes>
           {/* Public Pages */}
           <Route path="/" element={<LandingLayout><LandingPage /></LandingLayout>} />
@@ -71,66 +72,76 @@ function App() {
           <Route
             path="/citizen/dashboard"
             element={
-              <DashboardLayout
-                navItems={CITIZEN_NAV_ITEMS}
-                profile={CITIZEN_PROFILE}
-                profileHref="/citizen/profile"
-                logoutHref="/login"
-              >
-                <CitizenDashboardPage />
-              </DashboardLayout>
+              <ProtectedRoute allowedRoles={["citizen"]}>
+                <DashboardLayout
+                  navItems={CITIZEN_NAV_ITEMS}
+                  profile={CITIZEN_PROFILE}
+                  profileHref="/citizen/profile"
+                  logoutHref="/login"
+                >
+                  <CitizenDashboardPage />
+                </DashboardLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/citizen/reports-waste"
             element={
-              <DashboardLayout
-                navItems={CITIZEN_NAV_ITEMS}
-                profile={CITIZEN_PROFILE}
-                profileHref="/citizen/profile"
-                logoutHref="/login"
-              >
-                <CitizenWasteReportPage />
-              </DashboardLayout>
+              <ProtectedRoute allowedRoles={["citizen"]}>
+                <DashboardLayout
+                  navItems={CITIZEN_NAV_ITEMS}
+                  profile={CITIZEN_PROFILE}
+                  profileHref="/citizen/profile"
+                  logoutHref="/login"
+                >
+                  <CitizenWasteReportPage />
+                </DashboardLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/citizen/reports-flood"
             element={
-              <DashboardLayout
-                navItems={CITIZEN_NAV_ITEMS}
-                profile={CITIZEN_PROFILE}
-                profileHref="/citizen/profile"
-                logoutHref="/login"
-              >
-                <CitizenFloodReportPage />
-              </DashboardLayout>
+              <ProtectedRoute allowedRoles={["citizen"]}>
+                <DashboardLayout
+                  navItems={CITIZEN_NAV_ITEMS}
+                  profile={CITIZEN_PROFILE}
+                  profileHref="/citizen/profile"
+                  logoutHref="/login"
+                >
+                  <CitizenFloodReportPage />
+                </DashboardLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/citizen/map"
             element={
-              <DashboardLayout
-                navItems={CITIZEN_NAV_ITEMS}
-                profile={CITIZEN_PROFILE}
-                profileHref="/citizen/profile"
-                logoutHref="/login"
-              >
-                <CitizenMapPage />
-              </DashboardLayout>
+              <ProtectedRoute allowedRoles={["citizen"]}>
+                <DashboardLayout
+                  navItems={CITIZEN_NAV_ITEMS}
+                  profile={CITIZEN_PROFILE}
+                  profileHref="/citizen/profile"
+                  logoutHref="/login"
+                >
+                  <CitizenMapPage />
+                </DashboardLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/citizen/reports"
             element={
-              <DashboardLayout
-                navItems={CITIZEN_NAV_ITEMS}
-                profile={CITIZEN_PROFILE}
-                profileHref="/citizen/profile"
-                logoutHref="/login"
-              >
-                <CitizenReportTrackingPage />
-              </DashboardLayout>
+              <ProtectedRoute allowedRoles={["citizen"]}>
+                <DashboardLayout
+                  navItems={CITIZEN_NAV_ITEMS}
+                  profile={CITIZEN_PROFILE}
+                  profileHref="/citizen/profile"
+                  logoutHref="/login"
+                >
+                  <CitizenReportTrackingPage />
+                </DashboardLayout>
+              </ProtectedRoute>
             }
           />
           <Route
@@ -177,57 +188,71 @@ function App() {
           <Route
             path="/officer/dashboard"
             element={
-              <DashboardLayout>
-                <OfficerDashboardPage />
-              </DashboardLayout>
+              <ProtectedRoute allowedRoles={["officer"]}>
+                <DashboardLayout>
+                  <OfficerDashboardPage />
+                </DashboardLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/officer/reports/waste"
             element={
-              <DashboardLayout>
-                <OfficerWasteReportsPage />
-              </DashboardLayout>
+              <ProtectedRoute allowedRoles={["officer"]}>
+                <DashboardLayout>
+                  <OfficerWasteReportsPage />
+                </DashboardLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/officer/reports/waste/:reportId"
             element={
-              <DashboardLayout>
-                <OfficerWasteReportDetailPage />
-              </DashboardLayout>
+              <ProtectedRoute allowedRoles={["officer"]}>
+                <DashboardLayout>
+                  <OfficerWasteReportDetailPage />
+                </DashboardLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/officer/reports/flood"
             element={
-              <DashboardLayout>
-                <OfficerFloodReportsPage />
-              </DashboardLayout>
+              <ProtectedRoute allowedRoles={["officer"]}>
+                <DashboardLayout>
+                  <OfficerFloodReportsPage />
+                </DashboardLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/officer/activity-map"
             element={
-              <DashboardLayout>
-                <OfficerActivityMapPage />
-              </DashboardLayout>
+              <ProtectedRoute allowedRoles={["officer"]}>
+                <DashboardLayout>
+                  <OfficerActivityMapPage />
+                </DashboardLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/officer/notifications"
             element={
-              <DashboardLayout>
-                <OfficerNotificationPage />
-              </DashboardLayout>
+              <ProtectedRoute allowedRoles={["officer"]}>
+                <DashboardLayout>
+                  <OfficerNotificationPage />
+                </DashboardLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/officer/profile"
             element={
-              <DashboardLayout>
-                <OfficerProfilePage />
-              </DashboardLayout>
+              <ProtectedRoute allowedRoles={["officer"]}>
+                <DashboardLayout>
+                  <OfficerProfilePage />
+                </DashboardLayout>
+              </ProtectedRoute>
             }
           />
 
@@ -235,118 +260,136 @@ function App() {
           <Route
             path="/government/dashboard"
             element={
-              <DashboardLayout
-                navItems={GOVERNMENT_NAV_ITEMS}
-                profile={GOVERNMENT_PROFILE}
-                profileHref="/government/profile"
-                logoutHref="/login"
-              >
-                <GovernmentDashboardPage />
-              </DashboardLayout>
+              <ProtectedRoute allowedRoles={["government"]}>
+                <DashboardLayout
+                  navItems={GOVERNMENT_NAV_ITEMS}
+                  profile={GOVERNMENT_PROFILE}
+                  profileHref="/government/profile"
+                  logoutHref="/login"
+                >
+                  <GovernmentDashboardPage />
+                </DashboardLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/government/waste-reports"
             element={
-              <DashboardLayout
-                navItems={GOVERNMENT_NAV_ITEMS}
-                profile={GOVERNMENT_PROFILE}
-                profileHref="/government/profile"
-                logoutHref="/login"
-              >
-                <GovernmentWasteReportPage />
-              </DashboardLayout>
+              <ProtectedRoute allowedRoles={["government"]}>
+                <DashboardLayout
+                  navItems={GOVERNMENT_NAV_ITEMS}
+                  profile={GOVERNMENT_PROFILE}
+                  profileHref="/government/profile"
+                  logoutHref="/login"
+                >
+                  <GovernmentWasteReportPage />
+                </DashboardLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/government/flood-reports"
             element={
-              <DashboardLayout
-                navItems={GOVERNMENT_NAV_ITEMS}
-                profile={GOVERNMENT_PROFILE}
-                profileHref="/government/profile"
-                logoutHref="/login"
-              >
-                <GovernmentFloodReportPage />
-              </DashboardLayout>
+              <ProtectedRoute allowedRoles={["government"]}>
+                <DashboardLayout
+                  navItems={GOVERNMENT_NAV_ITEMS}
+                  profile={GOVERNMENT_PROFILE}
+                  profileHref="/government/profile"
+                  logoutHref="/login"
+                >
+                  <GovernmentFloodReportPage />
+                </DashboardLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/government/activity-map"
             element={
-              <DashboardLayout
-                navItems={GOVERNMENT_NAV_ITEMS}
-                profile={GOVERNMENT_PROFILE}
-                profileHref="/government/profile"
-                logoutHref="/login"
-              >
-                <GovernmentActivityMapPage />
-              </DashboardLayout>
+              <ProtectedRoute allowedRoles={["government"]}>
+                <DashboardLayout
+                  navItems={GOVERNMENT_NAV_ITEMS}
+                  profile={GOVERNMENT_PROFILE}
+                  profileHref="/government/profile"
+                  logoutHref="/login"
+                >
+                  <GovernmentActivityMapPage />
+                </DashboardLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/government/ai-prediction"
             element={
-              <DashboardLayout
-                navItems={GOVERNMENT_NAV_ITEMS}
-                profile={GOVERNMENT_PROFILE}
-                profileHref="/government/profile"
-                logoutHref="/login"
-              >
-                <GovernmentAIPredictionPage />
-              </DashboardLayout>
+              <ProtectedRoute allowedRoles={["government"]}>
+                <DashboardLayout
+                  navItems={GOVERNMENT_NAV_ITEMS}
+                  profile={GOVERNMENT_PROFILE}
+                  profileHref="/government/profile"
+                  logoutHref="/login"
+                >
+                  <GovernmentAIPredictionPage />
+                </DashboardLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/government/user-management"
             element={
-              <DashboardLayout
-                navItems={GOVERNMENT_NAV_ITEMS}
-                profile={GOVERNMENT_PROFILE}
-                profileHref="/government/profile"
-                logoutHref="/login"
-              >
-                <GovernmentUserManagementPage />
-              </DashboardLayout>
+              <ProtectedRoute allowedRoles={["government"]}>
+                <DashboardLayout
+                  navItems={GOVERNMENT_NAV_ITEMS}
+                  profile={GOVERNMENT_PROFILE}
+                  profileHref="/government/profile"
+                  logoutHref="/login"
+                >
+                  <GovernmentUserManagementPage />
+                </DashboardLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/government/announcements"
             element={
-              <DashboardLayout
-                navItems={GOVERNMENT_NAV_ITEMS}
-                profile={GOVERNMENT_PROFILE}
-                profileHref="/government/profile"
-                logoutHref="/login"
-              >
-                <GovernmentAnnouncementsPage />
-              </DashboardLayout>
+              <ProtectedRoute allowedRoles={["government"]}>
+                <DashboardLayout
+                  navItems={GOVERNMENT_NAV_ITEMS}
+                  profile={GOVERNMENT_PROFILE}
+                  profileHref="/government/profile"
+                  logoutHref="/login"
+                >
+                  <GovernmentAnnouncementsPage />
+                </DashboardLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/government/export-data"
             element={
-              <DashboardLayout
-                navItems={GOVERNMENT_NAV_ITEMS}
-                profile={GOVERNMENT_PROFILE}
-                profileHref="/government/profile"
-                logoutHref="/login"
-              >
-                <GovernmentExportDataPage />
-              </DashboardLayout>
+              <ProtectedRoute allowedRoles={["government"]}>
+                <DashboardLayout
+                  navItems={GOVERNMENT_NAV_ITEMS}
+                  profile={GOVERNMENT_PROFILE}
+                  profileHref="/government/profile"
+                  logoutHref="/login"
+                >
+                  <GovernmentExportDataPage />
+                </DashboardLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/government/profile"
             element={
-              <DashboardLayout
-                navItems={GOVERNMENT_NAV_ITEMS}
-                profile={GOVERNMENT_PROFILE}
-                profileHref="/government/profile"
-                logoutHref="/login"
-              >
-                <GovernmentProfilePage />
-              </DashboardLayout>
+              <ProtectedRoute allowedRoles={["government"]}>
+                <DashboardLayout
+                  navItems={GOVERNMENT_NAV_ITEMS}
+                  profile={GOVERNMENT_PROFILE}
+                  profileHref="/government/profile"
+                  logoutHref="/login"
+                >
+                  <GovernmentProfilePage />
+                </DashboardLayout>
+              </ProtectedRoute>
             }
           />
 
@@ -357,8 +400,8 @@ function App() {
           {/* Catch-all: redirect unknown routes to /not-found */}
           <Route path="*" element={<Navigate to="/not-found" replace />} />
         </Routes>
-      </BrowserRouter>
-    </ErrorBoundary>
+      </ErrorBoundary>
+    </BrowserRouter>
   )
 }
 

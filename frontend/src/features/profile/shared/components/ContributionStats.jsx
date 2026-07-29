@@ -1,7 +1,22 @@
 import { motion } from 'framer-motion'
 import { BarChart3 } from 'lucide-react'
 
-export function ContributionStats({ stats }) {
+export function ContributionStats({ stats, profile }) {
+  const dynamicStats = profile ? [
+    {
+      id: 'total-laporan',
+      label: 'Total Laporan',
+      value: Math.min(100, (profile.totalReports / 50) * 100),
+      actual: profile.totalReports,
+    },
+    {
+      id: 'laporan-selesai',
+      label: 'Laporan Selesai',
+      value: profile.totalReports > 0 ? Math.min(100, (profile.completedReports / profile.totalReports) * 100) : 0,
+      actual: profile.completedReports,
+    },
+  ] : stats || []
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -15,11 +30,11 @@ export function ContributionStats({ stats }) {
       </div>
 
       <div className="flex flex-col gap-4">
-        {stats.map((stat) => (
+        {dynamicStats.map((stat) => (
           <div key={stat.id} className="flex flex-col gap-1">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold tracking-[0.6px] text-text-muted">{stat.label}</span>
-              <span className="text-xs font-bold tracking-[0.6px] text-navy">{stat.value}%</span>
+              <span className="text-xs font-bold tracking-[0.6px] text-navy">{Math.round(stat.value)}%</span>
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-bg-blue-light">
               <motion.div
@@ -29,6 +44,9 @@ export function ContributionStats({ stats }) {
                 className="h-full rounded-full bg-navy"
               />
             </div>
+            {stat.actual !== undefined && (
+              <span className="text-[10px] text-text-muted">{stat.actual} items</span>
+            )}
           </div>
         ))}
       </div>

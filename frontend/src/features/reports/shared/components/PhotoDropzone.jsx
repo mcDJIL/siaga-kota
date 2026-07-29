@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { ImageOff, ImagePlus, X } from 'lucide-react'
 import { usePhotoUpload } from '../hooks/usePhotoUpload'
 
-const ACCEPTED_TYPES = { 'image/jpeg': ['.jpg', '.jpeg'], 'image/png': ['.png'], 'image/webp': ['.webp'] }
+const ACCEPTED_TYPES = { 'image/jpeg': ['.jpg', '.jpeg'], 'image/png': ['.png'] }
 
 export function PhotoDropzone({ value = [], onChange, label = 'Unggah Foto (Maks. 3)' }) {
   const { previews, addFiles, removeFile, maxImages, canAddMore } = usePhotoUpload({ value, onChange })

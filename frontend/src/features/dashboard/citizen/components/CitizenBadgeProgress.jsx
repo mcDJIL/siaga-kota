@@ -1,10 +1,29 @@
 import { motion } from 'framer-motion'
 import { Award } from 'lucide-react'
-import { BADGE_PROGRESS } from '../data/dashboardData'
 
-export function CitizenBadgeProgress() {
-  const { title, description, currentXp, targetXp, level } = BADGE_PROGRESS
+const XP_PER_REPORT = 100
+const TARGET_XP_PER_LEVEL = 1000
+
+function calculateBadgeProgress(totalReports) {
+  const currentXp = totalReports * XP_PER_REPORT
+  const level = Math.floor(currentXp / TARGET_XP_PER_LEVEL) + 1
+  const targetXp = level * TARGET_XP_PER_LEVEL
+  const reportsNeeded = Math.max(0, Math.ceil((targetXp - currentXp) / XP_PER_REPORT))
+
+  return {
+    currentXp,
+    targetXp,
+    level,
+    reportsNeeded,
+  }
+}
+
+export function CitizenBadgeProgress({ totalReports = 0 }) {
+  const { currentXp, targetXp, level, reportsNeeded } = calculateBadgeProgress(totalReports)
   const progress = Math.min(100, Math.round((currentXp / targetXp) * 100))
+
+  const title = `Menuju Level ${level + 1}`
+  const description = `Lakukan ${reportsNeeded} laporan lagi untuk naik level!`
 
   return (
     <section

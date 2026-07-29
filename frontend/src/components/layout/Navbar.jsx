@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { NavLink, Link } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { cn } from '../../lib/cn'
+import { me } from '../../services/auth.service'
 
 const NAV_LINKS = [
   { label: 'Beranda', href: '/' },
@@ -14,6 +15,32 @@ const NAV_LINKS = [
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [dashboardPath, setDashboardPath] = useState('/citizen/dashboard')
+
+  useEffect(() => {
+    async function loadUser() {
+      try {
+        const response = await me()
+        const user = response?.data?.user ?? response?.data
+        if (user) {
+          const role = String(user.role ?? (user.roles && user.roles[0]) ?? '').toLowerCase()
+          setIsLoggedIn(true)
+          if (/officer|petugas|koordinator/.test(role)) {
+            setDashboardPath('/officer/dashboard')
+          } else if (/government|gov|admin/.test(role)) {
+            setDashboardPath('/government/dashboard')
+          } else {
+            setDashboardPath('/citizen/dashboard')
+          }
+        }
+      } catch {
+        setIsLoggedIn(false)
+      }
+    }
+
+    loadUser()
+  }, [])
 
   return (
     <header className="sticky top-0 z-50 flex h-20 items-center justify-center bg-bg-soft shadow-[0_1px_2px_0_rgba(0,0,0,0.05)]">
@@ -46,12 +73,20 @@ export function Navbar() {
         </nav>
 
         <div className="hidden items-center gap-4 lg:flex">
-          <Button as={Link} to="/login" variant="ghost" size="sm">
-            Login
-          </Button>
-          <Button as={Link} to="/register" variant="navy" size="sm">
-            Daftar
-          </Button>
+          {isLoggedIn ? (
+            <Button as={Link} to={dashboardPath} variant="navy" size="sm">
+              Dashboard
+            </Button>
+          ) : (
+            <>
+              <Button as={Link} to="/login" variant="ghost" size="sm">
+                Login
+              </Button>
+              <Button as={Link} to="/register" variant="navy" size="sm">
+                Daftar
+              </Button>
+            </>
+          )}
         </div>
 
         <button
@@ -84,12 +119,20 @@ export function Navbar() {
             </NavLink>
           ))}
           <div className="mt-2 flex flex-col gap-2">
-            <Button as={Link} to="/login" variant="ghost" size="sm" className="w-full">
-              Login
-            </Button>
-            <Button as={Link} to="/register" variant="navy" size="sm" className="w-full">
-              Daftar
-            </Button>
+            {isLoggedIn ? (
+              <Button as={Link} to={dashboardPath} variant="navy" size="sm" className="w-full">
+                Dashboard
+              </Button>
+            ) : (
+              <>
+                <Button as={Link} to="/login" variant="ghost" size="sm" className="w-full">
+                  Login
+                </Button>
+                <Button as={Link} to="/register" variant="navy" size="sm" className="w-full">
+                  Daftar
+                </Button>
+              </>
+            )}
           </div>
         </div>
       )}
