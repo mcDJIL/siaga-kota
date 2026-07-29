@@ -1,8 +1,8 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\DistrictLookupController;
-use App\Http\Controllers\FloodPredictionController;
+use App\Http\Controllers\Public\DistrictLookupController;
+use App\Http\Controllers\Public\FloodPredictionController;
 use Illuminate\Support\Facades\Route;
 
 
