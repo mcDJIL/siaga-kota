@@ -68,7 +68,7 @@ export function CreateReportModal({ isOpen, onClose, onSuccess }) {
       })
 
       const newReport = {
-        id: report?.code ?? `#SK-${now.getFullYear()}-${Math.floor(100 + Math.random() * 900)}`,
+        id: report?.id ?? `#SK-${now.getFullYear()}-${Math.floor(100 + Math.random() * 900)}`,
         title: report?.title ?? values.title,
         category: report?.category?.slug ?? values.category,
         date: formattedDate,

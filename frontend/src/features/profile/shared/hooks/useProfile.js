@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { fetchReports } from '../../../../services/report.service'
+import { fetchReports, updateProfile, changePassword as changePasswordAPI, deleteAccount as deleteAccountAPI } from '../../../../services/report.service'
 
 export function useProfile() {
   const [profile, setProfile] = useState(null)
@@ -71,21 +71,51 @@ export function useProfile() {
     toast.success('Foto profil berhasil diperbarui.')
   }
 
-  function saveProfile(values) {
-    setProfile((current) => ({ ...current, ...values }))
-    toast.success('Profil berhasil diperbarui.')
+  async function saveProfile(values) {
+    try {
+      const data = {
+        name: values.fullName,
+        phone: values.phone,
+      }
+
+      const res = await updateProfile(data)
+
+      if (res?.data?.user) {
+        const user = res.data.user
+        localStorage.setItem('user', JSON.stringify(user))
+
+        setProfile((current) => ({
+          ...current,
+          fullName: user.name,
+          phone: user.phone,
+          email: user.email,
+        }))
+      }
+
+      toast.success('Profil berhasil diperbarui.')
+    } catch (err) {
+      toast.error(err.message || 'Gagal memperbarui profil.')
+    }
   }
 
-  function changePassword(oldPassword, newPassword) {
-    // TODO: Call API to change password
-    toast.success('Password berhasil diperbarui.')
+  async function changePassword(oldPassword, newPassword) {
+    try {
+      await changePasswordAPI(oldPassword, newPassword)
+      toast.success('Password berhasil diperbarui.')
+    } catch (err) {
+      toast.error(err.message || 'Gagal mengubah password.')
+    }
   }
 
-  function deleteAccount() {
-    // TODO: Call API to delete account
-    localStorage.removeItem('user')
-    localStorage.removeItem('siagakota_auth_token')
-    window.location.href = '/login'
+  async function deleteAccount() {
+    try {
+      await deleteAccountAPI()
+      localStorage.removeItem('user')
+      localStorage.removeItem('siagakota_auth_token')
+      window.location.href = '/login'
+    } catch (err) {
+      toast.error(err.message || 'Gagal menghapus akun.')
+    }
   }
 
   return { profile, isLoading, updateAvatar, saveProfile, changePassword, deleteAccount }

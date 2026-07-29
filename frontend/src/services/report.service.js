@@ -97,3 +97,34 @@ export async function submitReport(formData) {
     formatAxiosError(error)
   }
 }
+
+export async function updateProfile(data) {
+  try {
+    const response = await axiosClient.patch('/api/v1/auth/me', data, attachAuthHeader())
+    return response.data
+  } catch (error) {
+    formatAxiosError(error)
+  }
+}
+
+export async function changePassword(oldPassword, newPassword) {
+  try {
+    const response = await axiosClient.post(
+      '/api/v1/auth/change-password',
+      { current_password: oldPassword, password: newPassword, password_confirmation: newPassword },
+      attachAuthHeader()
+    )
+    return response.data
+  } catch (error) {
+    formatAxiosError(error)
+  }
+}
+
+export async function deleteAccount() {
+  try {
+    const response = await axiosClient.delete('/api/v1/auth/me', attachAuthHeader())
+    return response.data
+  } catch (error) {
+    formatAxiosError(error)
+  }
+}

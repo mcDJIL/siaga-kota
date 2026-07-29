@@ -31,6 +31,7 @@ import { CitizenWasteReportPage } from './features/dashboard/citizen/reports/was
 import { CitizenFloodReportPage } from './features/reports/citizen/flood/pages/CitizenFloodReportPage'
 import { CitizenMapPage } from './features/map/citizen/map/pages/CitizenMapPage'
 import { CitizenReportTrackingPage } from './features/reports/citizen/reports/pages/CitizenReportTrackingPage'
+import { CitizenReportDetailPage } from './features/reports/citizen/reports/pages/CitizenReportDetailPage'
 import { CitizenGamificationPage } from './features/gamification/citizen/gamification/pages/CitizenGamificationPage'
 import { CitizenBadgeCollectionPage } from './features/gamification/citizen/gamification/pages/CitizenBadgeCollectionPage'
 import { CitizenProfilePage } from './features/profile/citizen/profile/pages/CitizenProfilePage'
@@ -140,6 +141,21 @@ function App() {
                   logoutHref="/login"
                 >
                   <CitizenReportTrackingPage />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/citizen/reports/:id"
+            element={
+              <ProtectedRoute allowedRoles={["citizen"]}>
+                <DashboardLayout
+                  navItems={CITIZEN_NAV_ITEMS}
+                  profile={CITIZEN_PROFILE}
+                  profileHref="/citizen/profile"
+                  logoutHref="/login"
+                >
+                  <CitizenReportDetailPage />
                 </DashboardLayout>
               </ProtectedRoute>
             }

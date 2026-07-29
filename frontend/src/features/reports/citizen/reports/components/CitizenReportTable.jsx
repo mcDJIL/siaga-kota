@@ -5,7 +5,7 @@ export function CitizenReportTable({ reports }) {
   const navigate = useNavigate()
 
   function handleViewDetail(report) {
-    navigate(`/citizen/reports/${report.id.replace('#', '')}`)
+    navigate(`/citizen/reports/${report.id}`)
   }
 
   return <ReportTable reports={reports} onViewDetail={handleViewDetail} />

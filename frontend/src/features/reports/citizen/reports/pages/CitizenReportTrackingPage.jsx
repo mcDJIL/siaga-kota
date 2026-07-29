@@ -57,7 +57,7 @@ export function CitizenReportTrackingPage() {
           }
 
           return {
-            id: r.code ?? r.id,
+            id: r.id,
             title: r.title,
             category: r.category?.slug ?? r.category?.name ?? 'sampah',
             date: formattedDate,
@@ -138,7 +138,7 @@ export function CitizenReportTrackingPage() {
         message="Laporan Anda berhasil dibuat dan akan segera diverifikasi oleh petugas."
         primaryLabel="Lihat Detail"
         onPrimaryClick={() => {
-          if (createdReport) navigate(`/citizen/reports/${createdReport.id.replace('#', '')}`)
+          if (createdReport) navigate(`/citizen/reports/${createdReport.id}`)
           setCreatedReport(null)
         }}
         secondaryLabel="Tutup"
