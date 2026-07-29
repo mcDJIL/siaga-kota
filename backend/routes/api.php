@@ -10,6 +10,8 @@ Route::prefix('v1')->group(function (): void {
     Route::prefix('auth')->controller(AuthController::class)->group(function (): void {
         Route::post('register', 'register')->middleware('throttle:auth');
         Route::post('login', 'login')->middleware('throttle:auth');
+        Route::post('forgot-password', 'forgotPassword');
+        Route::post('reset-password', 'resetPassword');
 
         Route::middleware('auth:sanctum')->group(function (): void {
             Route::post('logout', 'logout');
