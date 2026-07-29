@@ -5,6 +5,7 @@ import { Modal } from '../../../../components/ui/Modal'
 import { ReportForm } from './ReportForm'
 import { SubmitReportButton } from './SubmitReportButton'
 import { createReportSchema } from '../../citizen/reports/validation/createReportSchema'
+import { submitReport } from '../../../../services/report.service'
 
 const DEFAULT_VALUES = {
   reportType: '',
@@ -42,13 +43,43 @@ export function CreateReportModal({ isOpen, onClose, onSuccess }) {
 
   async function onSubmit(values) {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      const newReport = buildReportFromForm(values)
+      const payload = {
+        category_id: values.category || values.category_id || '',
+        title: values.title,
+        description: values.description,
+        address: values.location ?? values.address ?? '',
+        latitude: values.latitude,
+        longitude: values.longitude,
+        waste_type: values.waste_type ?? null,
+        water_level_cm: values.water_level_cm ?? null,
+        photos: values.images ?? [],
+      }
+
+      const result = await submitReport(payload)
+      const report = result?.data
+
+      const now = report?.created_at ? new Date(report.created_at) : new Date()
+      const formattedDate = now.toLocaleString('id-ID', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+
+      const newReport = {
+        id: report?.code ?? `#SK-${now.getFullYear()}-${Math.floor(100 + Math.random() * 900)}`,
+        title: report?.title ?? values.title,
+        category: report?.category?.slug ?? values.category,
+        date: formattedDate,
+        status: report?.status ?? 'pending',
+      }
+
       toast.success('Laporan berhasil dibuat.')
       methods.reset(DEFAULT_VALUES)
       onSuccess(newReport)
-    } catch {
-      toast.error('Gagal membuat laporan.')
+    } catch (err) {
+      toast.error(err?.message ?? 'Gagal membuat laporan.')
     }
   }
 

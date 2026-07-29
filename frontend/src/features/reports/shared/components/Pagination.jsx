@@ -31,7 +31,7 @@ export function Pagination({ page, totalPages, onPageChange, totalItems, pageSiz
             onClick={() => onPageChange(pageNumber)}
             className={cn(
               'relative flex h-10 w-10 items-center justify-center rounded-lg border text-base',
-              pageNumber === page ? 'border-navy text-white' : 'border-border-muted text-text-body'
+              pageNumber === page ? 'border-navy text-dark' : 'border-border-muted text-text-body'
             )}
           >
             {pageNumber === page && (

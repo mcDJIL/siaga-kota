@@ -32,11 +32,7 @@ class ReportResource extends JsonResource
             'waste_type' => $this->waste_type?->value,
             'water_level_cm' => $this->water_level_cm,
             'is_emergency' => $this->is_emergency,
-            'location' => [
-                'latitude' => $this->latitude,
-                'longitude' => $this->longitude,
-                'address' => $this->address,
-            ],
+            'location' => $this->parseLocationForResponse($this->location),
             'photo_url' => $this->photo_path ? url("storage/{$this->photo_path}") : null,
             'reporter' => [
                 'id' => $this->user->id,
@@ -84,6 +80,18 @@ class ReportResource extends JsonResource
         ];
     }
 
+    private function parseLocationForResponse($location)
+    {
+        if (!$location) return null;
+        
+        preg_match('/POINT\(([^ ]+) ([^ ]+)\)/', $location, $matches);
+        
+        return [
+            'latitude' => $matches[2] ?? null,
+            'longitude' => $matches[1] ?? null,
+            'address' => $this->address,
+        ];
+    }
     private function getStatusLabel(): string
     {
         return match ($this->status->value) {

@@ -2,10 +2,13 @@ import { useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
+import { submitReport } from '../../../../../services/report.service'
 import { Bell, Eye, ShieldCheck } from 'lucide-react'
 import { FloodReportForm } from '../components/FloodReportForm'
 import { ReportSuccessDialog } from '../../../shared/components/ReportSuccessDialog'
 import { floodReportSchema } from '../validation/floodReportSchema'
+
+const FLOOD_CATEGORY_ID = '01kyq8sh5rprvjb4jfc8tdhkk7'
 
 const GUIDANCE_CARDS = [
   {
@@ -30,26 +33,39 @@ export function CitizenFloodReportPage() {
 
   const methods = useForm({
     resolver: zodResolver(floodReportSchema),
+    mode: 'onChange',
     defaultValues: {
       title: '',
-      severity: '',
       address: 'Jl. Jendral Sudirman No. 12, Jakarta Selatan',
       latitude: -6.2088,
       longitude: 106.8229,
+      water_level_cm: '',
       description: '',
       agreement: false,
       images: [],
     },
   })
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1200))
+      const payload = {
+        category_id: FLOOD_CATEGORY_ID,
+        title: values.title,
+        description: values.description,
+        address: values.address,
+        latitude: values.latitude,
+        longitude: values.longitude,
+        water_level_cm: values.water_level_cm ? parseInt(values.water_level_cm, 10) : null,
+        photos: values.images,
+      }
+
+      await submitReport(payload)
       toast.success('Laporan banjir berhasil dikirim.')
       setIsSuccessOpen(true)
       methods.reset()
-    } catch {
-      toast.error('Gagal mengirim laporan.')
+    } catch (err) {
+      const errorMsg = err?.response?.message || err?.message || 'Gagal mengirim laporan.'
+      toast.error(errorMsg)
     }
   }
 

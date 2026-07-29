@@ -9,8 +9,8 @@ export function WasteDescriptionField() {
 
   return (
     <div className="flex flex-col gap-2">
-      <label htmlFor="description" className="text-base text-text-body">
-        Deskripsi Detail
+      <label htmlFor="description" className="flex items-center gap-2 text-base text-text-body">
+        Deskripsi Detail <span className="text-[#BA1A1A]">*</span>
       </label>
       <Textarea
         id="description"

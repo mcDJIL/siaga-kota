@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { LogOut, Settings, User } from 'lucide-react'
 import { OFFICER_PROFILE } from '../../data/dashboardData'
+import { performLogout } from '../../../../../utils/logout'
 
 export function ProfileDropdown({ profile = OFFICER_PROFILE, profileHref = '/officer/profile', logoutHref = '/login' }) {
   const [isOpen, setIsOpen] = useState(false)
@@ -51,10 +52,14 @@ export function ProfileDropdown({ profile = OFFICER_PROFILE, profileHref = '/off
                 <User className="h-4 w-4" />
                 Profil Saya
               </Link>
-              <Link to={logoutHref} className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-[#BA1A1A] hover:bg-bg-soft">
+              <button
+                type="button"
+                onClick={performLogout}
+                className="w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-[#BA1A1A] hover:bg-bg-soft"
+              >
                 <LogOut className="h-4 w-4" />
                 Keluar
-              </Link>
+              </button>
             </motion.div>
           </>
         )}

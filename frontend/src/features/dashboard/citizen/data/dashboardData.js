@@ -12,7 +12,7 @@ import {
 } from 'lucide-react'
 
 export const CITIZEN_PROFILE = {
-  name: 'User',
+  name: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).name : 'User',
   role: 'Masyarakat',
   avatar: 'https://api.builder.io/api/v1/image/assets/TEMP/67cb26c260d4e27b177a34859c876c367dbc32ab?width=76',
 }

@@ -4,13 +4,16 @@ import { StatusBadge } from '../cards/StatusBadge'
 
 export const CATEGORY_STYLES = {
   banjir: { bg: 'bg-[#D6E3FF]', text: 'text-[#001B3C]', label: 'Banjir' },
+  sampah: { bg: 'bg-[#FFE17C]', text: 'text-[#231B00]', label: 'Sampah' },
   kebersihan: { bg: 'bg-[#91F8B8]', text: 'text-[#002110]', label: 'Kebersihan' },
 }
+
+const DEFAULT_CATEGORY = { bg: 'bg-bg-blue-light', text: 'text-text-body', label: 'Laporan' }
 
 const COLUMNS = ['Laporan', 'Kategori', 'Tanggal', 'Status']
 
 export function ReportTable({ reports, onRowClick, emptyMessage = 'Belum ada laporan.' }) {
-  const category = (report) => CATEGORY_STYLES[report.category]
+  const category = (report) => CATEGORY_STYLES[report.category] || DEFAULT_CATEGORY
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }} className="overflow-x-auto">
@@ -55,9 +58,13 @@ export function ReportTable({ reports, onRowClick, emptyMessage = 'Belum ada lap
                           alt={report.title}
                           className="h-10 w-10 shrink-0 rounded-lg object-cover"
                         />
-                      ) : (
+                      ) : Icon ? (
                         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-bg-blue-light">
                           <Icon className="h-5 w-5 text-text-muted" aria-hidden="true" />
+                        </span>
+                      ) : (
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-bg-blue-light text-xs font-bold text-text-muted">
+                          {report.title.substring(0, 1).toUpperCase()}
                         </span>
                       )}
                       <span className="text-base font-medium text-navy">{report.title}</span>

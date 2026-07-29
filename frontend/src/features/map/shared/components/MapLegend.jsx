@@ -18,7 +18,7 @@ export function MapLegend({ className = '' }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
-      className={`pointer-events-auto w-64 rounded-2xl border border-white/30 bg-white/85 p-4 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] backdrop-blur-md sm:p-6 ${className}`}
+      className={`z-50 pointer-events-auto w-64 rounded-2xl border border-white/30 bg-white/85 p-4 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] backdrop-blur-md sm:p-6 ${className}`}
     >
       <button
         type="button"

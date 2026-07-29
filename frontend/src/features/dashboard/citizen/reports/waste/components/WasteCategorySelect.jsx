@@ -10,18 +10,18 @@ export function WasteCategorySelect() {
 
   return (
     <div className="flex flex-col gap-2">
-      <label htmlFor="category" className="text-base text-text-body">
-        Kategori Sampah
+      <label htmlFor="wasteType" className="flex items-center gap-2 text-base text-text-body">
+        Tipe Sampah <span className="text-[#BA1A1A]">*</span>
       </label>
       <Select
-        id="category"
+        id="wasteType"
         defaultValue=""
-        error={errors.category}
+        error={errors.wasteType}
         className="rounded-xl bg-[#F8FAFC] py-4"
-        {...register('category')}
+        {...register('wasteType')}
       >
         <option value="" disabled>
-          Pilih Kategori
+          Pilih Tipe Sampah
         </option>
         {WASTE_CATEGORIES.map((category) => (
           <option key={category.value} value={category.value}>
@@ -29,7 +29,7 @@ export function WasteCategorySelect() {
           </option>
         ))}
       </Select>
-      {errors.category && <p className="text-sm text-[#BA1A1A]">{errors.category.message}</p>}
+      {errors.wasteType && <p className="text-sm text-[#BA1A1A]">{errors.wasteType.message}</p>}
     </div>
   )
 }

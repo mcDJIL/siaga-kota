@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -7,20 +8,27 @@ import { Button } from '../../../components/ui/Button'
 import { AuthCard } from '../components/AuthCard'
 import { MailIcon, LoginArrowIcon } from '../components/icons'
 import { cn } from '../../../lib/cn'
+import { requestPasswordReset } from '../../../services/auth.service'
 
 const forgotPasswordSchema = z.object({
   email: z.string().min(1, 'Email wajib diisi').email('Format email tidak valid'),
 })
 
 export function ForgotPasswordPage() {
+  const [statusMessage, setStatusMessage] = useState('')
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitSuccessful },
+    formState: { errors, isSubmitting, isSubmitSuccessful },
   } = useForm({ resolver: zodResolver(forgotPasswordSchema), defaultValues: { email: '' } })
 
-  const onSubmit = (data) => {
-    console.log('Permintaan reset kata sandi (belum ada backend):', data)
+  const onSubmit = async (data) => {
+    try {
+      await requestPasswordReset(data.email)
+      setStatusMessage('Tautan reset kata sandi berhasil dikirim ke email Anda.')
+    } catch (error) {
+      setStatusMessage(error.response?.message ?? 'Gagal mengirim tautan reset password. Coba lagi.')
+    }
   }
 
   return (
@@ -46,9 +54,7 @@ export function ForgotPasswordPage() {
             />
           </div>
           {errors.email && <p className="text-sm text-[#BA1A1A]">{errors.email.message}</p>}
-          {isSubmitSuccessful && !errors.email && (
-            <p className="text-sm text-brand-green">Tautan reset kata sandi telah dikirim ke email Anda.</p>
-          )}
+          {statusMessage && <p className="text-sm text-brand-green">{statusMessage}</p>}
         </div>
 
         <Button type="submit" variant="secondary" size="md" className="w-full rounded-lg py-3 text-xl font-semibold">

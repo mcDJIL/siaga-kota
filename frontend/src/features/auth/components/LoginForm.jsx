@@ -9,8 +9,11 @@ import { RememberMeCheckbox } from './RememberMeCheckbox'
 import { MailIcon, LoginArrowIcon } from './icons'
 import { loginSchema } from '../validation/loginSchema'
 import { cn } from '../../../lib/cn'
+import { login, saveAuthToken, me } from '../../../services/auth.service'
+import { useNavigate } from 'react-router-dom'
 
 export function LoginForm() {
+  const navigate = useNavigate()
   const {
     register,
     handleSubmit,
@@ -20,8 +23,33 @@ export function LoginForm() {
     defaultValues: { identifier: '', password: '', rememberMe: false },
   })
 
-  const onSubmit = (data) => {
-    console.log('Login siap dikirim (belum ada backend):', data)
+  const onSubmit = async (data) => {
+    try {
+      const payload = await login({ email: data.identifier, password: data.password })
+      saveAuthToken(payload.data.token)
+      localStorage.setItem('user', JSON.stringify(payload.data.user))
+      // attempt to fetch current user (me) to determine role and redirect
+      try {
+        const who = await me()
+        const user = who?.data?.user ?? who?.data ?? payload?.data?.user
+        const role = user?.role ?? (user?.roles && user.roles[0]) ?? ''
+        const r = String(role).toLowerCase()
+        const path = /citizen|warga|masyarakat/.test(r)
+          ? '/citizen/dashboard'
+          : /officer|petugas|koordinator/.test(r)
+          ? '/officer/dashboard'
+          : /government|gov|admin/.test(r)
+          ? '/government/dashboard'
+          : '/'
+
+        navigate(path, { replace: true })
+      } catch (err) {
+        navigate('/', { replace: true })
+      }
+    } catch (error) {
+      console.error('Login gagal:', error)
+      alert(error.response?.message ?? error.message)
+    }
   }
 
   return (

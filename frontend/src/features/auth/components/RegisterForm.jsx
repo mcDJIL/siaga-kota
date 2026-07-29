@@ -8,6 +8,7 @@ import { RememberMeCheckbox } from './RememberMeCheckbox'
 import { MailIcon, PhoneIcon, RegisterArrowIcon, UserIcon } from './icons'
 import { registerSchema } from '../validation/registerSchema'
 import { cn } from '../../../lib/cn'
+import { register as registerUser } from '../../../services/auth.service'
 
 function TextField({ id, label, icon: Icon, error, register, className, ...props }) {
   return (
@@ -43,8 +44,23 @@ export function RegisterForm() {
     defaultValues: { fullName: '', email: '', phone: '', password: '', confirmPassword: '', agree: false },
   })
 
-  const onSubmit = (data) => {
-    console.log('Registrasi siap dikirim (belum ada backend):', data)
+  const onSubmit = async (data) => {
+    try {
+      const payload = await registerUser({
+        name: data.fullName,
+        email: data.email,
+        phone: data.phone,
+        password: data.password,
+        password_confirmation: data.confirmPassword,
+      })
+
+      console.log('Registrasi berhasil:', payload.data.user)
+      alert('Registrasi berhasil. Silakan login.')
+      // TODO: redirect ke halaman login di sini
+    } catch (error) {
+      console.error('Registrasi gagal:', error)
+      alert(error.response?.message ?? error.message)
+    }
   }
 
   return (
