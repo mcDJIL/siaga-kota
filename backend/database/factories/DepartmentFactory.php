@@ -1,0 +1,31 @@
+<?php
+
+namespace Database\Factories;
+
+use App\Enums\DepartmentType;
+use App\Models\Department;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
+
+/**
+ * @extends Factory<Department>
+ */
+class DepartmentFactory extends Factory
+{
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        $name = fake()->company();
+
+        return [
+            'name' => $name,
+            'slug' => Str::slug($name),
+            'type' => fake()->randomElement(DepartmentType::cases())->value,
+            'active' => true,
+        ];
+    }
+}

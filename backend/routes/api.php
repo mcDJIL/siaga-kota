@@ -18,20 +18,25 @@ Route::prefix('v1')->group(function (): void {
         });
     });
 
-    Route::middleware(['auth:sanctum', 'role:warga', 'throttle:warga'])
+    Route::middleware(['auth:sanctum', 'role:warga,sanctum', 'throttle:warga'])
         ->prefix('public')
         ->group(function (): void {
             Route::get('districts', [DistrictLookupController::class, 'index']);
             Route::post('flood-prediction', [FloodPredictionController::class, 'predict']);
+            Route::controller(\App\Http\Controllers\Public\ReportController::class)
+                ->prefix('reports')
+                ->group(function (): void {
+                    Route::get('/', 'index');
+                    Route::post('/', 'store');
+                    Route::get('/{id}', 'show');
+                });
         });
 
-    Route::middleware(['auth:sanctum', 'role:petugas', 'throttle:petugas'])
+    Route::middleware(['auth:sanctum', 'role:petugas,sanctum', 'throttle:petugas'])
         ->prefix('ops')
-        ->group(function (): void {
-            // route petugas nanti di langkah fitur berikutnya
-        });
+        ->group(function (): void {});
 
-    Route::middleware(['auth:sanctum', 'role:admin', 'throttle:admin'])
+    Route::middleware(['auth:sanctum', 'role:admin,sanctum', 'throttle:admin'])
         ->prefix('admin')
         ->group(function (): void {
             // route admin nanti di langkah fitur berikutnya
