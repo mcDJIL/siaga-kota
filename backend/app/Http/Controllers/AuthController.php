@@ -3,14 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Enums\UserRole;
+use App\Http\Requests\Auth\ForgotPasswordRequest;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Http\Requests\Auth\UpdateProfileRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Role;
 
@@ -148,6 +153,53 @@ class AuthController extends Controller
             ],
             'message' => 'Profil berhasil diperbarui.',
         ]);
+    }
+
+    /**
+     * @group Auth
+     * @unauthenticated
+     * @bodyParam email string required Email pengguna.
+     */
+    public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
+    {
+        $status = Password::sendResetLink($request->only('email'));
+
+        return response()->json([
+            'message' => $status === Password::RESET_LINK_SENT
+                ? 'Tautan reset password berhasil dikirim ke email Anda.'
+                : 'Gagal mengirim tautan reset password. Silakan coba lagi.',
+        ], $status === Password::RESET_LINK_SENT ? 200 : 422);
+    }
+
+    /**
+     * @group Auth
+     * @unauthenticated
+     * @bodyParam email string required Email pengguna.
+     * @bodyParam token string required Token reset password.
+     * @bodyParam password string required Password baru minimal 8 karakter.
+     * @bodyParam password_confirmation string required Konfirmasi password baru.
+     */
+    public function resetPassword(ResetPasswordRequest $request): JsonResponse
+    {
+        $data = $request->validated();
+
+        $status = Password::reset(
+            $data,
+            function (User $user, string $password) {
+                $user->forceFill([
+                    'password' => $password,
+                    'remember_token' => Str::random(60),
+                ])->save();
+
+                event(new PasswordReset($user));
+            }
+        );
+
+        return response()->json([
+            'message' => $status === Password::PASSWORD_RESET
+                ? 'Password berhasil direset. Silakan login dengan password baru Anda.'
+                : 'Token reset tidak valid atau telah kedaluwarsa.',
+        ], $status === Password::PASSWORD_RESET ? 200 : 422);
     }
 
     private function userPayload(User $user): array
