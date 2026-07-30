@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Ops\ReportController as OpsReportController;
 use App\Http\Controllers\Public\DistrictLookupController;
 use App\Http\Controllers\Public\FloodPredictionController;
 use App\Http\Controllers\Public\MapController;
@@ -32,6 +33,7 @@ Route::prefix('v1')->group(function (): void {
             Route::get('/heatmap', 'heatmap');
         });
 
+    // warga only
     Route::middleware(['auth:sanctum', 'role:warga,sanctum', 'throttle:warga'])
         ->prefix('public')
         ->group(function (): void {
@@ -48,7 +50,20 @@ Route::prefix('v1')->group(function (): void {
 
     Route::middleware(['auth:sanctum', 'role:petugas,sanctum', 'throttle:petugas'])
         ->prefix('ops')
-        ->group(function (): void {});
+        ->group(function (): void {
+            Route::controller(OpsReportController::class)
+                ->prefix('reports')
+                ->group(function (): void {
+                    Route::get('/', 'index');
+                    Route::get('/{id}', 'show');
+                    Route::patch('/{id}/status', 'updateStatus');
+                    Route::post('/{id}/attachments', 'uploadHandlingPhotos');
+                    Route::post('/{id}/emergency', 'markEmergency');
+                    Route::post('/{id}/assign', 'assign');
+                });
+
+            Route::get('/operators', [OpsReportController::class, 'operators']);
+        });
 
     Route::middleware(['auth:sanctum', 'role:admin,sanctum', 'throttle:admin'])
         ->prefix('admin')
