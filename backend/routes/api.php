@@ -3,6 +3,8 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Public\DistrictLookupController;
 use App\Http\Controllers\Public\FloodPredictionController;
+use App\Http\Controllers\Public\MapController;
+use App\Http\Controllers\Public\ReportController as PublicReportController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -20,12 +22,21 @@ Route::prefix('v1')->group(function (): void {
         });
     });
 
+    // all authenticated users
+    Route::middleware(['auth:sanctum', 'throttle:warga'])
+        ->prefix('map')
+        ->controller(MapController::class)
+        ->group(function (): void {
+            Route::get('/points', 'points');
+            Route::get('/heatmap', 'heatmap');
+        });
+
     Route::middleware(['auth:sanctum', 'role:warga,sanctum', 'throttle:warga'])
         ->prefix('public')
         ->group(function (): void {
             Route::get('districts', [DistrictLookupController::class, 'index']);
             Route::post('flood-prediction', [FloodPredictionController::class, 'predict']);
-            Route::controller(\App\Http\Controllers\Public\ReportController::class)
+            Route::controller(PublicReportController::class)
                 ->prefix('reports')
                 ->group(function (): void {
                     Route::get('/', 'index');

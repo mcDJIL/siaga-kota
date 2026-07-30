@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             DepartmentSeeder::class,
             ReportCategorySeeder::class,
+            JemberGeoSeeder::class,
         ]);
 
         $cleaningDepartment = Department::query()
