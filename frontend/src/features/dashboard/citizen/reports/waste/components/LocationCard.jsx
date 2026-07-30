@@ -23,9 +23,12 @@ export function LocationCard() {
 
   const { position, address, isLocating, setPosition, locate } = useLocationPicker({
     initialPosition: DEFAULT_POSITION,
-    onChange: (next) => {
+    onChange: (next, newAddress) => {
       setValue('latitude', next.lat, { shouldValidate: true })
       setValue('longitude', next.lng, { shouldValidate: true })
+      if (newAddress) {
+        setValue('address', newAddress, { shouldValidate: true })
+      }
     },
   })
 

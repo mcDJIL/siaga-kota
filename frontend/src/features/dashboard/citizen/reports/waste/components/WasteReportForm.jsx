@@ -37,6 +37,20 @@ export function WasteReportForm() {
 
         <WasteCategorySelect />
 
+        <div className="flex flex-col gap-2">
+          <label htmlFor="address" className="flex items-center gap-2 text-base text-text-body">
+            Alamat <span className="text-[#BA1A1A]">*</span>
+          </label>
+          <Input
+            id="address"
+            placeholder="Alamat lokasi pembuangan sampah"
+            error={errors.address}
+            className="rounded-xl bg-[#F8FAFC] py-[18px]"
+            {...register('address')}
+          />
+          {errors.address && <p className="text-sm text-[#BA1A1A]">{errors.address.message}</p>}
+        </div>
+
         <WasteDescriptionField />
 
         <Controller

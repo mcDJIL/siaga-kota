@@ -29,15 +29,6 @@ export function ReportToolbar({
             Siaga.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={onCreateClick}
-          aria-label="Buat laporan baru"
-          className="flex shrink-0 items-center justify-center gap-2 rounded-lg bg-navy px-6 py-4 text-sm font-medium tracking-[0.14px] text-white shadow-[0_10px_15px_-3px_rgba(0,32,69,0.20),0_4px_6px_-4px_rgba(0,32,69,0.20)] transition-transform hover:scale-[1.02]"
-        >
-          <Plus size={14} aria-hidden="true" />
-          Buat Laporan Baru
-        </button>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

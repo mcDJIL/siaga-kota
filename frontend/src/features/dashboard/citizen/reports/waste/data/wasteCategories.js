@@ -1,8 +1,10 @@
 export const WASTE_CATEGORIES = [
-  { value: 'plastic', label: 'Plastik' },
-  { value: 'organic', label: 'Organik' },
-  { value: 'construction', label: 'Konstruksi' },
-  { value: 'household', label: 'Rumah Tangga' },
-  { value: 'industrial', label: 'Industri' },
-  { value: 'other', label: 'Lainnya' },
+  { value: 'plastik', label: 'Plastik' },
+  { value: 'organik', label: 'Organik' },
+  { value: 'konstruksi', label: 'Konstruksi' },
+  { value: 'rumah_tangga', label: 'Rumah Tangga' },
+  { value: 'industri', label: 'Industri' },
+  { value: 'lainnya', label: 'Lainnya' },
 ]
+
+export const CATEGORY_ID = '01kyq8sh5hxadrwsawvedeq5h4'

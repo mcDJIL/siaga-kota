@@ -7,6 +7,7 @@ use App\Http\Requests\Auth\ForgotPasswordRequest;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\ResetPasswordRequest;
+use App\Http\Requests\Auth\UpdatePasswordRequest;
 use App\Http\Requests\Auth\UpdateProfileRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
@@ -152,6 +153,30 @@ class AuthController extends Controller
                 'user' => new UserResource($request->user()->fresh()),
             ],
             'message' => 'Profil berhasil diperbarui.',
+        ]);
+    }
+
+    /**
+     * @group Auth
+     * @authenticated
+     * @bodyParam current_password string required Password saat ini.
+     * @bodyParam password string required Password baru minimal 8 karakter.
+     * @bodyParam password_confirmation string required Konfirmasi password baru.
+     */
+    public function updatePassword(UpdatePasswordRequest $request): JsonResponse
+    {
+        $data = $request->validated();
+
+        $user = $request->user();
+        $user->forceFill([
+            'password' => $data['password'],
+        ])->save();
+
+        return response()->json([
+            'data' => [
+                'user' => new UserResource($user->fresh()),
+            ],
+            'message' => 'Password berhasil diperbarui.',
         ]);
     }
 

@@ -7,4 +7,13 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://api-siaga.eepis.web.id',
+        changeOrigin: true,
+        secure: true,
+      },
+    },
+  },
 })

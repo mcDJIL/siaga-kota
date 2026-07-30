@@ -19,6 +19,7 @@ Route::prefix('v1')->group(function (): void {
             Route::post('logout', 'logout');
             Route::get('me', 'me');
             Route::patch('me', 'updateMe');
+            Route::patch('me/password', 'updatePassword');
         });
     });
 

@@ -11,8 +11,6 @@ import { DeleteAccountModal } from '../../../shared/components/DeleteAccountModa
 import { useProfile } from '../../../shared/hooks/useProfile'
 import { useNotificationSettings } from '../../../shared/hooks/useNotificationSettings'
 import {
-  ACTIVITY_RANK,
-  CITIZEN_PROFILE_DATA,
   COMMUNITY_RANKINGS,
   CONTRIBUTION_BADGES,
   CONTRIBUTION_STATS,
@@ -21,18 +19,41 @@ import {
 } from '../data/profileData'
 
 export function CitizenProfilePage() {
-  const { profile, updateAvatar, saveProfile, changePassword, deleteAccount } = useProfile(CITIZEN_PROFILE_DATA)
+  const { profile, isLoading, updateAvatar, saveProfile, changePassword, deleteAccount } = useProfile()
   const { settings, toggleSetting } = useNotificationSettings(NOTIFICATION_SETTINGS)
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false)
   const [isDeleteAccountOpen, setIsDeleteAccountOpen] = useState(false)
+
+  if (isLoading || !profile) {
+    return (
+      <div className="flex flex-col gap-8 p-4 sm:p-8">
+        <div className="flex flex-col gap-1">
+          <div className="h-8 w-48 animate-pulse rounded-lg bg-border-muted" />
+          <div className="h-4 w-96 animate-pulse rounded-lg bg-border-muted" />
+        </div>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[304px_1fr]">
+          <div className="flex flex-col gap-6">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-48 animate-pulse rounded-xl bg-border-muted" />
+            ))}
+          </div>
+          <div className="flex flex-col gap-6">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="h-48 animate-pulse rounded-xl bg-border-muted" />
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   function handleSaveProfile(values) {
     saveProfile(values)
   }
 
-  function handleChangePassword() {
+  function handleChangePassword(oldPassword, newPassword) {
     setIsChangePasswordOpen(false)
-    changePassword()
+    changePassword(oldPassword, newPassword)
   }
 
   function handleDeleteAccount() {
@@ -52,8 +73,7 @@ export function CitizenProfilePage() {
           <ProfileCard profile={profile} onAvatarChange={updateAvatar} />
           <ContributionBadgeList badges={CONTRIBUTION_BADGES} />
           <RecentPointActivity activities={RECENT_POINT_ACTIVITY} />
-          <CommunityRankCard rankings={COMMUNITY_RANKINGS} activityRank={ACTIVITY_RANK} />
-          <ContributionStats stats={CONTRIBUTION_STATS} />
+          <ContributionStats stats={CONTRIBUTION_STATS} profile={profile} />
         </div>
 
         <div className="flex flex-col gap-6">
