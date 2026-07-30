@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { ErrorBoundary } from './components/common/ErrorBoundary'
 import ProtectedRoute from './components/common/ProtectedRoute'
+import PublicAuthRoute from './components/common/PublicAuthRoute'
 import { LandingLayout } from './layouts/LandingLayout'
 import { AuthLayout } from './layouts/AuthLayout'
 import { DashboardLayout } from './layouts/DashboardLayout'
@@ -65,9 +66,9 @@ function App() {
           <Route path="/about" element={<LandingLayout><AboutPage /></LandingLayout>} />
 
           {/* Authentication */}
-          <Route path="/login" element={<AuthLayout><LoginPage /></AuthLayout>} />
-          <Route path="/register" element={<AuthLayout><RegisterPage /></AuthLayout>} />
-          <Route path="/forgot-password" element={<AuthLayout><ForgotPasswordPage /></AuthLayout>} />
+          <Route path="/login" element={<PublicAuthRoute><AuthLayout><LoginPage /></AuthLayout></PublicAuthRoute>} />
+          <Route path="/register" element={<PublicAuthRoute><AuthLayout><RegisterPage /></AuthLayout></PublicAuthRoute>} />
+          <Route path="/forgot-password" element={<PublicAuthRoute><AuthLayout><ForgotPasswordPage /></AuthLayout></PublicAuthRoute>} />
 
           {/* Citizen Routes */}
           <Route

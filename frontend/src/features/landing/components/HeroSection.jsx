@@ -15,7 +15,7 @@ export function HeroSection() {
           berkelanjutan.
         </p>
         <div className="flex flex-col gap-4 pt-2 sm:flex-row">
-          <Button variant="primary" size="lg">
+          <Button as={Link} to="/citizen/reports-waste" variant="primary" size="lg">
             <TrashIcon className="h-[18px] w-4 shrink-0" />
             Laporkan Sampah
           </Button>
