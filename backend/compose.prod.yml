@@ -69,6 +69,9 @@ services:
       timeout: 3s
       retries: 5
 
+  # Horizon adalah manajer queue worker (Redis). Tidak perlu service
+  # `queue:work` terpisah karena Horizon yang menjalankan & menskalakan worker
+  # sesuai supervisor di config/horizon.php.
   horizon:
     build:
       context: .
@@ -77,6 +80,7 @@ services:
     restart: unless-stopped
     working_dir: /var/www/html
     command: php artisan horizon
+    stop_grace_period: 60s
     volumes:
       - ./storage:/var/www/html/storage
     env_file:
@@ -84,10 +88,18 @@ services:
     environment:
       - APP_ENV=production
     depends_on:
-      - pgsql
-      - redis
+      pgsql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - siagakota
+    healthcheck:
+      test: ["CMD", "php", "artisan", "horizon:status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   scheduler:
     build:
@@ -104,8 +116,10 @@ services:
     environment:
       - APP_ENV=production
     depends_on:
-      - pgsql
-      - redis
+      pgsql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - siagakota
 
