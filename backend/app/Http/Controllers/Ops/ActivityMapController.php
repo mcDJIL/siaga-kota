@@ -9,7 +9,7 @@ use App\Http\Resources\OfficerResource;
 use App\Http\Resources\ReportResource;
 use App\Models\Report;
 use App\Models\User;
-use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;

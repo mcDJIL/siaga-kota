@@ -207,7 +207,10 @@ return [
             'maxJobs' => 0,
             'memory' => 128,
             'tries' => 1,
-            'timeout' => 60,
+            // Rantai timeout wajib: job timeout (300) < supervisor timeout (330)
+            // < queue retry_after (360). Lihat REDIS_QUEUE_RETRY_AFTER di .env.
+            // ProcessExportJob memakai timeout 300s untuk dataset besar.
+            'timeout' => 330,
             'nice' => 0,
         ],
     ],

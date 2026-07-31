@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+notebooks/
+tests/
+reports/
+*.ipynb
+.git
+.gitignore
+AI_DEVELOPMENT_PLAN.md
