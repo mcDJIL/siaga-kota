@@ -5,9 +5,15 @@ import { Button } from '../../../../../components/ui/Button'
 import { Input } from '../../../../../components/ui/Input'
 import { Textarea } from '../../../../../components/ui/Textarea'
 import { Select } from '../../../../../components/ui/Select'
-import { TARGET_OPTIONS } from '../../data/announcementData'
+import { AUDIENCE_OPTIONS, TYPE_OPTIONS } from '../../data/announcementData'
 
-const INITIAL_FORM = { title: '', body: '', target: TARGET_OPTIONS[0], publishDate: '' }
+const INITIAL_FORM = {
+  title: '',
+  body: '',
+  audience: AUDIENCE_OPTIONS[0].value,
+  type: TYPE_OPTIONS[0].value,
+  publishDate: '',
+}
 
 export function AnnouncementForm({ onPublish }) {
   const [form, setForm] = useState(INITIAL_FORM)
@@ -21,7 +27,7 @@ export function AnnouncementForm({ onPublish }) {
     const nextErrors = {}
     if (!form.title.trim()) nextErrors.title = 'Judul wajib diisi.'
     if (!form.body.trim()) nextErrors.body = 'Isi pengumuman wajib diisi.'
-    if (!form.target) nextErrors.target = 'Target audiens wajib dipilih.'
+    if (!form.audience) nextErrors.audience = 'Target audiens wajib dipilih.'
     if (!form.publishDate) nextErrors.publishDate = 'Tanggal publikasi wajib diisi.'
     setErrors(nextErrors)
     return Object.keys(nextErrors).length === 0
@@ -31,7 +37,13 @@ export function AnnouncementForm({ onPublish }) {
     event.preventDefault()
     if (!validate()) return
 
-    onPublish({ title: form.title, body: form.body, target: form.target, publishDate: form.publishDate })
+    onPublish({
+      title: form.title,
+      body: form.body,
+      audience: form.audience,
+      type: form.type,
+      published_at: form.publishDate,
+    })
     setForm(INITIAL_FORM)
     setErrors({})
   }
@@ -77,10 +89,29 @@ export function AnnouncementForm({ onPublish }) {
       <div className="flex flex-col gap-4 sm:flex-row">
         <label className="flex flex-1 flex-col gap-2 text-sm font-medium text-text-body">
           Target Audiens
-          <Select value={form.target} onChange={(event) => updateField('target', event.target.value)} className="border border-[#C4C6CF] py-3">
-            {TARGET_OPTIONS.map((option) => (
-              <option key={option} value={option}>
-                {option}
+          <Select
+            value={form.audience}
+            onChange={(event) => updateField('audience', event.target.value)}
+            className="border border-[#C4C6CF] py-3"
+          >
+            {AUDIENCE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </Select>
+        </label>
+
+        <label className="flex flex-1 flex-col gap-2 text-sm font-medium text-text-body">
+          Jenis Pengumuman
+          <Select
+            value={form.type}
+            onChange={(event) => updateField('type', event.target.value)}
+            className="border border-[#C4C6CF] py-3"
+          >
+            {TYPE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
               </option>
             ))}
           </Select>

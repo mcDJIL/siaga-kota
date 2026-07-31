@@ -243,7 +243,7 @@ class UserManagementController extends Controller
             'position' => $user->position,
             'department' => $user->department?->name,
             'institution' => $user->department?->name,
-            'district' => $user->department?->region ?? 'N/A',
+            'district' => $user->village_id ?? 'N/A',
             'avatarUrl' => $user->avatar_url,
             'status' => $user->active ? 'Aktif' : 'Nonaktif',
             'active' => $user->active,

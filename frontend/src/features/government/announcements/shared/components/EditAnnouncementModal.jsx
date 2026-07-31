@@ -4,7 +4,12 @@ import { Button } from '../../../../../components/ui/Button'
 import { Input } from '../../../../../components/ui/Input'
 import { Textarea } from '../../../../../components/ui/Textarea'
 import { Select } from '../../../../../components/ui/Select'
-import { STATUS_OPTIONS, TARGET_OPTIONS } from '../../data/announcementData'
+import { AUDIENCE_OPTIONS, STATUS_OPTIONS, TYPE_OPTIONS } from '../../data/announcementData'
+
+function toDateInputValue(value) {
+  if (!value) return ''
+  return String(value).slice(0, 10)
+}
 
 export function EditAnnouncementModal({ announcement, onClose, onSave }) {
   const [form, setForm] = useState(null)
@@ -12,11 +17,12 @@ export function EditAnnouncementModal({ announcement, onClose, onSave }) {
   useEffect(() => {
     if (announcement) {
       setForm({
-        title: announcement.title,
-        body: announcement.body,
-        target: announcement.target,
-        publishDate: announcement.publishDate,
-        status: announcement.status,
+        title: announcement.title ?? '',
+        body: announcement.body ?? '',
+        type: announcement.type ?? 'info',
+        audience: announcement.audience ?? 'all',
+        published_at: toDateInputValue(announcement.published_at),
+        status: announcement.status ?? 'draft',
       })
     }
   }, [announcement])
@@ -26,7 +32,12 @@ export function EditAnnouncementModal({ announcement, onClose, onSave }) {
   }
 
   function handleSave() {
-    if (announcement) onSave(announcement.id, form)
+    if (!announcement) return
+
+    onSave(announcement.id, {
+      ...form,
+      published_at: form.published_at || null,
+    })
   }
 
   return (
@@ -46,10 +57,21 @@ export function EditAnnouncementModal({ announcement, onClose, onSave }) {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <label className="flex flex-col gap-1.5 text-sm text-text-body">
               Target Audiens
-              <Select value={form.target} onChange={(event) => updateField('target', event.target.value)}>
-                {TARGET_OPTIONS.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
+              <Select value={form.audience} onChange={(event) => updateField('audience', event.target.value)}>
+                {AUDIENCE_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </Select>
+            </label>
+
+            <label className="flex flex-col gap-1.5 text-sm text-text-body">
+              Jenis
+              <Select value={form.type} onChange={(event) => updateField('type', event.target.value)}>
+                {TYPE_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
                   </option>
                 ))}
               </Select>
@@ -57,15 +79,19 @@ export function EditAnnouncementModal({ announcement, onClose, onSave }) {
 
             <label className="flex flex-col gap-1.5 text-sm text-text-body">
               Tanggal Publikasi
-              <Input type="date" value={form.publishDate} onChange={(event) => updateField('publishDate', event.target.value)} />
+              <Input
+                type="date"
+                value={form.published_at}
+                onChange={(event) => updateField('published_at', event.target.value)}
+              />
             </label>
 
             <label className="flex flex-col gap-1.5 text-sm text-text-body">
               Status
               <Select value={form.status} onChange={(event) => updateField('status', event.target.value)}>
                 {STATUS_OPTIONS.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
+                  <option key={option.value} value={option.value}>
+                    {option.label}
                   </option>
                 ))}
               </Select>

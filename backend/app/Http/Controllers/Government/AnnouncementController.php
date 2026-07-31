@@ -2,119 +2,159 @@
 
 namespace App\Http\Controllers\Government;
 
+use App\Enums\AnnouncementAudience;
+use App\Enums\AnnouncementStatus;
+use App\Enums\AnnouncementType;
 use App\Http\Controllers\Controller;
 use App\Models\Announcement;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class AnnouncementController extends Controller
 {
+    /**
+     * @group Admin - Announcements
+     * @authenticated
+     */
     public function index(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'status' => ['nullable', Rule::in('Draft', 'Aktif', 'Arsip')],
-            'target' => ['nullable', Rule::in('Semua', 'Warga', 'Petugas', 'Pemerintah')],
-            'search' => 'nullable|string|max:255',
-            'per_page' => 'nullable|integer|min:1|max:100',
-            'page' => 'nullable|integer|min:1',
+            'status' => ['nullable', Rule::enum(AnnouncementStatus::class)],
+            'audience' => ['nullable', Rule::enum(AnnouncementAudience::class)],
+            'search' => ['nullable', 'string', 'max:255'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'page' => ['nullable', 'integer', 'min:1'],
         ]);
 
-        $query = Announcement::query()->latest('created_at');
-
-        if ($validated['status'] ?? null) {
-            $query->where('status', $validated['status']);
-        }
-
-        if ($validated['target'] ?? null) {
-            $query->forTarget($validated['target']);
-        }
-
-        if ($validated['search'] ?? null) {
-            $query->where('title', 'like', "%{$validated['search']}%")
-                ->orWhere('body', 'like', "%{$validated['search']}%");
-        }
-
-        $announcements = $query->paginate($validated['per_page'] ?? 10);
+        $announcements = Announcement::query()
+            ->with('creator:id,name')
+            ->when(
+                $validated['status'] ?? null,
+                fn (Builder $q, string $status) => $q->where('status', $status),
+            )
+            ->when(
+                $validated['audience'] ?? null,
+                fn (Builder $q, string $audience) => $q->forAudience($audience),
+            )
+            ->when($validated['search'] ?? null, function (Builder $q, string $search): void {
+                // Bungkus dalam grup agar tidak membocorkan filter status/audience.
+                $q->where(function (Builder $inner) use ($search): void {
+                    $inner->where('title', 'ilike', "%{$search}%")
+                        ->orWhere('body', 'ilike', "%{$search}%");
+                });
+            })
+            ->latest('created_at')
+            ->paginate($validated['per_page'] ?? 10);
 
         return response()->json([
             'data' => [
-                'announcements' => $announcements->items(),
+                'announcements' => collect($announcements->items())
+                    ->map(fn (Announcement $item) => $this->formatAnnouncement($item)),
                 'total' => $announcements->total(),
-                'per_page' => $announcements->per_page(),
-                'current_page' => $announcements->current_page(),
-                'last_page' => $announcements->last_page(),
+                'per_page' => $announcements->perPage(),
+                'current_page' => $announcements->currentPage(),
+                'last_page' => $announcements->lastPage(),
             ],
             'message' => 'Pengumuman berhasil diambil.',
         ]);
     }
 
+    /**
+     * @group Admin - Announcements
+     * @authenticated
+     */
     public function show(string $id): JsonResponse
     {
-        $announcement = Announcement::findOrFail($id);
+        $announcement = Announcement::query()->with('creator:id,name')->findOrFail($id);
 
         return response()->json([
-            'data' => $announcement,
+            'data' => $this->formatAnnouncement($announcement),
             'message' => 'Detail pengumuman berhasil diambil.',
         ]);
     }
 
+    /**
+     * @group Admin - Announcements
+     * @authenticated
+     */
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'body' => 'required|string',
-            'target' => ['required', Rule::in('Semua', 'Warga', 'Petugas', 'Pemerintah')],
-            'status' => ['required', Rule::in('Draft', 'Aktif', 'Arsip')],
+            'title' => ['required', 'string', 'max:255'],
+            'body' => ['required', 'string'],
+            'type' => ['nullable', Rule::enum(AnnouncementType::class)],
+            'audience' => ['required', Rule::enum(AnnouncementAudience::class)],
+            'audience_value' => ['nullable', 'string', 'max:255'],
+            'status' => ['required', Rule::enum(AnnouncementStatus::class)],
+            'published_at' => ['nullable', 'date'],
+            'expires_at' => ['nullable', 'date', 'after:published_at'],
         ], [
             'title.required' => 'Judul pengumuman wajib diisi.',
             'body.required' => 'Konten pengumuman wajib diisi.',
-            'target.required' => 'Target pengumuman wajib dipilih.',
+            'audience.required' => 'Audiens pengumuman wajib dipilih.',
             'status.required' => 'Status pengumuman wajib dipilih.',
+            'expires_at.after' => 'Tanggal kedaluwarsa harus setelah tanggal publikasi.',
         ]);
 
+        $validated['type'] ??= AnnouncementType::Info->value;
         $validated['created_by'] = $request->user()->id;
 
-        if ($validated['status'] === 'Aktif') {
-            $validated['published_at'] = now();
+        if ($validated['status'] === AnnouncementStatus::Published->value) {
+            $validated['published_at'] ??= now();
         }
 
-        $announcement = Announcement::create($validated);
+        $announcement = Announcement::query()->create($validated);
 
         return response()->json([
-            'data' => $announcement,
+            'data' => $this->formatAnnouncement($announcement->load('creator:id,name')),
             'message' => 'Pengumuman berhasil dibuat.',
         ], 201);
     }
 
+    /**
+     * @group Admin - Announcements
+     * @authenticated
+     */
     public function update(Request $request, string $id): JsonResponse
     {
-        $announcement = Announcement::findOrFail($id);
+        $announcement = Announcement::query()->findOrFail($id);
 
         $validated = $request->validate([
-            'title' => 'nullable|string|max:255',
-            'body' => 'nullable|string',
-            'target' => ['nullable', Rule::in('Semua', 'Warga', 'Petugas', 'Pemerintah')],
-            'status' => ['nullable', Rule::in('Draft', 'Aktif', 'Arsip')],
+            'title' => ['sometimes', 'required', 'string', 'max:255'],
+            'body' => ['sometimes', 'required', 'string'],
+            'type' => ['nullable', Rule::enum(AnnouncementType::class)],
+            'audience' => ['nullable', Rule::enum(AnnouncementAudience::class)],
+            'audience_value' => ['nullable', 'string', 'max:255'],
+            'status' => ['nullable', Rule::enum(AnnouncementStatus::class)],
+            'published_at' => ['nullable', 'date'],
+            'expires_at' => ['nullable', 'date'],
         ]);
 
-        // If status changes to Aktif and not yet published, set published_at
-        if (($validated['status'] ?? null) === 'Aktif' && !$announcement->published_at) {
-            $validated['published_at'] = now();
+        $isPublishing = ($validated['status'] ?? null) === AnnouncementStatus::Published->value;
+
+        if ($isPublishing && ! $announcement->published_at) {
+            $validated['published_at'] ??= now();
         }
 
         $announcement->update($validated);
 
         return response()->json([
-            'data' => $announcement,
+            'data' => $this->formatAnnouncement($announcement->fresh()->load('creator:id,name')),
             'message' => 'Pengumuman berhasil diperbarui.',
         ]);
     }
 
+    /**
+     * @group Admin - Announcements
+     * @authenticated
+     */
     public function destroy(string $id): JsonResponse
     {
-        $announcement = Announcement::findOrFail($id);
+        $announcement = Announcement::query()->findOrFail($id);
         $title = $announcement->title;
+
         $announcement->delete();
 
         return response()->json([
@@ -122,54 +162,100 @@ class AnnouncementController extends Controller
         ]);
     }
 
-    public function publish(Request $request, string $id): JsonResponse
+    /**
+     * @group Admin - Announcements
+     * @authenticated
+     */
+    public function publish(string $id): JsonResponse
     {
-        $announcement = Announcement::findOrFail($id);
+        $announcement = Announcement::query()->findOrFail($id);
 
         $announcement->update([
-            'status' => 'Aktif',
-            'published_at' => now(),
+            'status' => AnnouncementStatus::Published->value,
+            'published_at' => $announcement->published_at ?? now(),
         ]);
 
         return response()->json([
-            'data' => $announcement,
+            'data' => $this->formatAnnouncement($announcement->fresh()->load('creator:id,name')),
             'message' => 'Pengumuman berhasil dipublikasikan.',
         ]);
     }
 
-    public function archive(Request $request, string $id): JsonResponse
+    /**
+     * @group Admin - Announcements
+     * @authenticated
+     */
+    public function archive(string $id): JsonResponse
     {
-        $announcement = Announcement::findOrFail($id);
+        $announcement = Announcement::query()->findOrFail($id);
 
         $announcement->update([
-            'status' => 'Arsip',
+            'status' => AnnouncementStatus::Archived->value,
         ]);
 
         return response()->json([
-            'data' => $announcement,
+            'data' => $this->formatAnnouncement($announcement->fresh()->load('creator:id,name')),
             'message' => 'Pengumuman berhasil diarsipkan.',
         ]);
     }
 
+    /**
+     * Pengumuman publik: hanya yang berstatus `published` dan belum kedaluwarsa.
+     *
+     * @group Public - Announcements
+     * @unauthenticated
+     */
     public function getPublic(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'target' => ['nullable', Rule::in('Semua', 'Warga', 'Petugas', 'Pemerintah')],
-            'limit' => 'nullable|integer|min:1|max:50',
+            'audience' => ['nullable', Rule::enum(AnnouncementAudience::class)],
+            'limit' => ['nullable', 'integer', 'min:1', 'max:50'],
         ]);
 
-        $query = Announcement::active()->published()->latest('published_at');
-
-        if ($validated['target'] ?? null) {
-            $query->forTarget($validated['target']);
-        }
-
-        $announcements = $query->limit($validated['limit'] ?? 5)->get();
+        $announcements = Announcement::query()
+            ->published()
+            ->when(
+                $validated['audience'] ?? null,
+                fn (Builder $q, string $audience) => $q->forAudience($audience),
+            )
+            ->latest('published_at')
+            ->limit($validated['limit'] ?? 5)
+            ->get();
 
         return response()->json([
             'data' => [
-                'announcements' => $announcements,
+                'announcements' => $announcements
+                    ->map(fn (Announcement $item) => $this->formatAnnouncement($item)),
             ],
         ]);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function formatAnnouncement(Announcement $announcement): array
+    {
+        return [
+            'id' => $announcement->id,
+            'title' => $announcement->title,
+            'body' => $announcement->body,
+            'type' => $announcement->type->value,
+            'typeLabel' => $announcement->type->label(),
+            'audience' => $announcement->audience->value,
+            'audienceLabel' => $announcement->audience->label(),
+            'audience_value' => $announcement->audience_value,
+            'status' => $announcement->status->value,
+            'statusLabel' => $announcement->status->label(),
+            'published_at' => $announcement->published_at?->toISOString(),
+            'expires_at' => $announcement->expires_at?->toISOString(),
+            'created_by' => $announcement->relationLoaded('creator') && $announcement->creator
+                ? [
+                    'id' => $announcement->creator->id,
+                    'name' => $announcement->creator->name,
+                ]
+                : null,
+            'created_at' => $announcement->created_at?->toISOString(),
+            'updated_at' => $announcement->updated_at?->toISOString(),
+        ];
     }
 }

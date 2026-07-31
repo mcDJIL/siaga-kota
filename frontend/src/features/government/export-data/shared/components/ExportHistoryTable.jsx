@@ -71,11 +71,11 @@ export function ExportHistoryTable({ items, totalCount, page, totalPages, onPage
                 return (
                   <tr key={record.id} className={cn(index > 0 && 'border-t border-[#C4C6CF]/30')}>
                     <td className="px-6 py-4 text-base text-text-body">{formatExportTimestamp(record.exportedAt)}</td>
-                    <td className="px-6 py-4 text-base font-medium text-navy">{record.dataType}</td>
+                    <td className="px-6 py-4 text-base font-medium text-navy">{record.dataTypeLabel ?? record.dataType}</td>
                     <td className="px-6 py-4 text-base text-text-body">
                       <span className="flex items-center gap-2">
-                        <FormatIcon className="h-4 w-4 text-text-muted" aria-hidden="true" />
-                        {record.format}
+                        {FormatIcon ? <FormatIcon className="h-4 w-4 text-text-muted" aria-hidden="true" /> : null}
+                        {record.formatLabel ?? record.format}
                       </span>
                     </td>
                     <td className="px-6 py-4">

@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Enums\NotificationCategory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Foundation\Auth\User as Authenticatable;
 
 #[Fillable([
     'user_id',
@@ -21,18 +23,20 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
     'read_at',
     'confirmed_at',
 ])]
-class Notification extends Authenticatable
+class Notification extends Model
 {
     use HasFactory, HasUlids, SoftDeletes;
 
     protected $table = 'notifications';
 
-    protected $casts = [
-        'read_at' => 'datetime',
-        'confirmed_at' => 'datetime',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'category' => NotificationCategory::class,
+            'read_at' => 'datetime',
+            'confirmed_at' => 'datetime',
+        ];
+    }
 
     public function user(): BelongsTo
     {
@@ -44,51 +48,39 @@ class Notification extends Authenticatable
         return $this->belongsTo(Report::class);
     }
 
-    /**
-     * Scope to get only unread notifications
-     */
-    public function scopeUnread($query)
+    public function scopeUnread(Builder $query): Builder
     {
         return $query->where('status', 'unread');
     }
 
-    /**
-     * Scope to filter by category
-     */
-    public function scopeByCategory($query, $category)
+    public function scopeByCategory(Builder $query, ?string $category): Builder
     {
-        if ($category === 'semua') {
+        if (! $category || $category === 'semua') {
             return $query;
         }
+
         return $query->where('category', $category);
     }
 
-    /**
-     * Scope to filter by status
-     */
-    public function scopeByStatus($query, $status)
+    public function scopeByStatus(Builder $query, ?string $status): Builder
     {
-        if ($status === 'semua') {
-            return $query->whereNotIn('status', ['hidden']);
+        if (! $status || $status === 'semua') {
+            return $query->where('status', '!=', 'hidden');
         }
+
         return $query->where('status', $status);
     }
 
-    /**
-     * Scope to filter by priority
-     */
-    public function scopeByPriority($query, $priority)
+    public function scopeByPriority(Builder $query, ?string $priority): Builder
     {
-        if ($priority === 'semua') {
+        if (! $priority || $priority === 'semua') {
             return $query;
         }
+
         return $query->where('priority', $priority);
     }
 
-    /**
-     * Mark notification as read
-     */
-    public function markAsRead()
+    public function markAsRead(): void
     {
         $this->update([
             'status' => 'read',
@@ -96,10 +88,7 @@ class Notification extends Authenticatable
         ]);
     }
 
-    /**
-     * Mark notification as confirmed
-     */
-    public function markAsConfirmed()
+    public function markAsConfirmed(): void
     {
         $this->update([
             'status' => 'confirmed',
@@ -107,10 +96,7 @@ class Notification extends Authenticatable
         ]);
     }
 
-    /**
-     * Hide notification
-     */
-    public function hide()
+    public function hide(): void
     {
         $this->update(['status' => 'hidden']);
     }

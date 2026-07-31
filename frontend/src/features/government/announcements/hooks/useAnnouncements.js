@@ -1,19 +1,19 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import {
   getAnnouncements,
   createAnnouncement,
   updateAnnouncement,
   deleteAnnouncement,
-  publishAnnouncement,
 } from '../../../../services/announcement.service'
+import { ANNOUNCEMENT_STATUS } from '../data/announcementData'
 
 const PAGE_SIZE = 5
 
 export function useAnnouncements() {
   const [announcements, setAnnouncements] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState('Semua')
+  const [statusFilter, setStatusFilter] = useState('all')
   const [page, setPage] = useState(1)
   const [editTarget, setEditTarget] = useState(null)
   const [deleteTarget, setDeleteTarget] = useState(null)
@@ -32,7 +32,7 @@ export function useAnnouncements() {
         page,
       }
 
-      if (statusFilter !== 'Semua') {
+      if (statusFilter !== 'all') {
         params.status = statusFilter
       }
 
@@ -42,15 +42,14 @@ export function useAnnouncements() {
 
       const response = await getAnnouncements(params)
 
-      // Handle different response structures
-      const announcements = response.data?.announcements || response.data || []
-      const total = response.data?.total || response.meta?.total || (Array.isArray(announcements) ? announcements.length : 0)
+      const items = response.data?.announcements ?? []
+      const total = response.data?.total ?? (Array.isArray(items) ? items.length : 0)
 
-      setAnnouncements(Array.isArray(announcements) ? announcements : [])
+      setAnnouncements(Array.isArray(items) ? items : [])
       setTotalCount(typeof total === 'number' ? total : 0)
     } catch (error) {
       console.error('Error loading announcements:', error)
-      toast.error('Gagal memuat pengumuman')
+      toast.error(error.message || 'Gagal memuat pengumuman')
     } finally {
       setIsLoading(false)
     }
@@ -61,15 +60,15 @@ export function useAnnouncements() {
   function handleStatusFilterChange(value) {
     setStatusFilter(value)
     setPage(1)
-    toast.success('Filter berhasil diterapkan.')
   }
 
   async function handlePublish(announcementData) {
     try {
       const response = await createAnnouncement({
         ...announcementData,
-        status: 'Aktif',
+        status: ANNOUNCEMENT_STATUS.PUBLISHED,
       })
+
       if (response.data) {
         setPage(1)
         await loadAnnouncements()

@@ -1,6 +1,17 @@
-export const TARGET_LABEL_STYLES = {
-  Semua: 'text-text-body',
-  Warga: 'text-text-body',
-  Petugas: 'text-text-body',
-  Pemerintah: 'text-text-body',
+import { ANNOUNCEMENT_AUDIENCE } from '../data/announcementData'
+
+export const AUDIENCE_LABEL_STYLES = {
+  [ANNOUNCEMENT_AUDIENCE.ALL]: 'text-text-body',
+  [ANNOUNCEMENT_AUDIENCE.WARGA]: 'text-text-body',
+  [ANNOUNCEMENT_AUDIENCE.PETUGAS]: 'text-text-body',
+  [ANNOUNCEMENT_AUDIENCE.RW]: 'text-text-body',
+  [ANNOUNCEMENT_AUDIENCE.ZONE]: 'text-text-body',
+}
+
+export const AUDIENCE_LABELS = {
+  [ANNOUNCEMENT_AUDIENCE.ALL]: 'Semua',
+  [ANNOUNCEMENT_AUDIENCE.WARGA]: 'Warga',
+  [ANNOUNCEMENT_AUDIENCE.PETUGAS]: 'Staf',
+  [ANNOUNCEMENT_AUDIENCE.RW]: 'RW',
+  [ANNOUNCEMENT_AUDIENCE.ZONE]: 'Zona',
 }

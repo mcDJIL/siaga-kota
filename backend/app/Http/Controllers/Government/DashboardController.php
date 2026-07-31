@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Government;
 
 use App\Http\Controllers\Controller;
+use App\Models\Announcement;
 use App\Models\Report;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Str;
 
 class DashboardController extends Controller
 {
@@ -172,35 +174,24 @@ class DashboardController extends Controller
 
     public function getAnnouncements(): JsonResponse
     {
-        // Get announcements from database if available, otherwise use defaults
-        $announcements = \App\Models\Announcement::latest('published_at')
+        $announcements = Announcement::query()
+            ->published()
+            ->with('creator:id,name')
+            ->latest('published_at')
             ->limit(5)
             ->get()
-            ->map(fn($ann) => [
-                'id' => $ann->id,
-                'title' => $ann->title,
-                'description' => substr($ann->content ?? '', 0, 80) . '…',
-                'fullContent' => $ann->content,
-                'author' => $ann->author ?? 'Administrator',
-                'publishDate' => $ann->published_at?->diffForHumans(),
-                'priority' => $ann->priority ?? 'normal',
+            ->map(fn (Announcement $announcement) => [
+                'id' => $announcement->id,
+                'title' => $announcement->title,
+                'description' => Str::limit($announcement->body, 80),
+                'fullContent' => $announcement->body,
+                'author' => $announcement->creator?->name ?? 'Administrator',
+                'publishDate' => $announcement->published_at?->diffForHumans(),
+                'type' => $announcement->type->value,
+                'typeLabel' => $announcement->type->label(),
+                'audience' => $announcement->audience->value,
             ])
-            ->toArray();
-
-        // Fallback to default announcements if no data
-        if (empty($announcements)) {
-            $announcements = [
-                [
-                    'id' => 'default-1',
-                    'title' => 'Selamat datang di Dashboard',
-                    'description' => 'Dashboard sistem manajemen laporan banjir dan sampah kota…',
-                    'fullContent' => 'Selamat datang di sistem manajemen laporan banjir dan sampah kota. Gunakan dashboard ini untuk memantau laporan terbaru dan statistik pengelolaan sampah dan banjir.',
-                    'author' => 'System Administrator',
-                    'publishDate' => 'Hari ini',
-                    'priority' => 'normal',
-                ],
-            ];
-        }
+            ->all();
 
         return response()->json([
             'data' => [

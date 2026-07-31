@@ -1,15 +1,16 @@
 import { Download, Loader2 } from 'lucide-react'
+import { EXPORT_STATUS } from '../../data/exportHistoryData'
 import { STATUS_TOOLTIP } from '../../utils/statusColor'
 
 export function DownloadExportButton({ record, onDownload, isDownloading }) {
-  const isDisabled = record.status !== 'Selesai' || isDownloading
+  const isDisabled = record.status !== EXPORT_STATUS.COMPLETED || isDownloading
 
   return (
     <button
       type="button"
       disabled={isDisabled}
       onClick={() => onDownload(record)}
-      aria-label={`Unduh ${record.dataType}`}
+      aria-label={`Unduh ${record.dataTypeLabel ?? record.dataType}`}
       title={isDownloading ? 'Mengunduh...' : STATUS_TOOLTIP[record.status]}
       className="flex h-8 w-8 items-center justify-center rounded-lg text-navy transition-colors hover:bg-bg-blue-soft disabled:cursor-not-allowed disabled:text-text-muted/40 disabled:hover:bg-transparent"
     >

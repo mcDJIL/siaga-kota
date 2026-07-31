@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, Pencil, Trash2 } from 'lucide-react'
 import { AnnouncementFilterBar } from './AnnouncementFilterBar'
 import { AnnouncementStatusBadge } from './AnnouncementStatusBadge'
 import { formatPublishDate } from '../../utils/announcementFormatter'
+import { AUDIENCE_LABELS } from '../../utils/targetColor'
 import { cn } from '../../../../../lib/cn'
 
 export function AnnouncementTable({
@@ -71,10 +72,14 @@ export function AnnouncementTable({
               items.map((item, index) => (
                 <tr key={item.id} className={cn(index > 0 && 'border-t border-[#C4C6CF]/30')}>
                   <td className="px-6 py-4 text-base font-medium text-navy">{item.title}</td>
-                  <td className="px-6 py-4 text-base text-text-body">{item.target}</td>
-                  <td className="px-6 py-4 text-base text-text-muted">{formatPublishDate(item.publishDate)}</td>
+                  <td className="px-6 py-4 text-base text-text-body">
+                    {item.audienceLabel ?? AUDIENCE_LABELS[item.audience] ?? item.audience}
+                  </td>
+                  <td className="px-6 py-4 text-base text-text-muted">
+                    {formatPublishDate(item.published_at ?? item.publishDate)}
+                  </td>
                   <td className="px-6 py-4">
-                    <AnnouncementStatusBadge status={item.status} />
+                    <AnnouncementStatusBadge status={item.status} label={item.statusLabel} />
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-3">

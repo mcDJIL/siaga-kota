@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Ops\ActivityMapController as OpsActivityMapController;
+use App\Http\Controllers\Ops\NotificationController as OpsNotificationController;
 use App\Http\Controllers\Ops\ReportController as OpsReportController;
 use App\Http\Controllers\Public\DistrictLookupController;
 use App\Http\Controllers\Public\FloodPredictionController;
@@ -52,18 +54,7 @@ Route::prefix('v1')->group(function (): void {
     Route::middleware(['auth:sanctum', 'role:petugas,sanctum', 'throttle:petugas'])
         ->prefix('ops')
         ->group(function (): void {
-            Route::controller(ReportController::class)
-                ->prefix('reports')
-                ->group(function (): void {
-                    Route::get('/', 'index');
-                    Route::get('/waste', 'wasteReports');
-                    Route::get('/flood', 'floodReports');
-                    Route::get('/{id}', 'show');
-                    Route::patch('/{id}/emergency', 'toggleEmergency');
-                    Route::post('/{id}/handling', 'storeHandling');
-                });
-
-            Route::controller(\App\Http\Controllers\Officer\ActivityMapController::class)
+            Route::controller(OpsActivityMapController::class)
                 ->prefix('activity-map')
                 ->group(function (): void {
                     Route::get('/tasks', 'getActiveTasks');
@@ -73,7 +64,7 @@ Route::prefix('v1')->group(function (): void {
                     Route::get('/statistics', 'getStatistics');
                 });
 
-            Route::controller(\App\Http\Controllers\Officer\NotificationController::class)
+            Route::controller(OpsNotificationController::class)
                 ->prefix('notifications')
                 ->group(function (): void {
                     Route::get('/', 'index');
@@ -85,9 +76,13 @@ Route::prefix('v1')->group(function (): void {
                 ->prefix('reports')
                 ->group(function (): void {
                     Route::get('/', 'index');
+                    Route::get('/waste', 'wasteReports');
+                    Route::get('/flood', 'floodReports');
                     Route::get('/{id}', 'show');
                     Route::patch('/{id}/status', 'updateStatus');
                     Route::post('/{id}/attachments', 'uploadHandlingPhotos');
+                    Route::post('/{id}/handling', 'storeHandling');
+                    Route::patch('/{id}/emergency', 'toggleEmergency');
                     Route::post('/{id}/emergency', 'markEmergency');
                     Route::post('/{id}/assign', 'assign');
                 });
@@ -134,7 +129,6 @@ Route::prefix('v1')->group(function (): void {
                     Route::get('/data', 'getMapData');
                     Route::post('/export', 'exportReport');
                     Route::post('/update-district-stats', 'updateDistrictStats');
-                    Route::post('/seed-reports', 'seedSampleReports');
                 });
 
             Route::controller(\App\Http\Controllers\Government\AIPredictionController::class)
@@ -189,12 +183,4 @@ Route::prefix('v1')->group(function (): void {
         ->group(function (): void {
             // route internal nanti pakai middleware service token, bukan Sanctum
         });
-
-    // Debug routes (remove in production)
-    if (config('app.debug')) {
-        Route::post('debug/test-upload', [\App\Http\Controllers\DebugController::class, 'testFileUpload']);
-        Route::get('debug/check-storage', [\App\Http\Controllers\DebugController::class, 'checkStoragePaths']);
-        Route::post('debug/test-db-save', [\App\Http\Controllers\DebugController::class, 'testDatabaseSave'])
-            ->middleware('auth:sanctum');
-    }
 });

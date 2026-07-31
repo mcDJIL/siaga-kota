@@ -45,12 +45,13 @@ class User extends Authenticatable
     protected function avatarUrl(): Attribute
     {
         return Attribute::make(
-            get: function () {
-                if (!$this->avatar_path) {
+            get: function (): string {
+                if (! $this->avatar_path) {
                     return url('/default-avatar.png');
                 }
 
-                return url($this->avatar_path);
+                // Path tersimpan relatif terhadap disk public, mis. "avatars/xyz.jpg".
+                return url("storage/{$this->avatar_path}");
             },
         );
     }

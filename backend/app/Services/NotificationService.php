@@ -2,100 +2,103 @@
 
 namespace App\Services;
 
+use App\Enums\NotificationCategory;
+use App\Enums\ReportPriority;
+use App\Enums\ReportStatus;
 use App\Models\Notification;
 use App\Models\Report;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 class NotificationService
 {
     /**
-     * Create notification for new report
+     * Label status untuk ditampilkan di notifikasi, selaras PLAN §6.6.
+     *
+     * @var array<string, string>
+     */
+    private const STATUS_LABELS = [
+        'menunggu' => 'Menunggu Verifikasi',
+        'diverifikasi' => 'Terverifikasi',
+        'diproses' => 'Sedang Diproses',
+        'selesai' => 'Selesai',
+        'ditolak' => 'Ditolak',
+    ];
+
+    /**
+     * Notifikasi laporan baru untuk seluruh petugas aktif.
      */
     public static function createNewReportNotification(Report $report): void
     {
-        // Get all officers to notify
-        $officers = User::where('role', 'petugas')->get();
+        $officers = self::activeOfficers();
 
-        foreach ($officers as $officer) {
-            $category = $report->category?->slug === 'banjir' ? 'peringatan-banjir' : 'laporan-baru';
-            $priority = $report->priority === 'tinggi' ? 'high' : ($report->priority === 'sedang' ? 'medium' : 'low');
-
-            Notification::create([
-                'user_id' => $officer->id,
-                'report_id' => $report->id,
-                'type' => 'new-report',
-                'category' => $category,
-                'title' => "Laporan Baru #{$report->code}: {$report->title}",
-                'description' => $report->description,
-                'priority' => $priority,
-                'status' => 'unread',
-            ]);
-        }
-    }
-
-    /**
-     * Create notification when report status changes
-     */
-    public static function createStatusUpdateNotification(Report $report, string $oldStatus, string $newStatus): void
-    {
-        // Get report submitter/citizen
-        $citizen = User::find($report->user_id);
-        
-        if (!$citizen) {
+        if ($officers->isEmpty()) {
             return;
         }
 
-        $statusLabels = [
-            'menunggu' => 'Menunggu Verifikasi',
-            'diverifikasi' => 'Terverifikasi',
-            'diproses' => 'Sedang Diproses',
-            'selesai' => 'Selesai',
-            'ditolak' => 'Ditolak',
-        ];
+        $isFlood = $report->category?->slug === 'banjir';
 
-        $statusLabelNew = $statusLabels[$newStatus] ?? $newStatus;
-        $categoryLabel = $report->category?->name ?? 'Laporan';
-
-        $type = $newStatus === 'selesai' ? 'completed' : 'status-update';
-        $priority = $newStatus === 'selesai' ? 'medium' : ($newStatus === 'ditolak' ? 'high' : 'medium');
-
-        Notification::create([
-            'user_id' => $citizen->id,
+        self::insertMany($officers, [
             'report_id' => $report->id,
-            'type' => $type,
-            'category' => 'sistem',
-            'title' => "Status Laporan #{$report->code} Berubah Menjadi {$statusLabelNew}",
-            'description' => "Laporan {$categoryLabel} Anda telah diperbarui status menjadi {$statusLabelNew}.",
-            'priority' => $priority,
+            'type' => 'new-report',
+            'category' => $isFlood
+                ? NotificationCategory::Alert->value
+                : NotificationCategory::LaporanBaru->value,
+            'title' => "Laporan Baru #{$report->code}: {$report->title}",
+            'description' => $report->description,
+            'priority' => self::mapPriority($report),
+        ]);
+    }
+
+    /**
+     * Notifikasi ke pelapor saat status laporannya berubah.
+     */
+    public static function createStatusUpdateNotification(Report $report, string $oldStatus, string $newStatus): void
+    {
+        if (! $report->user_id) {
+            return;
+        }
+
+        $statusLabel = self::STATUS_LABELS[$newStatus] ?? $newStatus;
+        $categoryLabel = $report->category?->name ?? 'Laporan';
+        $isDone = $newStatus === ReportStatus::Selesai->value;
+
+        Notification::query()->create([
+            'user_id' => $report->user_id,
+            'report_id' => $report->id,
+            'type' => $isDone ? 'completed' : 'status-update',
+            'category' => NotificationCategory::Sistem->value,
+            'title' => "Status Laporan #{$report->code} Berubah Menjadi {$statusLabel}",
+            'description' => "Laporan {$categoryLabel} Anda telah diperbarui status menjadi {$statusLabel}.",
+            'priority' => $newStatus === ReportStatus::Ditolak->value ? 'high' : 'medium',
             'status' => 'unread',
         ]);
     }
 
     /**
-     * Create notification when report is completed
+     * Notifikasi ke pelapor saat laporan dinyatakan selesai.
      */
     public static function createCompletionNotification(Report $report): void
     {
-        $citizen = User::find($report->user_id);
-        
-        if (!$citizen) {
+        if (! $report->user_id) {
             return;
         }
 
-        Notification::create([
-            'user_id' => $citizen->id,
+        Notification::query()->create([
+            'user_id' => $report->user_id,
             'report_id' => $report->id,
             'type' => 'completed',
-            'category' => 'sistem',
+            'category' => NotificationCategory::Sistem->value,
             'title' => "Laporan #{$report->code} Telah Diselesaikan",
-            'description' => "Terima kasih telah melaporkan. Laporan Anda telah ditangani dan diselesaikan oleh petugas.",
+            'description' => 'Terima kasih telah melaporkan. Laporan Anda telah ditangani dan diselesaikan oleh petugas.',
             'priority' => 'low',
             'status' => 'unread',
         ]);
     }
 
     /**
-     * Create alert notification for flood reports
+     * Peringatan banjir untuk seluruh petugas aktif.
      */
     public static function createFloodAlertNotification(Report $report): void
     {
@@ -103,56 +106,90 @@ class NotificationService
             return;
         }
 
-        // Get all officers to notify
-        $officers = User::where('role', 'petugas')->get();
+        $officers = self::activeOfficers();
 
-        $priority = $report->water_level_cm > 100 ? 'high' : 'medium';
-
-        foreach ($officers as $officer) {
-            Notification::create([
-                'user_id' => $officer->id,
-                'report_id' => $report->id,
-                'type' => 'alert',
-                'category' => 'peringatan-banjir',
-                'title' => "Peringatan Banjir: {$report->title} - Level Air: {$report->water_level_cm}cm",
-                'description' => $report->description,
-                'priority' => $priority,
-                'status' => 'unread',
-            ]);
+        if ($officers->isEmpty()) {
+            return;
         }
+
+        self::insertMany($officers, [
+            'report_id' => $report->id,
+            'type' => 'alert',
+            'category' => NotificationCategory::Alert->value,
+            'title' => "Peringatan Banjir: {$report->title} - Level Air: {$report->water_level_cm}cm",
+            'description' => $report->description,
+            'priority' => ($report->water_level_cm ?? 0) > 100 ? 'high' : 'medium',
+        ]);
     }
 
-    /**
-     * Get human readable time difference
-     */
     public static function getTimeString($date): string
     {
-        if (!$date) {
+        if (! $date) {
             return 'Baru saja';
         }
 
         $now = now();
-        $diff = $now->diffInSeconds($date);
 
-        if ($diff < 60) {
+        if ($now->diffInSeconds($date) < 60) {
             return 'Baru saja';
         }
 
-        $diffMinutes = $now->diffInMinutes($date);
-        if ($diffMinutes < 60) {
-            return "{$diffMinutes} menit yang lalu";
+        if (($minutes = $now->diffInMinutes($date)) < 60) {
+            return "{$minutes} menit yang lalu";
         }
 
-        $diffHours = $now->diffInHours($date);
-        if ($diffHours < 24) {
-            return "{$diffHours} jam yang lalu";
+        if (($hours = $now->diffInHours($date)) < 24) {
+            return "{$hours} jam yang lalu";
         }
 
-        $diffDays = $now->diffInDays($date);
-        if ($diffDays < 7) {
-            return "{$diffDays} hari yang lalu";
+        if (($days = $now->diffInDays($date)) < 7) {
+            return "{$days} hari yang lalu";
         }
 
         return $date->format('d M Y');
+    }
+
+    /**
+     * Petugas aktif berdasarkan role Spatie (sumber kebenaran RBAC).
+     *
+     * @return Collection<int, User>
+     */
+    private static function activeOfficers(): Collection
+    {
+        return User::query()
+            ->whereHas('roles', fn ($q) => $q->where('name', 'petugas'))
+            ->where('active', true)
+            ->get(['id']);
+    }
+
+    /**
+     * Sisipkan satu notifikasi untuk banyak penerima dalam satu query.
+     *
+     * @param  Collection<int, User>  $recipients
+     * @param  array<string, mixed>  $payload
+     */
+    private static function insertMany(Collection $recipients, array $payload): void
+    {
+        $now = now();
+
+        $rows = $recipients->map(fn (User $user) => [
+            'id' => (string) str()->ulid(),
+            'user_id' => $user->id,
+            'status' => 'unread',
+            'created_at' => $now,
+            'updated_at' => $now,
+            ...$payload,
+        ])->all();
+
+        DB::table('notifications')->insert($rows);
+    }
+
+    private static function mapPriority(Report $report): string
+    {
+        return match ($report->priority) {
+            ReportPriority::Mendesak, ReportPriority::Tinggi => 'high',
+            ReportPriority::Sedang => 'medium',
+            default => 'low',
+        };
     }
 }

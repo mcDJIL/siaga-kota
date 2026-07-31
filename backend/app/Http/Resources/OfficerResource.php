@@ -2,69 +2,67 @@
 
 namespace App\Http\Resources;
 
+use App\Enums\ReportStatus;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class OfficerResource extends JsonResource
 {
     /**
+     * Status laporan yang dianggap sebagai penugasan aktif petugas.
+     *
+     * @var array<int, string>
+     */
+    private const ACTIVE_STATUSES = [
+        ReportStatus::Diverifikasi->value,
+        ReportStatus::Diproses->value,
+    ];
+
+    /**
      * Transform the resource into an array.
+     *
+     * PII (email/phone) tidak diekspos sesuai PLAN §7.
      *
      * @return array<string, mixed>
      */
     public function toArray(Request $request): array
     {
-        $assignedReports = $this->whenLoaded('assignedReports', fn() => $this->assignedReports()
-            ->whereIn('status', ['ditugaskan', 'diproses'])
-            ->pluck('id')
-            ->toArray(), []);
+        $activeReports = $this->relationLoaded('assignedReports')
+            ? $this->assignedReports->whereIn('status.value', self::ACTIVE_STATUSES)
+            : null;
 
-        $currentTask = $this->whenLoaded('assignedReports', fn() => $this->assignedReports()
-            ->whereIn('status', ['ditugaskan', 'diproses'])
-            ->first(), null);
+        $currentTask = $activeReports?->first();
 
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'email' => $this->email,
-            'phone' => $this->phone,
+            'employee_id' => $this->employee_id,
             'position' => $this->position,
-            'avatar_path' => $this->avatar_path,
-            'latitude' => $this->latitude ?? -6.2088,
-            'longitude' => $this->longitude ?? 106.8456,
-            'department' => $this->whenLoaded('department', fn() => [
+            'avatar_path' => $this->avatar_path ? url("storage/{$this->avatar_path}") : null,
+            'department' => $this->whenLoaded('department', fn () => [
                 'id' => $this->department->id,
                 'name' => $this->department->name,
                 'slug' => $this->department->slug,
             ]),
             'active' => $this->active,
-            'assigned_reports_count' => count($assignedReports),
+            'assigned_reports_count' => $activeReports?->count() ?? 0,
             'current_task' => $currentTask ? [
                 'id' => $currentTask->id,
                 'code' => $currentTask->code,
                 'title' => $currentTask->title,
                 'status' => $currentTask->status->value,
             ] : null,
-            'status' => $this->getOfficerStatus(),
+            'status' => $this->resolveOfficerStatus($activeReports?->count() ?? 0),
             'last_login_at' => $this->last_login_at?->toIso8601String(),
         ];
     }
 
-    private function getOfficerStatus(): string
+    private function resolveOfficerStatus(int $activeReportCount): string
     {
         if (! $this->active) {
             return 'tidak-aktif';
         }
 
-        // Check if assignedReports relationship is loaded
-        if ($this->relationLoaded('assignedReports')) {
-            $assignedCount = $this->assignedReports()
-                ->whereIn('status', ['diproses'])
-                ->count();
-            return $assignedCount > 0 ? 'bertugas' : 'tersedia';
-        }
-
-        // Fallback: assume tersedia if not loaded
-        return 'tersedia';
+        return $activeReportCount > 0 ? 'bertugas' : 'tersedia';
     }
 }

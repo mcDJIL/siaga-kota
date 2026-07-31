@@ -410,36 +410,4 @@ class ActivityMapController extends Controller
             ], 500);
         }
     }
-
-    public function seedSampleReports(): JsonResponse
-    {
-        try {
-            // This endpoint helps with development/testing
-            // Seeds sample waste and flood reports if database is empty
-            $reportCount = Report::count();
-
-            if ($reportCount > 0) {
-                return response()->json([
-                    'message' => 'Database sudah memiliki reports.',
-                    'count' => $reportCount,
-                ]);
-            }
-
-            // Run the seeder
-            \Illuminate\Support\Facades\Artisan::call('db:seed', [
-                '--class' => 'Database\\Seeders\\ReportSeeder',
-            ]);
-
-            Cache::forget('activity_map_data');
-
-            return response()->json([
-                'message' => 'Sample reports berhasil dibuat.',
-                'output' => \Illuminate\Support\Facades\Artisan::output(),
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Gagal membuat sample reports: ' . $e->getMessage(),
-            ], 500);
-        }
-    }
 }

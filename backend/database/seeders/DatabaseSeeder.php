@@ -65,9 +65,10 @@ class DatabaseSeeder extends Seeder
         $officer->assignRole('petugas');
         $admin->assignRole('admin');
 
-        // Seed sample reports
+        // Seeder yang bergantung pada user demo di atas.
         $this->call([
             ReportSeeder::class,
+            AnnouncementSeeder::class,
         ]);
     }
 }

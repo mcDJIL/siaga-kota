@@ -5,6 +5,7 @@ import {
   downloadDataExport,
   getExportHistory,
 } from '../../../../services/export-data.service'
+import { EXPORT_STATUS } from '../data/exportHistoryData'
 
 const PAGE_SIZE = 10
 
@@ -17,14 +18,14 @@ export function useExportHistory() {
   const [isLoading, setIsLoading] = useState(true)
   const [downloadingIds, setDownloadingIds] = useState(new Set())
 
-  const [dataType, setDataType] = useState('Semua Sektor')
+  const [dataType, setDataType] = useState('all')
   const [startDate, setStartDate] = useState(() => {
     const date = new Date()
     date.setDate(date.getDate() - 30)
     return date.toISOString().slice(0, 10)
   })
   const [endDate, setEndDate] = useState(() => new Date().toISOString().slice(0, 10))
-  const [format, setFormat] = useState('PDF')
+  const [format, setFormat] = useState('pdf')
 
   useEffect(() => {
     loadHistory()
@@ -60,12 +61,12 @@ export function useExportHistory() {
       await createDataExport({
         data_type: dataType,
         format,
-        start_date: startDate,
-        end_date: endDate,
+        date_from: startDate,
+        date_to: endDate,
       })
       setPage(1)
       await loadHistory()
-      toast.success('Ekspor berhasil dibuat.')
+      toast.success('Ekspor sedang diproses. Segarkan riwayat untuk melihat statusnya.')
     } catch (error) {
       console.error('Error creating export:', error)
       toast.error(error.message || 'Gagal membuat ekspor')
@@ -80,7 +81,7 @@ export function useExportHistory() {
   }
 
   async function handleDownload(record) {
-    if (record.status !== 'Selesai') return
+    if (record.status !== EXPORT_STATUS.COMPLETED) return
     if (downloadingIds.has(record.id)) return
 
     try {
