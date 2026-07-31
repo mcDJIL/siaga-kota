@@ -1,0 +1,36 @@
+services:
+  ml:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    image: siagakota-ml:latest
+    container_name: siagakota-ml
+    restart: unless-stopped
+    working_dir: /app
+    command: uvicorn src.api:app --host 0.0.0.0 --port 8001 --workers 2
+    ports:
+      - "127.0.0.1:8001:8001"
+    environment:
+      - PYTHONUNBUFFERED=1
+    networks:
+      - siagakota
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://localhost:8001/health').read()"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  siagakota:
+    external: true
+    name: backend_siagakota

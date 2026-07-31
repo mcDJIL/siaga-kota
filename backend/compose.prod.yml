@@ -69,9 +69,6 @@ services:
       timeout: 3s
       retries: 5
 
-  # Horizon adalah manajer queue worker (Redis). Tidak perlu service
-  # `queue:work` terpisah karena Horizon yang menjalankan & menskalakan worker
-  # sesuai supervisor di config/horizon.php.
   horizon:
     build:
       context: .

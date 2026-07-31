@@ -1,0 +1,76 @@
+name: Deploy ML Production
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'ml/**'
+      - '.github/workflows/deploy-ml.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy ML Service to Production VPS
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          port: ${{ secrets.VPS_PORT }}
+          script: |
+            set -e
+
+            echo "🚀 Starting ML deployment..."
+
+            cd /opt/siaga-kota/ml
+
+            echo "📥 Pulling latest code..."
+            git fetch origin
+            git reset --hard origin/main
+
+            # Model dilatih di dalam build (best_model.pkl tidak di-commit).
+            echo "🐳 Building ML image..."
+            docker compose -f compose.prod.yml build --no-cache
+
+            echo "⏹️ Stopping old container..."
+            docker compose -f compose.prod.yml down
+
+            echo "▶️ Starting new container..."
+            docker compose -f compose.prod.yml up -d
+
+            echo "⏳ Waiting for ML service to be healthy..."
+            for i in $(seq 1 30); do
+              if curl -fsS http://127.0.0.1:8001/health > /dev/null 2>&1; then
+                echo "✅ ML service healthy on 127.0.0.1:8001"
+                break
+              fi
+              if [ "$i" -eq 30 ]; then
+                echo "❌ ML service failed health check"
+                docker compose -f compose.prod.yml logs --tail=50 ml
+                exit 1
+              fi
+              sleep 2
+            done
+
+            echo "🧹 Pruning dangling images..."
+            docker image prune -f
+
+            echo "✅ ML deployment completed!"
+
+            docker compose -f compose.prod.yml ps
+
+            docker compose -f compose.prod.yml logs --tail=20 ml
+
+      - name: Notification
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ ML Deployment SUCCESS"
+          else
+            echo "❌ ML Deployment FAILED"
+          fi
