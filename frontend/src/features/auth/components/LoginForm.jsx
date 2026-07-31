@@ -118,8 +118,6 @@ export function LoginForm() {
         <span className="h-px flex-1 bg-border-muted" />
       </div>
 
-      <GoogleButton />
-
       <p className="text-center text-base text-text-muted">
         Belum punya akun?{' '}
         <Link to="/register" className="text-navy">

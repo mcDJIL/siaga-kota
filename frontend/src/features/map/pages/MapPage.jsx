@@ -19,16 +19,16 @@ export function MapPage() {
       <section className="relative mx-4 my-4 h-[70vh] overflow-hidden rounded-2xl shadow-[0_10px_15px_-3px_rgba(0,0,0,0.10),0_4px_6px_-4px_rgba(0,0,0,0.10)] sm:mx-8 sm:h-[75vh] lg:h-[80vh]">
         <MapContainer />
 
-        <div className="pointer-events-none absolute inset-0">
+        <div className="pointer-events-none absolute inset-0 z-[20]">
           <ReportPreviewCard report={wasteReports[0]} onLoginClick={() => {}} />
 
-          <LegendCard className="absolute right-6 bottom-6 hidden lg:flex" />
+          <LegendCard className="absolute right-6 bottom-6 hidden lg:flex z-[400]" />
 
           <button
             type="button"
             aria-label="Buka legenda peta"
             onClick={() => setIsLegendOpen(true)}
-            className="pointer-events-auto absolute right-4 bottom-4 flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-navy shadow-[0_4px_6px_-1px_rgba(0,0,0,0.10)] lg:hidden"
+            className="z-[400] pointer-events-auto absolute right-4 bottom-4 flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-navy shadow-[0_4px_6px_-1px_rgba(0,0,0,0.10)] lg:hidden"
           >
             <ListFilter size={16} />
             Legenda

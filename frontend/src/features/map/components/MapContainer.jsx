@@ -69,7 +69,7 @@ export function MapContainer() {
   const [map, setMap] = useState(null)
 
   return (
-    <div className="relative h-full w-full">
+    <div className="relative h-full w-full z-10">
       <LeafletMap
         ref={setMap}
         center={mapCenter}

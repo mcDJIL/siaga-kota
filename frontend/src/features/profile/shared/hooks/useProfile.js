@@ -30,7 +30,7 @@ export function useProfile() {
               email: user.email || '',
               phone: user.phone || '-',
               role: 'Citizen Responder',
-              avatar: user.avatar || 'https://api.builder.io/api/v1/image/assets/TEMP/a38dc99574d343b750982753e861f0d9993d4540?width=240',
+              avatar: user.avatar_url || 'https://api.builder.io/api/v1/image/assets/TEMP/a38dc99574d343b750982753e861f0d9993d4540?width=240',
               totalReports,
               completedReports,
               userRank: completedReports >= 20 ? 'Platinum' : completedReports >= 15 ? 'Emas' : completedReports >= 10 ? 'Perak' : 'Pemula',

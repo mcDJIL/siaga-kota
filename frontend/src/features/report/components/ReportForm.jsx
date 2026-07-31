@@ -1,6 +1,7 @@
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ChevronDown } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { Input } from '../../../components/ui/Input'
 import { Textarea } from '../../../components/ui/Textarea'
 import { Button } from '../../../components/ui/Button'
@@ -9,22 +10,43 @@ import { reportSchema, REPORT_CATEGORIES } from '../validation/reportSchema'
 import { LoginOverlay } from './LoginOverlay'
 import { LocationPicker } from './LocationPicker'
 import { ImageDropzone } from './ImageDropzone'
+import { useSubmitReport } from '../hooks/useSubmitReport'
 
-const isAuthenticated = false
+function isUserAuthenticated() {
+  return !!window.localStorage.getItem('siagakota_auth_token')
+}
 
 export function ReportForm() {
+  const navigate = useNavigate()
+  const isAuthenticated = isUserAuthenticated()
+  const { isSubmitting, handleSubmit: submitToAPI } = useSubmitReport()
+
   const {
     register,
     handleSubmit,
     control,
     formState: { errors },
+    reset,
   } = useForm({
     resolver: zodResolver(reportSchema),
     defaultValues: { title: '', category: '', location: '', description: '', photo: null },
   })
 
-  const onSubmit = (data) => {
-    console.log('Laporan siap dikirim (belum ada backend):', data)
+  const onSubmit = async (data) => {
+    try {
+      await submitToAPI(data)
+      reset()
+    } catch (error) {
+      console.error('Form submission error:', error)
+    }
+  }
+
+  const handleLoginClick = () => {
+    navigate('/login')
+  }
+
+  const handleRegisterClick = () => {
+    navigate('/register')
   }
 
   return (
@@ -50,6 +72,7 @@ export function ReportForm() {
               id="title"
               placeholder="Contoh: Genangan air setinggi mata kaki"
               error={errors.title}
+              disabled={isSubmitting}
               {...register('title')}
             />
           </div>
@@ -62,7 +85,8 @@ export function ReportForm() {
               <div className="relative">
                 <select
                   id="category"
-                  className="w-full appearance-none rounded-lg bg-bg-soft px-4 py-4 text-base text-text-body focus:outline-2 focus:outline-brand-green"
+                  disabled={isSubmitting}
+                  className="w-full appearance-none rounded-lg bg-bg-soft px-4 py-4 text-base text-text-body focus:outline-2 focus:outline-brand-green disabled:opacity-60 disabled:cursor-not-allowed"
                   defaultValue=""
                   {...register('category')}
                 >
@@ -93,6 +117,7 @@ export function ReportForm() {
               id="description"
               placeholder="Ceritakan detail kejadian..."
               error={errors.description}
+              disabled={isSubmitting}
               {...register('description')}
             />
           </div>
@@ -102,17 +127,22 @@ export function ReportForm() {
             <Controller
               name="photo"
               control={control}
-              render={({ field }) => <ImageDropzone onChange={field.onChange} disabled={!isAuthenticated} />}
+              render={({ field }) => <ImageDropzone onChange={field.onChange} disabled={!isAuthenticated || isSubmitting} />}
             />
           </div>
 
-          <Button type="submit" size="block" disabled={!isAuthenticated} aria-label="Kirim laporan">
-            Kirim Laporan
+          <Button 
+            type="submit" 
+            size="block" 
+            disabled={!isAuthenticated || isSubmitting}
+            aria-label="Kirim laporan"
+          >
+            {isSubmitting ? 'Mengirim Laporan...' : 'Kirim Laporan'}
           </Button>
         </form>
 
         {!isAuthenticated && (
-          <LoginOverlay onLoginClick={() => {}} onRegisterClick={() => {}} />
+          <LoginOverlay onLoginClick={handleLoginClick} onRegisterClick={handleRegisterClick} />
         )}
       </div>
     </section>
