@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Ops\ActivityMapController as OpsActivityMapController;
+use App\Http\Controllers\Ops\DashboardController as OpsDashboardController;
 use App\Http\Controllers\Ops\NotificationController as OpsNotificationController;
 use App\Http\Controllers\Ops\ReportController as OpsReportController;
 use App\Http\Controllers\Public\DistrictLookupController;
@@ -22,8 +23,11 @@ Route::prefix('v1')->group(function (): void {
             Route::post('logout', 'logout');
             Route::get('me', 'me');
             Route::patch('me', 'updateMe');
+            Route::delete('me', 'destroy');
             Route::post('me/avatar', 'uploadAvatar');
             Route::patch('me/password', 'updatePassword');
+            Route::post('push/subscribe', 'subscribePush');
+            Route::delete('push/subscribe', 'unsubscribePush');
         });
     });
 
@@ -54,6 +58,8 @@ Route::prefix('v1')->group(function (): void {
     Route::middleware(['auth:sanctum', 'role:petugas,sanctum', 'throttle:petugas'])
         ->prefix('ops')
         ->group(function (): void {
+            Route::get('/dashboard', [OpsDashboardController::class, 'index']);
+
             Route::controller(OpsActivityMapController::class)
                 ->prefix('activity-map')
                 ->group(function (): void {
@@ -63,6 +69,9 @@ Route::prefix('v1')->group(function (): void {
                     Route::post('/tasks/{reportId}/assign', 'assignOfficer');
                     Route::get('/statistics', 'getStatistics');
                 });
+
+            // Alias sesuai PLAN §6.3: GET /ops/map/tasks
+            Route::get('/map/tasks', [OpsActivityMapController::class, 'getActiveTasks']);
 
             Route::controller(OpsNotificationController::class)
                 ->prefix('notifications')
@@ -79,6 +88,7 @@ Route::prefix('v1')->group(function (): void {
                     Route::get('/waste', 'wasteReports');
                     Route::get('/flood', 'floodReports');
                     Route::get('/{id}', 'show');
+                    Route::get('/{id}/export', 'export');
                     Route::patch('/{id}/status', 'updateStatus');
                     Route::post('/{id}/attachments', 'uploadHandlingPhotos');
                     Route::post('/{id}/handling', 'storeHandling');
@@ -161,6 +171,8 @@ Route::prefix('v1')->group(function (): void {
                     Route::post('/{id}/toggle-status', 'toggleStatus');
                     Route::delete('/{id}', 'destroy');
                 });
+
+            Route::get('/departments', [\App\Http\Controllers\Government\DepartmentController::class, 'index']);
 
             Route::controller(\App\Http\Controllers\Government\ExportDataController::class)
                 ->prefix('export-data')

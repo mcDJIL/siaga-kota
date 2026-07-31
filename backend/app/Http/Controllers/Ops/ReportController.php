@@ -15,11 +15,13 @@ use App\Http\Resources\ReportResource;
 use App\Models\Report;
 use App\Models\ReportAttachment;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\Response;
 
 class ReportController extends Controller
 {
@@ -255,6 +257,32 @@ class ReportController extends Controller
             'data' => new ReportResource($report),
             'message' => 'Data penanganan berhasil disimpan.',
         ]);
+    }
+
+    /**
+     * Cetak/Unduh Laporan dalam format PDF sesuai PLAN §6.3.
+     *
+     * @group Ops - Reports
+     * @authenticated
+     */
+    public function export(string $id): Response
+    {
+        $report = Report::query()
+            ->with(['category', 'user', 'assignedOperator', 'statusHistories.actor', 'attachments'])
+            ->findOrFail($id);
+
+        $pdf = Pdf::loadView('pdf.report', [
+            'report' => $report,
+            'statusLabels' => [
+                ReportStatus::Menunggu->value => 'Menunggu Verifikasi',
+                ReportStatus::Diverifikasi->value => 'Terverifikasi',
+                ReportStatus::Diproses->value => 'Sedang Diproses',
+                ReportStatus::Selesai->value => 'Selesai',
+                ReportStatus::Ditolak->value => 'Ditolak',
+            ],
+        ])->setPaper('a4');
+
+        return $pdf->download("laporan-{$report->code}.pdf");
     }
 
     /**
