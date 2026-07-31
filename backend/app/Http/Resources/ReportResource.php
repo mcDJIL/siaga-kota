@@ -33,8 +33,6 @@ class ReportResource extends JsonResource
             'water_level_cm' => $this->water_level_cm,
             'is_emergency' => $this->is_emergency,
             'location' => $this->parseLocationForResponse($this->location),
-            'latitude' => $this->latitude,
-            'longitude' => $this->longitude,
             'photo_url' => $this->photo_path ? url("storage/{$this->photo_path}") : null,
             'reporter' => [
                 'id' => $this->user->id,
@@ -84,11 +82,13 @@ class ReportResource extends JsonResource
 
     private function parseLocationForResponse($location)
     {
-        if (!$location) return null;
+        if (! $location) {
+            return null;
+        }
 
         $location = (string) $location;
 
-        // Match "POINT(lng lat)" or "POINT (lng lat)" formats
+        // Terima format "POINT(lng lat)" maupun "POINT (lng lat)".
         if (preg_match('/POINT\s*\(([^ ]+)\s+([^ ]+)\)/', $location, $matches)) {
             $lng = (float) $matches[1];
             $lat = (float) $matches[2];
@@ -106,6 +106,7 @@ class ReportResource extends JsonResource
 
         return null;
     }
+
     private function getStatusLabel(): string
     {
         return match ($this->status->value) {

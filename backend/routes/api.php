@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\Officer\ReportController;
 use App\Http\Controllers\Ops\ReportController as OpsReportController;
 use App\Http\Controllers\Public\DistrictLookupController;
 use App\Http\Controllers\Public\FloodPredictionController;
@@ -47,31 +46,11 @@ Route::prefix('v1')->group(function (): void {
                     Route::post('/', 'store');
                     Route::get('/{id}', 'show');
                 });
-            });
-                
+        });
+
     Route::middleware(['auth:sanctum', 'role:petugas,sanctum', 'throttle:petugas'])
         ->prefix('ops')
         ->group(function (): void {
-            Route::controller(ReportController::class)
-                ->prefix('reports')
-                ->group(function (): void {
-                    Route::get('/', 'index');
-                    Route::get('/waste', 'wasteReports');
-                    Route::get('/flood', 'floodReports');
-                    Route::get('/{id}', 'show');
-                    Route::patch('/{id}/emergency', 'toggleEmergency');
-                    Route::post('/{id}/handling', 'storeHandling');
-                });
-
-            Route::controller(\App\Http\Controllers\Officer\ActivityMapController::class)
-                ->prefix('activity-map')
-                ->group(function (): void {
-                    Route::get('/tasks', 'getActiveTasks');
-                    Route::get('/officers', 'getOfficers');
-                    Route::get('/officers/{id}', 'getOfficer');
-                    Route::post('/tasks/{reportId}/assign', 'assignOfficer');
-                    Route::get('/statistics', 'getStatistics');
-                });
             Route::controller(OpsReportController::class)
                 ->prefix('reports')
                 ->group(function (): void {

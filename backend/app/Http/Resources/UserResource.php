@@ -31,7 +31,7 @@ class UserResource extends JsonResource
                 'slug' => $this->department->slug,
                 'type' => $this->department->type->value,
             ]),
-            'avatar_path' => $this->avatar_path,
+            'avatar_path' => $this->avatar_path ? url("storage/{$this->avatar_path}") : null,
             'settings' => $this->settings,
             'active' => $this->active,
         ];

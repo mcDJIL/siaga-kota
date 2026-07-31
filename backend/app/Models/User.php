@@ -30,8 +30,6 @@ use Spatie\Permission\Traits\HasRoles;
     'position',
     'department_id',
     'avatar_path',
-    'latitude',
-    'longitude',
     'active',
     'last_login_at',
     'settings',

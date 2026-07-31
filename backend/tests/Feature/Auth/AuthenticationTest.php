@@ -212,6 +212,7 @@ class AuthenticationTest extends TestCase
     }
 
     public function test_guest_cannot_fetch_profile(): void
+    {
         $response = $this->getJson('/api/v1/auth/me');
 
         $response

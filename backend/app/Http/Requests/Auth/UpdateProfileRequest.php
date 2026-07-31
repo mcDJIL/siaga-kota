@@ -42,7 +42,7 @@ class UpdateProfileRequest extends FormRequest
                 Rule::unique('users', 'phone')->ignore($user?->id),
             ],
             'password' => ['sometimes', 'required', 'string', 'min:8', 'confirmed'],
-            'avatar_path' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+            'avatar_path' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:5120'],
             'rw' => ['nullable', 'string', 'max:3'],
             'rt' => ['nullable', 'string', 'max:3'],
             'village_id' => ['nullable', 'string', 'max:255'],
