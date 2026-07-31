@@ -15,7 +15,8 @@ use App\Http\Resources\ReportResource;
 use App\Models\Report;
 use App\Models\ReportAttachment;
 use App\Models\User;
-use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -304,8 +305,10 @@ class ReportController extends Controller
 
     /**
      * Ambil laporan terpaginasi untuk satu slug kategori.
+     *
+     * @return LengthAwarePaginator<int, Report>
      */
-    private function reportsByCategorySlug(Request $request, string $slug): mixed
+    private function reportsByCategorySlug(Request $request, string $slug): LengthAwarePaginator
     {
         return $this->baseReportQuery($request)
             ->whereHas('category', fn ($q) => $q->where('slug', $slug))
