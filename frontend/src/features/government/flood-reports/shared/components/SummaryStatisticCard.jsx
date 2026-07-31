@@ -1,10 +1,19 @@
 import { motion } from 'framer-motion'
-import { Sparkles } from 'lucide-react'
+import { Sparkles, Droplet, CheckCircle2, Clock, ShieldCheck } from 'lucide-react'
 import { cn } from '../../../../../lib/cn'
 import { useCountUp } from '../../../dashboard/shared/components/DashboardSummaryCard'
 
+const ICON_MAP = {
+  Droplet,
+  CheckCircle2,
+  Clock,
+  ShieldCheck,
+  Sparkles,
+}
+
 export function SummaryStatisticCard({ statistic }) {
-  const { label, value, unit, total, icon: Icon, iconBg, iconColor, trend, showProgress, footnote } = statistic
+  const { label, value, unit, total, icon: iconName, iconBg, iconColor, trend, showProgress, footnote } = statistic
+  const Icon = ICON_MAP[iconName] || Sparkles
   const count = useCountUp(value)
   const progress = total ? Math.round((value / total) * 100) : 0
 

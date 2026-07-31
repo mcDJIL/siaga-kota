@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import { ChevronLeft, ChevronRight, Search, SlidersHorizontal } from 'lucide-react'
-import { FLOOD_REPORTS } from '../../data/reportData'
+import { useRecentFloodReports } from '../../hooks/useRecentFloodReports'
+import { verifyFloodReport } from '../../../../../services/flood-report.service'
 import { FloodReportDetailModal } from './FloodReportDetailModal'
 import { FloodReportFilterModal, DEFAULT_FLOOD_FILTERS } from './FloodReportFilterModal'
 import { VerifyConfirmationModal } from './VerifyConfirmationModal'
@@ -22,7 +23,7 @@ function useFilteredReports(reports, query, sort, appliedFilters) {
     const normalized = query.trim().toLowerCase()
 
     let results = reports.filter((report) => {
-      const statusLabel = STATUS_STYLES[report.status].label
+      const statusLabel = STATUS_STYLES[report.status]?.label || 'Unknown'
       const matchesQuery =
         !normalized ||
         [report.id, report.location, String(report.waterLevel), statusLabel].join(' ').toLowerCase().includes(normalized)
@@ -44,8 +45,8 @@ function useFilteredReports(reports, query, sort, appliedFilters) {
   }, [reports, query, sort, appliedFilters])
 }
 
-export function FloodReportTable() {
-  const [reports, setReports] = useState(FLOOD_REPORTS)
+export function FloodReportTable({ filters = {} }) {
+  const { reports: apiReports, loading } = useRecentFloodReports(filters)
   const [searchInput, setSearchInput] = useState('')
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState({ key: null, direction: 'asc' })
@@ -56,6 +57,11 @@ export function FloodReportTable() {
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [draftFilters, setDraftFilters] = useState(DEFAULT_FLOOD_FILTERS)
   const [appliedFilters, setAppliedFilters] = useState(DEFAULT_FLOOD_FILTERS)
+  const [reports, setReports] = useState([])
+
+  useEffect(() => {
+    setReports(apiReports)
+  }, [apiReports])
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -81,10 +87,20 @@ export function FloodReportTable() {
     toast.success('Detail laporan berhasil dimuat.')
   }
 
-  function handleConfirmVerify() {
-    setReports((prev) => prev.map((item) => (item.id === reportPendingVerify.id ? { ...item, status: 'terverifikasi' } : item)))
-    setReportPendingVerify(null)
-    toast.success('Laporan berhasil diverifikasi.')
+  async function handleConfirmVerify() {
+    try {
+      const result = await verifyFloodReport(reportPendingVerify.id)
+      if (result.success) {
+        setReports((prev) => prev.map((item) => (item.id === reportPendingVerify.id ? { ...item, status: 'terverifikasi' } : item)))
+        setReportPendingVerify(null)
+        toast.success('Laporan berhasil diverifikasi.')
+      } else {
+        toast.error(result.message || 'Gagal memverifikasi laporan')
+      }
+    } catch (error) {
+      console.error('Error verifying report:', error)
+      toast.error(error.message || 'Gagal memverifikasi laporan')
+    }
   }
 
   function handleApplyFilters() {
@@ -98,6 +114,26 @@ export function FloodReportTable() {
     setDraftFilters(DEFAULT_FLOOD_FILTERS)
     setAppliedFilters(DEFAULT_FLOOD_FILTERS)
     setPage(1)
+  }
+
+  if (loading) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4, delay: 0.2 }}
+        className="flex flex-col overflow-hidden rounded-2xl border border-border-muted/20 bg-white shadow-[0_4px_12px_0_rgba(26,54,93,0.08)]"
+      >
+        <div className="flex flex-col gap-4 border-b border-border-muted/30 p-6">
+          <div className="h-10 w-48 animate-pulse rounded-lg bg-gray-200" />
+        </div>
+        <div className="flex flex-col gap-4 p-6">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="h-16 w-full animate-pulse rounded-lg bg-gray-200" />
+          ))}
+        </div>
+      </motion.div>
+    )
   }
 
   return (

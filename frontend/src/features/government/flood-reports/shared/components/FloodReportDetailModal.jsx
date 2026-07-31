@@ -14,10 +14,10 @@ const STATUS_STYLES = {
 
 export function FloodReportDetailModal({ report, isOpen, onClose }) {
   if (!report) return null
-  const status = STATUS_STYLES[report.status]
+  const status = STATUS_STYLES[report.status] || { label: 'Unknown', className: 'bg-gray-200 text-gray-800' }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`${report.id} · ${report.severity}`} className="max-w-lg">
+    <Modal isOpen={isOpen} onClose={onClose} title={`${report.id || 'Report'} · ${report.severity || 'N/A'}`} className="max-w-lg">
       <div className="flex flex-col gap-6">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-1 rounded-lg bg-bg-blue-soft p-4">
@@ -25,70 +25,76 @@ export function FloodReportDetailModal({ report, isOpen, onClose }) {
               <User className="h-3.5 w-3.5" aria-hidden="true" />
               Pelapor
             </span>
-            <span className="text-sm font-bold text-text-body">{report.reporter}</span>
+            <span className="text-sm font-bold text-text-body">{report.reporter || '-'}</span>
           </div>
           <div className="flex flex-col gap-1 rounded-lg bg-bg-blue-soft p-4">
             <span className="flex items-center gap-1.5 text-xs font-semibold tracking-[0.6px] text-text-muted uppercase">
               <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
               Koordinat
             </span>
-            <span className="text-sm font-bold text-text-body">{report.coordinates}</span>
+            <span className="text-sm font-bold text-text-body">{report.coordinates || '-'}</span>
           </div>
         </div>
 
         <div className="flex flex-col gap-1">
           <span className="text-xs font-semibold tracking-[0.6px] text-text-muted uppercase">Alamat</span>
-          <span className="text-sm text-text-body">{report.address}</span>
+          <span className="text-sm text-text-body">{report.address || '-'}</span>
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-1 rounded-lg bg-bg-blue-soft p-4">
             <span className="text-xs font-semibold tracking-[0.6px] text-text-muted uppercase">Tinggi Air</span>
-            <span className="text-sm font-bold text-text-body">{report.waterLevel} cm</span>
+            <span className="text-sm font-bold text-text-body">{report.waterLevel ? `${report.waterLevel} cm` : '-'}</span>
           </div>
           <div className="flex flex-col gap-1 rounded-lg bg-bg-blue-soft p-4">
             <span className="text-xs font-semibold tracking-[0.6px] text-text-muted uppercase">Tingkat Keparahan</span>
-            <span className="text-sm font-bold text-text-body">{report.severity}</span>
+            <span className="text-sm font-bold text-text-body">{report.severity || '-'}</span>
           </div>
         </div>
 
         <div className="flex flex-col gap-1">
           <span className="text-xs font-semibold tracking-[0.6px] text-text-muted uppercase">Deskripsi</span>
-          <p className="text-sm text-text-body">{report.description}</p>
+          <p className="text-sm text-text-body">{report.description || '-'}</p>
         </div>
 
-        <div>
-          <h3 className="mb-3 text-sm font-bold text-text-body">Foto</h3>
-          <div className="grid grid-cols-3 gap-3">
-            {Array.from({ length: report.photos }, (_, index) => (
-              <div key={index} className="flex aspect-square items-center justify-center rounded-lg bg-bg-blue-light">
-                <ImageIcon className="h-6 w-6 text-navy-lighter" aria-hidden="true" />
-              </div>
-            ))}
+        {report.photos && report.photos > 0 && (
+          <div>
+            <h3 className="mb-3 text-sm font-bold text-text-body">Foto</h3>
+            <div className="grid grid-cols-3 gap-3">
+              {Array.from({ length: report.photos }, (_, index) => (
+                <div key={index} className="flex aspect-square items-center justify-center rounded-lg bg-bg-blue-light">
+                  <ImageIcon className="h-6 w-6 text-navy-lighter" aria-hidden="true" />
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
-        <div>
-          <h3 className="mb-3 text-sm font-bold text-text-body">Timeline</h3>
-          <ul className="flex flex-col gap-4">
-            {report.timeline.map((step) => (
-              <TimelineStep key={step.title} step={step} />
-            ))}
-          </ul>
-        </div>
-
-        <div className="flex items-start gap-2 rounded-lg border border-navy/20 bg-navy/5 p-4">
-          <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-navy" aria-hidden="true" />
-          <div className="flex flex-col gap-1">
-            <span className="text-xs font-semibold tracking-[0.6px] text-navy uppercase">Prediksi AI</span>
-            <span className="text-sm text-text-body">{report.aiPrediction}</span>
+        {report.timeline && Array.isArray(report.timeline) && report.timeline.length > 0 && (
+          <div>
+            <h3 className="mb-3 text-sm font-bold text-text-body">Timeline</h3>
+            <ul className="flex flex-col gap-4">
+              {report.timeline.map((step) => (
+                <TimelineStep key={step.title} step={step} />
+              ))}
+            </ul>
           </div>
-        </div>
+        )}
+
+        {report.aiPrediction && (
+          <div className="flex items-start gap-2 rounded-lg border border-navy/20 bg-navy/5 p-4">
+            <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-navy" aria-hidden="true" />
+            <div className="flex flex-col gap-1">
+              <span className="text-xs font-semibold tracking-[0.6px] text-navy uppercase">Prediksi AI</span>
+              <span className="text-sm text-text-body">{report.aiPrediction}</span>
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-1 rounded-lg bg-bg-blue-soft p-4">
             <span className="text-xs font-semibold tracking-[0.6px] text-text-muted uppercase">Instansi Terkait</span>
-            <span className="text-sm font-bold text-text-body">{report.assignedDepartment}</span>
+            <span className="text-sm font-bold text-text-body">{report.assignedDepartment || '-'}</span>
           </div>
           <div className="flex flex-col gap-1 rounded-lg bg-bg-blue-soft p-4">
             <span className="text-xs font-semibold tracking-[0.6px] text-text-muted uppercase">Status Saat Ini</span>

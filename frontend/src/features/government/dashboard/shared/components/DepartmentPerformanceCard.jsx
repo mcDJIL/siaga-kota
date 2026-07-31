@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
-import { DEPARTMENTS } from '../../data/departmentData'
 import { DepartmentDetailModal } from './DepartmentDetailModal'
 
 function rateColor(rate) {
@@ -10,7 +9,7 @@ function rateColor(rate) {
   return 'bg-[#BA1A1A] text-[#BA1A1A]'
 }
 
-export function DepartmentPerformanceCard() {
+export function DepartmentPerformanceCard({ departments = [] }) {
   const [selectedDepartment, setSelectedDepartment] = useState(null)
 
   function handleOpen(department) {
@@ -32,8 +31,8 @@ export function DepartmentPerformanceCard() {
         </div>
 
         <div className="flex flex-col gap-4">
-          {DEPARTMENTS.map((department) => {
-            const [barColor, textColor] = rateColor(department.completionRate).split(' ')
+          {departments.map((department) => {
+            const [barColor, textColor] = rateColor(department.value).split(' ')
 
             return (
               <button
@@ -45,12 +44,12 @@ export function DepartmentPerformanceCard() {
               >
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold tracking-[0.6px] text-text-body">{department.name}</span>
-                  <span className={`text-xs font-bold tracking-[0.6px] ${textColor}`}>{department.completionRate}%</span>
+                  <span className={`text-xs font-bold tracking-[0.6px] ${textColor}`}>{department.value}%</span>
                 </div>
                 <div className="h-2 w-full rounded-full bg-bg-blue-lighter">
                   <motion.div
                     initial={{ width: 0 }}
-                    whileInView={{ width: `${department.completionRate}%` }}
+                    whileInView={{ width: `${department.value}%` }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.8, ease: 'easeOut' }}
                     className={`h-2 rounded-full ${barColor}`}

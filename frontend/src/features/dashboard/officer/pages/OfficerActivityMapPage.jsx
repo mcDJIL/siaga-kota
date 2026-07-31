@@ -12,6 +12,7 @@ import { MapControlButtons } from '../components/MapControlButtons'
 import { ActivitySidebar } from '../components/ActivitySidebar'
 import { AssignOfficerModal } from '../components/AssignOfficerModal'
 import { MapLoadingSkeleton } from '../components/MapLoadingSkeleton'
+import { ActivityMapSkeleton } from '../components/ActivityMapSkeleton'
 import { useActivityMapTasks, useActivityMapOfficers, useAssignOfficer } from '../hooks/useActivityMapData'
 import { useGeolocation } from '../hooks/useGeolocation'
 import { ACTIVITY_MAP_CENTER, ACTIVITY_MAP_ZOOM, MAP_LAYERS, MAP_LEGEND_ITEMS } from '../data/activityMapData'
@@ -100,6 +101,13 @@ export function OfficerActivityMapPage() {
     position: [task.latitude || 0, task.longitude || 0],
   }))
 
+  // Show skeleton when either tasks or officers are loading (initial load)
+  const isInitialLoading = tasksLoading || officersLoading
+
+  if (isInitialLoading) {
+    return <ActivityMapSkeleton />
+  }
+
   return (
     <div className="flex h-[calc(100vh-4rem)] flex-col lg:flex-row">
       <div className="relative flex-1">
@@ -110,7 +118,7 @@ export function OfficerActivityMapPage() {
           focusPosition={focusPosition}
           focusZoom={15}
           showZoomControl={false}
-          className="h-full w-full"
+          className="h-full w-full z-10"
         >
           <MapControlButtons homeCenter={ACTIVITY_MAP_CENTER} homeZoom={ACTIVITY_MAP_ZOOM} userLocation={userLocation} />
 

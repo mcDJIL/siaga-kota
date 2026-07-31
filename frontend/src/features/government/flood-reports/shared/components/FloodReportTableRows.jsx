@@ -3,11 +3,10 @@ import { cn } from '../../../../../lib/cn'
 import { Button } from '../../../../../components/ui/Button'
 
 export const STATUS_STYLES = {
-  'menunggu-verifikasi': { label: 'Menunggu Verifikasi', className: 'bg-[#FFDAD6] text-[#93000A]' },
+  menunggu: { label: 'Menunggu', className: 'bg-[#FFDAD6] text-[#93000A]' },
   terverifikasi: { label: 'Terverifikasi', className: 'bg-badge-gold/30 text-[#715C00]' },
-  selesai: { label: 'Selesai', className: 'bg-bg-blue-lighter text-navy' },
-  ditolak: { label: 'Ditolak', className: 'bg-[#FFB4AB] text-[#690005]' },
-  'perlu-tindak-lanjut': { label: 'Perlu Tindak Lanjut', className: 'bg-[#FFE17C] text-[#7A4100]' },
+  diproses: { label: 'Diproses', className: 'bg-[#B3E5FC] text-[#01579B]' },
+  selesai: { label: 'Selesai', className: 'bg-[#C8E6C9] text-[#1B5E20]' },
 }
 
 const COLUMNS = [
@@ -49,7 +48,7 @@ export function FloodReportTableRows({ reports, onSort, onVerify, onOpenDetail }
           </tr>
         ) : (
           reports.map((report) => {
-            const status = STATUS_STYLES[report.status]
+            const status = STATUS_STYLES[report.status] || { label: 'Unknown', className: 'bg-gray-100 text-gray-700' }
             return (
               <tr key={report.id} className="border-t border-bg-blue-light hover:bg-bg-soft">
                 <td className="px-4 py-4 text-base font-medium text-text-body">{report.id}</td>
@@ -64,9 +63,9 @@ export function FloodReportTableRows({ reports, onSort, onVerify, onOpenDetail }
                   </span>
                 </td>
                 <td className="px-4 py-4 text-right">
-                  {report.status === 'menunggu-verifikasi' ? (
+                  {report.status === 'menunggu' ? (
                     <Button variant="navy" size="sm" className="rounded-md px-4 py-1.5 text-xs" onClick={() => onVerify(report)}>
-                      Verify
+                      Verifikasi
                     </Button>
                   ) : (
                     <Button

@@ -25,10 +25,9 @@ class UpdateProfileRequest extends FormRequest
         $user = $this->user();
 
         return [
-            'name' => ['sometimes', 'required', 'string', 'max:255'],
+            'name' => ['sometimes', 'string', 'max:255'],
             'email' => [
                 'sometimes',
-                'required',
                 'string',
                 'email:rfc,dns',
                 'max:255',
@@ -36,17 +35,15 @@ class UpdateProfileRequest extends FormRequest
             ],
             'phone' => [
                 'sometimes',
-                'required',
                 'string',
                 'max:20',
                 Rule::unique('users', 'phone')->ignore($user?->id),
             ],
-            'password' => ['sometimes', 'required', 'string', 'min:8', 'confirmed'],
-            'avatar_path' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:5120'],
-            'rw' => ['nullable', 'string', 'max:3'],
-            'rt' => ['nullable', 'string', 'max:3'],
-            'village_id' => ['nullable', 'string', 'max:255'],
-            'settings' => ['nullable', 'array'],
+            'password' => ['sometimes', 'string', 'min:8', 'confirmed'],
+            'rw' => ['sometimes', 'string', 'max:3'],
+            'rt' => ['sometimes', 'string', 'max:3'],
+            'village_id' => ['sometimes', 'string', 'max:255'],
+            'settings' => ['sometimes', 'array'],
         ];
     }
 }

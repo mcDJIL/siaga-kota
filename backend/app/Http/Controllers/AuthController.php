@@ -9,6 +9,7 @@ use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Http\Requests\Auth\UpdatePasswordRequest;
 use App\Http\Requests\Auth\UpdateProfileRequest;
+use App\Http\Requests\Auth\UploadAvatarRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
@@ -142,84 +143,13 @@ class AuthController extends Controller
 
         unset($data['password_confirmation']);
 
-        if (! array_key_exists('password', $data)) {
+        if (! array_key_exists('password', $data) || empty($data['password'])) {
             unset($data['password']);
         }
 
-        // Handle avatar upload
-        if ($request->hasFile('avatar_path')) {
-            try {
-                $file = $request->file('avatar_path');
-                
-                if (!$file) {
-                    return response()->json([
-                        'message' => 'File tidak ditemukan dalam request.',
-                    ], 400);
-                }
-
-                if (!$file->isValid()) {
-                    return response()->json([
-                        'message' => 'File tidak valid. Error: ' . $file->getErrorMessage(),
-                    ], 400);
-                }
-
-                \Log::info('Avatar upload attempt', [
-                    'file_name' => $file->getClientOriginalName(),
-                    'file_size' => $file->getSize(),
-                    'file_mime' => $file->getMimeType(),
-                    'user_id' => $request->user()->id,
-                ]);
-
-                // Store file and get path
-                $path = $file->store('avatars', 'public');
-                
-                if (!$path) {
-                    return response()->json([
-                        'message' => 'Gagal menyimpan file ke storage.',
-                    ], 400);
-                }
-
-                \Log::info('Avatar stored successfully', [
-                    'path' => $path,
-                    'full_path' => '/storage/' . $path,
-                ]);
-
-                // Verify file exists
-                if (!Storage::disk('public')->exists($path)) {
-                    return response()->json([
-                        'message' => 'File tersimpan tapi tidak ditemukan di storage.',
-                    ], 400);
-                }
-
-                $data['avatar_path'] = '/storage/' . $path;
-                
-            } catch (\Exception $e) {
-                \Log::error('Avatar upload error', [
-                    'error' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString(),
-                ]);
-
-                return response()->json([
-                    'message' => 'Gagal mengunggah avatar: ' . $e->getMessage(),
-                ], 400);
-            }
-        }
-
         $user = $request->user();
-        
-        \Log::info('Updating user profile', [
-            'user_id' => $user->id,
-            'data_keys' => array_keys($data),
-        ]);
-
         $user->fill($data)->save();
-
         $user = $user->fresh();
-
-        \Log::info('User profile updated', [
-            'user_id' => $user->id,
-            'avatar_path' => $user->avatar_path,
-        ]);
 
         return response()->json([
             'data' => [
@@ -227,6 +157,47 @@ class AuthController extends Controller
             ],
             'message' => 'Profil berhasil diperbarui.',
         ]);
+    }
+
+    public function uploadAvatar(UploadAvatarRequest $request): JsonResponse
+    {
+        try {
+            $file = $request->file('avatar_path');
+
+            if (!$file || !$file->isValid()) {
+                return response()->json([
+                    'message' => 'File tidak valid.',
+                ], 400);
+            }
+
+            $path = $file->store('avatars', 'public');
+
+            if (!$path) {
+                return response()->json([
+                    'message' => 'Gagal menyimpan file ke storage.',
+                ], 400);
+            }
+
+            $user = $request->user();
+
+            if ($user->avatar_path) {
+                Storage::disk('public')->delete($user->avatar_path);
+            }
+
+            $user->avatar_path = 'storage/' . $path;
+            $user->save();
+
+            return response()->json([
+                'data' => [
+                    'user' => new UserResource($user->fresh()),
+                ],
+                'message' => 'Foto profil berhasil diperbarui.',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Gagal mengunggah avatar: ' . $e->getMessage(),
+            ], 400);
+        }
     }
 
     /**

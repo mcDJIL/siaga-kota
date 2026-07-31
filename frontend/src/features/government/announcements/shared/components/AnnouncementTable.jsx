@@ -15,6 +15,7 @@ export function AnnouncementTable({
   onStatusFilterChange,
   onOpenEdit,
   onOpenDelete,
+  isLoading = false,
 }) {
   return (
     <motion.div
@@ -50,7 +51,17 @@ export function AnnouncementTable({
             </tr>
           </thead>
           <tbody>
-            {items.length === 0 ? (
+            {isLoading ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <tr key={i} className="animate-pulse border-t border-[#C4C6CF]/30">
+                  <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded" /></td>
+                  <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded" /></td>
+                  <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded" /></td>
+                  <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded" /></td>
+                  <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded" /></td>
+                </tr>
+              ))
+            ) : items.length === 0 ? (
               <tr>
                 <td colSpan={5} className="px-6 py-10 text-center text-sm text-text-muted">
                   Tidak ada pengumuman yang cocok.

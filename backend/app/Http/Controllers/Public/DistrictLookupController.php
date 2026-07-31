@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
+use App\Models\District;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -10,47 +11,35 @@ class DistrictLookupController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $districts = [
-            [
-                'id' => 'patrang',
-                'name' => 'PATRANG',
-                'elevation' => 84,
-                'drainage_score' => 0.72,
-                'population_density' => 4200,
-            ],
-            [
-                'id' => 'sumbersari',
-                'name' => 'SUMBERSARI',
-                'elevation' => 92,
-                'drainage_score' => 0.68,
-                'population_density' => 5100,
-            ],
-            [
-                'id' => 'jember',
-                'name' => 'JEMBER',
-                'elevation' => 88,
-                'drainage_score' => 0.70,
-                'population_density' => 4700,
-            ],
-            [
-                'id' => 'ambulu',
-                'name' => 'AMBULU',
-                'elevation' => 95,
-                'drainage_score' => 0.65,
-                'population_density' => 3900,
-            ],
-        ];
-
         $districtId = $request->query('district_id');
         if ($districtId) {
-            $match = collect($districts)->first(fn ($district) => $district['id'] === $districtId);
-            if ($match) {
-                return response()->json(['data' => $match]);
+            $district = District::query()->where('slug', $districtId)->first();
+            if ($district) {
+                return response()->json(['data' => $this->formatDistrict($district)]);
             }
 
             return response()->json(['message' => 'District not found'], 404);
         }
 
-        return response()->json(['data' => $districts]);
+        return response()->json([
+            'data' => District::query()
+                ->orderBy('name')
+                ->get()
+                ->map(fn(District $district) => $this->formatDistrict($district)),
+        ]);
+    }
+
+    private function formatDistrict(District $district): array
+    {
+        return [
+            'id' => $district->slug,
+            'name' => strtoupper($district->name),
+            'latitude' => (float) $district->latitude,
+            'longitude' => (float) $district->longitude,
+            'elevation' => (float) $district->elevation,
+            'river_distance' => (float) $district->river_distance,
+            'drainage_score' => (float) $district->drainage_score,
+            'population_density' => (float) $district->population_density,
+        ];
     }
 }

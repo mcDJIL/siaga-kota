@@ -20,10 +20,12 @@ export function GovernmentAIPredictionPage() {
 
   const {
     zones,
+    recommendations,
     mapCenter,
     mapZoom,
     statistics,
     period,
+    isLoading,
     isDetailModalOpen,
     onOpenDetail,
     onCloseDetail,
@@ -47,7 +49,7 @@ export function GovernmentAIPredictionPage() {
     onOpenAssign,
     onCloseAssign,
     onAssignOfficer,
-  } = usePriorityRecommendation()
+  } = usePriorityRecommendation(recommendations)
 
   return (
     <div className="flex flex-col gap-6 p-4 sm:p-8">
@@ -69,7 +71,7 @@ export function GovernmentAIPredictionPage() {
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="sm" className="border border-[#C4C6CF] bg-[#E5EEFF]">
             <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />
-            {period}
+            {isLoading ? 'Memuat...' : period}
           </Button>
           <Button variant="navy" size="sm" onClick={onOpenExportModal}>
             <Download className="h-3 w-3" aria-hidden="true" />

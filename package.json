@@ -1,0 +1,16 @@
+{
+  "name": "tic-unej",
+  "private": true,
+  "version": "1.0.0",
+  "description": "TIC UNEJ - Sistem Pelaporan Banjir dan Sampah",
+  "scripts": {
+    "dev": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "preview": "cd frontend && npm run preview",
+    "lint": "cd frontend && npm run lint"
+  },
+  "workspaces": [
+    "frontend",
+    "backend"
+  ]
+}

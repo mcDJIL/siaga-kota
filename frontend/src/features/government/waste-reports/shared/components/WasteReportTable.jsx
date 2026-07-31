@@ -4,7 +4,6 @@ import { toast } from 'sonner'
 import { ArrowUpDown, ChevronLeft, ChevronRight, Search } from 'lucide-react'
 import { cn } from '../../../../../lib/cn'
 import { Button } from '../../../../../components/ui/Button'
-import { WASTE_REPORTS } from '../../data/reportData'
 import { WasteReportDetailModal } from './WasteReportDetailModal'
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20]
@@ -23,7 +22,7 @@ const COLUMNS = [
   { key: 'date', label: 'Tanggal' },
 ]
 
-export function WasteReportTable({ districtFilter }) {
+export function WasteReportTable({ reports = [], districtFilter = 'Semua Kecamatan' }) {
   const [searchInput, setSearchInput] = useState('')
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState({ key: null, direction: 'asc' })
@@ -43,7 +42,7 @@ export function WasteReportTable({ districtFilter }) {
   const filtered = useMemo(() => {
     const normalized = query.trim().toLowerCase()
 
-    let results = WASTE_REPORTS.filter((report) => {
+    let results = reports.filter((report) => {
       const matchesDistrict = !districtFilter || districtFilter === 'Semua Kecamatan' || report.location.includes(districtFilter)
       const matchesQuery =
         !normalized || [report.id, report.location, report.category, report.status].join(' ').toLowerCase().includes(normalized)
@@ -58,7 +57,7 @@ export function WasteReportTable({ districtFilter }) {
     }
 
     return results
-  }, [query, sort, districtFilter])
+  }, [query, sort, districtFilter, reports])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
   const paginated = filtered.slice((page - 1) * pageSize, page * pageSize)
@@ -142,10 +141,10 @@ export function WasteReportTable({ districtFilter }) {
                       <span
                         className={cn(
                           'inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium',
-                          STATUS_STYLES[report.status].className
+                          STATUS_STYLES[report.status]?.className || 'bg-gray-100 text-gray-800'
                         )}
                       >
-                        {STATUS_STYLES[report.status].label}
+                        {STATUS_STYLES[report.status]?.label || report.status}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-text-muted">{report.date}</td>

@@ -2,13 +2,14 @@ import { motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react'
 import { ExportStatusBadge } from './ExportStatusBadge'
 import { DownloadExportButton } from './DownloadExportButton'
+import { ExportTableRowSkeleton } from './ExportTableRowSkeleton'
 import { FORMAT_ICONS } from '../../utils/formatColor'
 import { formatExportTimestamp } from '../../utils/exportFormatter'
 import { cn } from '../../../../../lib/cn'
 
 const PAGE_SIZE = 10
 
-export function ExportHistoryTable({ items, totalCount, page, totalPages, onPageChange, onRefresh, onDownload }) {
+export function ExportHistoryTable({ items, totalCount, page, totalPages, onPageChange, onRefresh, onDownload, downloadingIds, isLoading }) {
   const shownFrom = items.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1
   const shownTo = (page - 1) * PAGE_SIZE + items.length
 
@@ -53,7 +54,11 @@ export function ExportHistoryTable({ items, totalCount, page, totalPages, onPage
             </tr>
           </thead>
           <tbody>
-            {items.length === 0 ? (
+            {isLoading ? (
+              Array.from({ length: 5 }).map((_, index) => (
+                <ExportTableRowSkeleton key={index} index={index} />
+              ))
+            ) : items.length === 0 ? (
               <tr>
                 <td colSpan={5} className="px-6 py-10 text-center text-sm text-text-muted">
                   Belum ada riwayat ekspor.
@@ -78,7 +83,7 @@ export function ExportHistoryTable({ items, totalCount, page, totalPages, onPage
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex justify-end">
-                        <DownloadExportButton record={record} onDownload={onDownload} />
+                        <DownloadExportButton record={record} onDownload={onDownload} isDownloading={downloadingIds?.has(record.id)} />
                       </div>
                     </td>
                   </tr>
@@ -91,13 +96,13 @@ export function ExportHistoryTable({ items, totalCount, page, totalPages, onPage
 
       <div className="flex flex-col items-center justify-between gap-3 border-t border-[#C4C6CF]/30 p-6 sm:flex-row">
         <p className="text-sm text-text-muted">
-          Menampilkan {shownFrom}-{shownTo} dari {totalCount} riwayat ekspor
+          {isLoading ? 'Memuat riwayat ekspor...' : `Menampilkan ${shownFrom}-${shownTo} dari ${totalCount} riwayat ekspor`}
         </p>
         <nav className="flex items-center gap-2" aria-label="Navigasi halaman riwayat ekspor">
           <button
             type="button"
             aria-label="Halaman sebelumnya"
-            disabled={page === 1}
+            disabled={page === 1 || isLoading}
             onClick={() => onPageChange(page - 1)}
             className="flex h-8 w-8 items-center justify-center rounded-md border border-[#C4C6CF] text-text-body disabled:opacity-40"
           >
@@ -109,7 +114,7 @@ export function ExportHistoryTable({ items, totalCount, page, totalPages, onPage
           <button
             type="button"
             aria-label="Halaman berikutnya"
-            disabled={page === totalPages}
+            disabled={page === totalPages || isLoading}
             onClick={() => onPageChange(page + 1)}
             className="flex h-8 w-8 items-center justify-center rounded-md border border-[#C4C6CF] text-text-body disabled:opacity-40"
           >

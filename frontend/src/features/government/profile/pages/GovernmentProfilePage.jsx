@@ -10,17 +10,21 @@ import { useGovernmentProfile } from '../hooks/useGovernmentProfile'
 export function GovernmentProfilePage() {
   const {
     profile,
+    notifications,
+    isLoading,
+    isSaving,
+    isUploadingPhoto,
+    isChangingPassword,
     updateProfile,
     updatePhoto,
-    notifications,
     toggleNotification,
+    changePassword,
     isPhotoModalOpen,
     onOpenPhotoModal,
     onClosePhotoModal,
     isPasswordModalOpen,
     onOpenPasswordModal,
     onClosePasswordModal,
-    changePassword,
   } = useGovernmentProfile()
 
   return (
@@ -36,12 +40,12 @@ export function GovernmentProfilePage() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
         <div className="flex flex-col gap-6 lg:col-span-4">
-          <ProfileCard profile={profile} onEditPhoto={onOpenPhotoModal} />
+          <ProfileCard profile={profile} onEditPhoto={onOpenPhotoModal} isLoading={isLoading} />
           <SecurityCard onOpenChangePassword={onOpenPasswordModal} />
         </div>
 
         <div className="flex flex-col gap-6 lg:col-span-8">
-          <ProfileForm profile={profile} onSave={updateProfile} />
+          <ProfileForm profile={profile} onSave={updateProfile} isLoading={isSaving} />
           <NotificationSettingsCard notifications={notifications} onToggle={toggleNotification} />
         </div>
       </div>
@@ -51,8 +55,14 @@ export function GovernmentProfilePage() {
         onClose={onClosePhotoModal}
         currentAvatar={profile.avatar}
         onSave={updatePhoto}
+        isLoading={isUploadingPhoto}
       />
-      <ChangePasswordModal isOpen={isPasswordModalOpen} onClose={onClosePasswordModal} onSuccess={changePassword} />
+      <ChangePasswordModal 
+        isOpen={isPasswordModalOpen} 
+        onClose={onClosePasswordModal} 
+        onSuccess={changePassword}
+        isLoading={isChangingPassword}
+      />
     </div>
   )
 }

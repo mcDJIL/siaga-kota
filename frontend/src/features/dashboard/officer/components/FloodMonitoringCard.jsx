@@ -62,7 +62,7 @@ export function FloodMonitoringCard({ reports = [], loading = false }) {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
       aria-labelledby="flood-monitoring-heading"
-      className="flex flex-col overflow-hidden rounded-xl bg-white shadow-[0_4px_12px_0_rgba(26,54,93,0.08)] print:hidden"
+      className="z-10 flex flex-col overflow-hidden rounded-xl bg-white shadow-[0_4px_12px_0_rgba(26,54,93,0.08)] print:hidden"
     >
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border-muted bg-bg-soft px-6 py-4">
         <div className="flex items-center gap-2">

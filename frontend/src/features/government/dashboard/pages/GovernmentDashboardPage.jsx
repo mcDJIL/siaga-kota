@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
+import { toast } from 'sonner'
 import { DashboardSummaryCard } from '../shared/components/DashboardSummaryCard'
 import { CompletionCard } from '../shared/components/CompletionCard'
 import { MonthlyTrendChart } from '../shared/components/MonthlyTrendChart'
@@ -7,10 +8,18 @@ import { RecentReportTable } from '../shared/components/RecentReportTable'
 import { DepartmentPerformanceCard } from '../shared/components/DepartmentPerformanceCard'
 import { AnnouncementCard } from '../shared/components/AnnouncementCard'
 import { HeaderSkeleton, SummaryCardsSkeleton, ChartSkeleton, TableSkeleton, SidebarSectionSkeleton } from '../shared/components/DashboardSkeleton'
-import { COMPLETION_STAT, SUMMARY_STATS } from '../data/dashboardData'
+import { mapIconsToComponents } from '../utils/iconMapper'
+import { getDashboardStats, getMonthlyTrend, getRecentReports, getDepartmentPerformance, getAnnouncements } from '../../../../services/government-dashboard.service'
 
 export function GovernmentDashboardPage() {
   const [isLoading, setIsLoading] = useState(true)
+  const [summaryStats, setSummaryStats] = useState([])
+  const [completionStat, setCompletionStat] = useState(null)
+  const [monthlyTrendData, setMonthlyTrendData] = useState([])
+  const [recentReports, setRecentReports] = useState([])
+  const [departmentPerformance, setDepartmentPerformance] = useState([])
+  const [announcements, setAnnouncements] = useState([])
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
 
   useEffect(() => {
     let mounted = true
@@ -18,11 +27,29 @@ export function GovernmentDashboardPage() {
     async function loadData() {
       setIsLoading(true)
       try {
-        // Simulate data loading delay
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-        if (mounted) setIsLoading(false)
-      } catch {
-        if (mounted) setIsLoading(false)
+        const [statsRes, trendsRes, reportsRes, deptRes, announcRes] = await Promise.all([
+          getDashboardStats(),
+          getMonthlyTrend(selectedYear),
+          getRecentReports(),
+          getDepartmentPerformance(),
+          getAnnouncements(),
+        ])
+
+        if (mounted) {
+          setSummaryStats(mapIconsToComponents(statsRes?.data?.stats || []))
+          setCompletionStat(statsRes?.data?.completion || null)
+          setMonthlyTrendData(trendsRes?.data?.trend || [])
+          setRecentReports(reportsRes?.data?.reports || [])
+          setDepartmentPerformance(deptRes?.data?.departments || [])
+          setAnnouncements(announcRes?.data?.announcements || [])
+          setIsLoading(false)
+        }
+      } catch (error) {
+        if (mounted) {
+          console.error('Error loading dashboard data:', error)
+          toast.error(error.message || 'Gagal memuat data dashboard')
+          setIsLoading(false)
+        }
       }
     }
 
@@ -31,7 +58,7 @@ export function GovernmentDashboardPage() {
     return () => {
       mounted = false
     }
-  }, [])
+  }, [selectedYear])
 
   return (
     <div className="flex flex-col gap-8 p-4 sm:p-8">
@@ -55,10 +82,10 @@ export function GovernmentDashboardPage() {
         <SummaryCardsSkeleton />
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {SUMMARY_STATS.map((statistic) => (
+          {summaryStats.map((statistic) => (
             <DashboardSummaryCard key={statistic.id} statistic={statistic} />
           ))}
-          <CompletionCard stat={COMPLETION_STAT} />
+          {completionStat && <CompletionCard stat={completionStat} />}
         </div>
       )}
 
@@ -67,12 +94,12 @@ export function GovernmentDashboardPage() {
           {isLoading ? (
             <ChartSkeleton />
           ) : (
-            <MonthlyTrendChart />
+            <MonthlyTrendChart data={monthlyTrendData} selectedYear={selectedYear} onYearChange={setSelectedYear} />
           )}
           {isLoading ? (
             <TableSkeleton />
           ) : (
-            <RecentReportTable />
+            <RecentReportTable reports={recentReports} />
           )}
         </div>
 
@@ -81,8 +108,8 @@ export function GovernmentDashboardPage() {
             <SidebarSectionSkeleton />
           ) : (
             <>
-              <DepartmentPerformanceCard />
-              <AnnouncementCard />
+              <DepartmentPerformanceCard departments={departmentPerformance} />
+              <AnnouncementCard announcements={announcements} />
             </>
           )}
         </div>

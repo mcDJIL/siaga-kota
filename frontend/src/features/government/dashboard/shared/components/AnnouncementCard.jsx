@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import { MoreVertical } from 'lucide-react'
-import { ANNOUNCEMENTS } from '../../data/announcementData'
 import { AnnouncementDetailModal } from './AnnouncementDetailModal'
 
 const PRIORITY_BORDER = {
@@ -12,7 +11,7 @@ const PRIORITY_BORDER = {
   info: 'border-navy',
 }
 
-export function AnnouncementCard() {
+export function AnnouncementCard({ announcements = [] }) {
   const [selectedAnnouncement, setSelectedAnnouncement] = useState(null)
 
   function handleOpen(announcement) {
@@ -36,7 +35,7 @@ export function AnnouncementCard() {
         </div>
 
         <ul className="flex flex-col gap-4">
-          {ANNOUNCEMENTS.map((announcement) => (
+          {announcements.map((announcement) => (
             <li key={announcement.id}>
               <button
                 type="button"

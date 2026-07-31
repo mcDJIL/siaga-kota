@@ -61,8 +61,8 @@ def predict(payload: dict[str, float | int | str], model_path: str | Path | None
         "recommendations": recommendations,
         "priority_score": compute_priority_score(
             score,
-            int(payload.get("flood_reports_24h", 0)),
-            int(payload.get("waste_reports_24h", 0)),
+            int((payload.get("reports") or {}).get("flood_reports_24h", payload.get("flood_reports_24h", 0))),
+            int((payload.get("reports") or {}).get("waste_reports_24h", payload.get("waste_reports_24h", 0))),
         ),
         "explanation": {
             "main_factors": [

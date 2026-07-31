@@ -23,6 +23,7 @@ export function UserManagementTable({
   onToggleStatus,
   onOpenEdit,
   onOpenDelete,
+  isLoading = false,
   ...filterProps
 }) {
   const shownStart = items.length === 0 ? 0 : (page - 1) * 5 + 1
@@ -65,7 +66,19 @@ export function UserManagementTable({
             </tr>
           </thead>
           <tbody>
-            {items.length === 0 ? (
+            {isLoading ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <tr key={i} className="border-t border-[#C4C6CF]/20 animate-pulse">
+                  <td className="px-4 py-4"><div className="h-4 bg-gray-200 rounded" /></td>
+                  <td className="px-4 py-4"><div className="h-4 bg-gray-200 rounded" /></td>
+                  <td className="px-4 py-4"><div className="h-4 bg-gray-200 rounded" /></td>
+                  <td className="px-4 py-4"><div className="h-4 bg-gray-200 rounded" /></td>
+                  <td className="px-4 py-4"><div className="h-4 bg-gray-200 rounded" /></td>
+                  <td className="px-4 py-4"><div className="h-4 bg-gray-200 rounded" /></td>
+                  <td className="px-4 py-4"><div className="h-4 bg-gray-200 rounded" /></td>
+                </tr>
+              ))
+            ) : items.length === 0 ? (
               <tr>
                 <td colSpan={7} className="px-4 py-10 text-center text-sm text-text-muted">
                   Tidak ada pengguna yang cocok.
@@ -103,14 +116,6 @@ export function UserManagementTable({
                   </td>
                   <td className="px-4 py-4">
                     <div className="flex items-center justify-end gap-3">
-                      <button
-                        type="button"
-                        aria-label={`Edit ${user.name}`}
-                        onClick={() => onOpenEdit(user)}
-                        className="text-text-muted hover:text-navy"
-                      >
-                        <Pencil className="h-4 w-4" aria-hidden="true" />
-                      </button>
                       <button
                         type="button"
                         aria-label={`Hapus ${user.name}`}

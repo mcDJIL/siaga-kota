@@ -33,8 +33,8 @@ class StoreReportRequest extends FormRequest
             'longitude' => ['required', 'numeric', 'between:-180,180'],
             'waste_type' => ['nullable', Rule::enum(WasteType::class)],
             'water_level_cm' => ['nullable', 'integer', 'min:0', 'max:1000'],
-            'photos' => ['nullable', 'array', 'max:3'],
-            'photos.*' => ['required', 'image', 'mimes:jpeg,jpg,png', 'max:5120'], // 5MB
+            'photos' => ['nullable', 'array', 'max:10'],
+            'photos.*' => ['required', 'image', 'mimes:jpeg,jpg,png,webp', 'max:5120'], // 5MB
         ];
     }
 
@@ -45,7 +45,7 @@ class StoreReportRequest extends FormRequest
             'category_id.exists' => 'Kategori laporan tidak valid.',
             'latitude.between' => 'Latitude harus antara -90 hingga 90.',
             'longitude.between' => 'Longitude harus antara -180 hingga 180.',
-            'photos.max' => 'Maksimal 3 foto.',
+            'photos.max' => 'Maksimal 10 foto.',
             'photos.*.image' => 'File harus berupa gambar.',
             'photos.*.max' => 'Ukuran foto maksimal 5MB.',
         ];

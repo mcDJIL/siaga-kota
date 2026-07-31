@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { TrendingDown, TrendingUp } from 'lucide-react'
+import { TrendingDown, TrendingUp, FileText, Trash2, Waves } from 'lucide-react'
 import { cn } from '../../../../../lib/cn'
 
 export function useCountUp(target, duration = 800) {
@@ -24,13 +24,20 @@ export function useCountUp(target, duration = 800) {
   return value
 }
 
+const ICON_MAP = {
+  FileText,
+  Trash2,
+  Waves,
+}
+
 const TREND_COLORS = {
   success: 'text-brand-green',
   danger: 'text-[#BA1A1A]',
 }
 
 export function DashboardSummaryCard({ statistic }) {
-  const { label, value, icon: Icon, iconBg, iconColor, trend, description } = statistic
+  const { label, value, icon: iconName, iconBg, iconColor, trend, description } = statistic
+  const Icon = ICON_MAP[iconName] || FileText
   const count = useCountUp(value)
   const TrendIcon = trend?.direction === 'up' ? TrendingUp : TrendingDown
 

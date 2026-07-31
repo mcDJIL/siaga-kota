@@ -28,7 +28,7 @@ export function DashboardTopbar({
 
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
-          <NotificationDropdown notifications={notifications} />
+          {/* <NotificationDropdown notifications={notifications} /> */}
           <ProfileDropdown profile={profile} profileHref={profileHref} />
         </div>
         <span className="hidden h-8 w-px bg-border-muted sm:block" aria-hidden="true" />

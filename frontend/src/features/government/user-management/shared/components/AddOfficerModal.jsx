@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { UserRound } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { Camera, UserRound } from 'lucide-react'
 import { Modal } from '../../../../../components/ui/Modal'
 import { Button } from '../../../../../components/ui/Button'
 import { Input } from '../../../../../components/ui/Input'
@@ -21,11 +21,22 @@ const INITIAL_FORM = {
   password: '',
   confirmPassword: '',
   status: 'Aktif',
+  avatar: null,
 }
 
 export function AddOfficerModal({ isOpen, onClose, onSubmit }) {
   const [form, setForm] = useState(INITIAL_FORM)
   const [errors, setErrors] = useState({})
+  const [avatarPreview, setAvatarPreview] = useState('')
+  const fileInputRef = useRef(null)
+
+  useEffect(() => {
+    return () => {
+      if (avatarPreview) {
+        URL.revokeObjectURL(avatarPreview)
+      }
+    }
+  }, [avatarPreview])
 
   function updateField(field, value) {
     setForm((current) => ({ ...current, [field]: value }))
@@ -40,8 +51,22 @@ export function AddOfficerModal({ isOpen, onClose, onSubmit }) {
     if (!form.address.trim()) nextErrors.address = 'Alamat wajib diisi.'
     if (form.password.length < 8) nextErrors.password = 'Password minimal 8 karakter.'
     if (form.confirmPassword !== form.password) nextErrors.confirmPassword = 'Konfirmasi password tidak cocok.'
+    if (form.avatar && form.avatar.size > 2 * 1024 * 1024) nextErrors.avatar = 'Ukuran foto maksimal 2MB.'
     setErrors(nextErrors)
     return Object.keys(nextErrors).length === 0
+  }
+
+  function handleAvatarChange(event) {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    if (avatarPreview) {
+      URL.revokeObjectURL(avatarPreview)
+    }
+
+    updateField('avatar', file)
+    setAvatarPreview(URL.createObjectURL(file))
+    setErrors((current) => ({ ...current, avatar: undefined }))
   }
 
   function handleSubmit() {
@@ -51,13 +76,22 @@ export function AddOfficerModal({ isOpen, onClose, onSubmit }) {
       name: form.name,
       email: form.email,
       phone: form.phone,
-      nip: form.nip,
-      role: 'Officer',
+      employee_id: form.nip,
+      password: form.password,
+      role: 'petugas',
       institution: form.institution,
       district: form.district,
       address: form.address,
       status: form.status,
+      avatar: form.avatar,
     })
+    if (avatarPreview) {
+      URL.revokeObjectURL(avatarPreview)
+    }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+    setAvatarPreview('')
     setForm(INITIAL_FORM)
     setErrors({})
   }
@@ -66,13 +100,32 @@ export function AddOfficerModal({ isOpen, onClose, onSubmit }) {
     <Modal isOpen={isOpen} onClose={onClose} title="Tambah Petugas Baru" className="max-w-xl">
       <div className="flex max-h-[70vh] flex-col gap-4 overflow-y-auto pr-1">
         <div className="flex items-center gap-4">
-          <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-bg-blue-light text-text-muted">
-            <UserRound className="h-7 w-7" aria-hidden="true" />
+          <span className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-bg-blue-light text-text-muted">
+            {avatarPreview ? (
+              <img src={avatarPreview} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <UserRound className="h-7 w-7" aria-hidden="true" />
+            )}
           </span>
-          <Button variant="ghost" size="sm" className="border border-[#C4C6CF]" type="button">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/jpg,image/webp"
+            className="hidden"
+            onChange={handleAvatarChange}
+          />
+          <Button
+            variant="ghost"
+            size="sm"
+            className="border border-[#C4C6CF]"
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <Camera className="h-4 w-4" aria-hidden="true" />
             Upload Foto Profil
           </Button>
         </div>
+        {errors.avatar && <span className="-mt-2 text-xs text-[#BA1A1A]">{errors.avatar}</span>}
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <label className="flex flex-col gap-1.5 text-sm text-text-body">
@@ -87,16 +140,10 @@ export function AddOfficerModal({ isOpen, onClose, onSubmit }) {
             {errors.email && <span className="text-xs text-[#BA1A1A]">{errors.email}</span>}
           </label>
 
-          <label className="flex flex-col gap-1.5 text-sm text-text-body">
+          <label className="flex flex-col gap-1.5 text-sm text-text-body col-span-2">
             Nomor Telepon
             <Input value={form.phone} onChange={(event) => updateField('phone', event.target.value)} error={Boolean(errors.phone)} />
             {errors.phone && <span className="text-xs text-[#BA1A1A]">{errors.phone}</span>}
-          </label>
-
-          <label className="flex flex-col gap-1.5 text-sm text-text-body">
-            NIP
-            <Input value={form.nip} onChange={(event) => updateField('nip', event.target.value)} error={Boolean(errors.nip)} />
-            {errors.nip && <span className="text-xs text-[#BA1A1A]">{errors.nip}</span>}
           </label>
 
           <label className="flex flex-col gap-1.5 text-sm text-text-body">

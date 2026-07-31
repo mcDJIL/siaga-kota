@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
@@ -78,6 +79,7 @@ class Report extends Model
             'waste_type' => WasteType::class,
             'is_emergency' => 'boolean',
             'water_level_cm' => 'integer',
+            'location' => 'string',
             'accepted_at' => 'datetime',
             'processed_at' => 'datetime',
             'resolved_at' => 'datetime',
@@ -99,6 +101,18 @@ class Report extends Model
         return $this->belongsTo(User::class, 'assigned_to');
     }
 
+    public function assignedDepartment(): HasOneThrough
+    {
+        return $this->hasOneThrough(
+            Department::class,
+            User::class,
+            'id',           // Foreign key on users table
+            'id',           // Foreign key on departments table
+            'assigned_to',  // Local key on reports table
+            'department_id' // Local key on users table
+        );
+    }
+
     public function statusHistories(): HasMany
     {
         return $this->hasMany(ReportStatusHistory::class);
@@ -115,22 +129,43 @@ class Report extends Model
     }
 
     /**
+     * Extract coordinates from PostGIS Point string.
+     * Format: POINT(longitude latitude) or SRID=4326;POINT(longitude latitude)
+     */
+    private function parsePointCoordinates(): ?array
+    {
+        $location = $this->attributes['location'] ?? null;
+
+        if (! $location) {
+            return null;
+        }
+
+        $location = trim((string) $location);
+
+        // Handle SRID prefix: SRID=4326;POINT(...)
+        if (strpos($location, 'SRID') !== false) {
+            $location = preg_replace('/^SRID=\d+;/', '', $location);
+            $location = trim($location);
+        }
+
+        // Match POINT(lng lat) or POINT(lat lng)
+        if (preg_match('/POINT\s*\(\s*([-\d.]+)\s+([-\d.]+)\s*\)/', $location, $matches)) {
+            return [
+                'longitude' => (float) $matches[1],
+                'latitude' => (float) $matches[2],
+            ];
+        }
+
+        return null;
+    }
+
+    /**
      * Get latitude from PostGIS Point.
      */
     public function getLatitudeAttribute(): ?float
     {
-        $location = $this->attributes['location'] ?? null;
-
-        if (! $location || $location instanceof \Illuminate\Database\Query\Expression) {
-            return null;
-        }
-
-        // Parse "POINT(lng lat)" format dari PostGIS
-        if (preg_match('/POINT\(([^ ]+) ([^ ]+)\)/', $location, $matches)) {
-            return (float) $matches[2];
-        }
-
-        return null;
+        $coords = $this->parsePointCoordinates();
+        return $coords['latitude'] ?? null;
     }
 
     /**
@@ -138,16 +173,19 @@ class Report extends Model
      */
     public function getLongitudeAttribute(): ?float
     {
-        $location = $this->attributes['location'] ?? null;
+        $coords = $this->parsePointCoordinates();
+        return $coords['longitude'] ?? null;
+    }
 
-        if (! $location || $location instanceof \Illuminate\Database\Query\Expression) {
+    public function getPosition(): ?array
+    {
+        $latitude = $this->latitude;
+        $longitude = $this->longitude;
+
+        if ($latitude === null || $longitude === null) {
             return null;
         }
 
-        if (preg_match('/POINT\(([^ ]+) ([^ ]+)\)/', $location, $matches)) {
-            return (float) $matches[1];
-        }
-
-        return null;
+        return [$latitude, $longitude];
     }
 }

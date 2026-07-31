@@ -5,10 +5,9 @@ const AUTH_TOKEN_KEY = 'siagakota_auth_token'
 
 const axiosClient = axios.create({
   baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
 })
+
+axiosClient.defaults.headers.common['Content-Type'] = 'application/json'
 
 function getAuthToken() {
   if (typeof window === 'undefined') {
@@ -171,13 +170,13 @@ export async function uploadAvatar(file) {
     const formData = new FormData()
     formData.append('avatar_path', file)
 
-    const config = attachAuthHeader({
+    const token = getAuthToken()
+
+    const { data } = await axios.post(`${API_BASE_URL}/api/v1/auth/me/avatar`, formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        Authorization: token ? `Bearer ${token}` : undefined,
       },
     })
-
-    const { data } = await axiosClient.patch('/api/v1/auth/me', formData, config)
 
     if (!data || !data.data) {
       throw new Error('Response tidak valid dari server')

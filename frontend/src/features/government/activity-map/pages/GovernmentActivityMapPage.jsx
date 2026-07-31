@@ -1,4 +1,3 @@
-import { useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
@@ -11,7 +10,6 @@ import { useGovernmentHeatmap } from '../hooks/useGovernmentHeatmap'
 
 export function GovernmentActivityMapPage() {
   const navigate = useNavigate()
-  const mapCaptureRef = useRef(null)
 
   const {
     activeLayer,
@@ -61,7 +59,6 @@ export function GovernmentActivityMapPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
         <div className="flex min-h-[500px] lg:col-span-8">
           <GovernmentHeatmap
-            mapRef={mapCaptureRef}
             center={mapCenter}
             zoom={mapZoom}
             heatPoints={heatPoints}
@@ -88,7 +85,8 @@ export function GovernmentActivityMapPage() {
         onClose={onCloseExportModal}
         activeLayer={activeLayer}
         districts={districts}
-        mapRef={mapCaptureRef}
+        wasteMarkers={visibleMarkers.filter((m) => m.type === 'waste')}
+        floodMarkers={visibleMarkers.filter((m) => m.type === 'flood')}
       />
     </div>
   )

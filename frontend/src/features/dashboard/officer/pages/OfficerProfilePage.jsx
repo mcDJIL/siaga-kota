@@ -130,7 +130,7 @@ export function OfficerProfilePage() {
     phone: profile.phone || '',
     jabatan: profile.position || '-',
     departemen: profile.department?.name || '-',
-    avatar: profile.avatar_path || '/default-avatar.png',
+    avatar: profile.avatar_url || '/default-avatar.png',
   }
 
   return (

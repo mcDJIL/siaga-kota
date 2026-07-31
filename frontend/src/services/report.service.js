@@ -76,22 +76,33 @@ export async function submitReport(formData) {
     Object.entries(formData).forEach(([key, value]) => {
       if (value === undefined || value === null) return
 
-      if (key === 'images') {
+      // Handle file uploads (images, photos, files)
+      if (key === 'images' || key === 'photos' || key === 'files') {
         if (Array.isArray(value)) {
-          value.forEach((file) => requestBody.append('photos[]', file))
+          value.forEach((file) => {
+            // Append as photos[] for Laravel array binding
+            if (file instanceof File || file instanceof Blob) {
+              requestBody.append('photos[]', file)
+            }
+          })
         }
         return
       }
 
+      // Handle other arrays
       if (Array.isArray(value)) {
         value.forEach((item) => requestBody.append(`${key}[]`, item))
         return
       }
 
+      // Handle regular values
       requestBody.append(key, String(value))
     })
 
     const config = attachAuthHeader()
+    config.headers = config.headers || {}
+    config.headers['Content-Type'] = 'multipart/form-data'
+
     const response = await axiosClient.post('/api/v1/public/reports', requestBody, config)
     return response.data
   } catch (error) {

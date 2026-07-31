@@ -19,11 +19,10 @@ class ActivityMapController extends Controller
      */
     public function getActiveTasks(Request $request): AnonymousResourceCollection
     {
-        $statuses = ['menunggu'];
         $query = Report::query()
             ->selectRaw("*,ST_AsText(location) as location")
             ->with(['category', 'user', 'assignedOperator'])
-            ->whereIn('status', $statuses)
+            ->whereIn('status', ['menunggu', 'diproses', 'terverifikasi'])
             ->orderByDesc('created_at');
 
         // Filter by region if provided
@@ -37,7 +36,7 @@ class ActivityMapController extends Controller
         }
 
         // Filter by category if provided
-        if ($request->filled('category')) {
+        if ($request->filled('category') && $request->category !== '') {
             $query->whereHas('category', fn($q) => $q->where('slug', $request->category));
         }
 

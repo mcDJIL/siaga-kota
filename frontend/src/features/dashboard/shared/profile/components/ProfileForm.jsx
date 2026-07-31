@@ -25,7 +25,6 @@ export const ProfileForm = forwardRef(function ProfileForm({ profile, onSubmit, 
     resolver: zodResolver(profileSchema),
     defaultValues: {
       fullName: profile.fullName,
-      nip: profile.nip,
       email: profile.email,
       phone: profile.phone,
     },
@@ -51,10 +50,6 @@ export const ProfileForm = forwardRef(function ProfileForm({ profile, onSubmit, 
       >
         <Field label="Nama Lengkap" error={errors.fullName}>
           <Input {...register('fullName')} autoComplete="name" error={Boolean(errors.fullName)} disabled={isLoading} />
-        </Field>
-
-        <Field label="NIP (Nomor Induk Pegawai)" error={errors.nip}>
-          <Input {...register('nip')} autoComplete="off" error={Boolean(errors.nip)} disabled={isLoading} />
         </Field>
 
         <Field label="Email Kerja">

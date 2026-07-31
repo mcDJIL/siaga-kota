@@ -1,11 +1,10 @@
 import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
-import { ArrowUpDown, Eye, Waves, Trash2 } from 'lucide-react'
+import { ArrowUpDown, Eye, Waves, Trash2, FileText } from 'lucide-react'
 import { cn } from '../../../../../lib/cn'
 import { SearchInput } from '../../../../reports/shared/components/SearchInput'
 import { Pagination } from '../../../../reports/shared/components/Pagination'
-import { RECENT_REPORTS } from '../../data/reportData'
 import { ReportDetailModal } from './ReportDetailModal'
 
 const PAGE_SIZE = 5
@@ -32,7 +31,7 @@ const COLUMNS = [
   { key: 'time', label: 'Time' },
 ]
 
-export function RecentReportTable() {
+export function RecentReportTable({ reports = [] }) {
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState({ key: null, direction: 'asc' })
   const [page, setPage] = useState(1)
@@ -40,7 +39,7 @@ export function RecentReportTable() {
 
   const filtered = useMemo(() => {
     const normalized = query.trim().toLowerCase()
-    let results = RECENT_REPORTS.filter((report) =>
+    let results = reports.filter((report) =>
       [report.id, report.typeLabel, report.location].join(' ').toLowerCase().includes(normalized)
     )
 
@@ -52,7 +51,7 @@ export function RecentReportTable() {
     }
 
     return results
-  }, [query, sort])
+  }, [query, sort, reports])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
@@ -118,7 +117,7 @@ export function RecentReportTable() {
                 </tr>
               ) : (
                 paginated.map((report) => {
-                  const TypeIcon = TYPE_ICONS[report.type]
+                  const TypeIcon = TYPE_ICONS[report.type] || FileText
                   return (
                     <tr
                       key={report.id}

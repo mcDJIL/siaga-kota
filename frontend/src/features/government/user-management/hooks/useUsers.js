@@ -1,92 +1,156 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { USERS } from '../data/userData'
-import { toggleStatus } from '../utils/statusColor'
+import {
+  getUsers,
+  createUser,
+  updateUser,
+  deleteUser,
+  toggleUserStatus,
+  getUserStatistics,
+} from '../../../../services/user-management.service'
 
 const PAGE_SIZE = 5
 
 export function useUsers() {
-  const [users, setUsers] = useState(USERS)
+  const [users, setUsers] = useState([])
+  const [statistics, setStatistics] = useState(null)
   const [searchInput, setSearchInput] = useState('')
-  const [query, setQuery] = useState('')
   const [roleFilter, setRoleFilter] = useState('Semua')
   const [statusFilter, setStatusFilter] = useState('Semua')
   const [districtFilter, setDistrictFilter] = useState('Semua')
-  const [sort, setSort] = useState({ key: null, direction: 'asc' })
   const [page, setPage] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
+  const [totalPages, setTotalPages] = useState(1)
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [editTarget, setEditTarget] = useState(null)
   const [deleteTarget, setDeleteTarget] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [sort, setSort] = useState({ key: null, direction: 'asc' })
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setQuery(searchInput)
-      setPage(1)
-      if (searchInput) toast.success('Pencarian berhasil diperbarui.')
-    }, 300)
-    return () => clearTimeout(timer)
-  }, [searchInput])
+    loadUsers()
+    loadStatistics()
+  }, [page, roleFilter, statusFilter, searchInput])
 
-  const filtered = useMemo(() => {
-    const normalized = query.trim().toLowerCase()
+  async function loadUsers() {
+    try {
+      setIsLoading(true)
+      const params = {
+        per_page: PAGE_SIZE,
+        page,
+      }
 
-    let results = users.filter((user) => {
-      const matchesRole = roleFilter === 'Semua' || user.role === roleFilter
-      const matchesStatus = statusFilter === 'Semua' || user.status === statusFilter
-      const matchesDistrict = districtFilter === 'Semua' || user.district === districtFilter
-      const matchesQuery =
-        !normalized || [user.name, user.email, user.nip ?? ''].join(' ').toLowerCase().includes(normalized)
-      return matchesRole && matchesStatus && matchesDistrict && matchesQuery
-    })
+      if (roleFilter !== 'Semua') {
+        params.role = roleFilter === 'Admin' ? 'admin' : roleFilter === 'Officer' ? 'petugas' : 'warga'
+      }
 
-    if (sort.key) {
-      results = [...results].sort((a, b) => {
-        const compare = String(a[sort.key]).localeCompare(String(b[sort.key]))
-        return sort.direction === 'asc' ? compare : -compare
-      })
+      if (statusFilter !== 'Semua') {
+        params.status = statusFilter === 'Aktif' ? 'aktif' : 'nonaktif'
+      }
+
+      if (districtFilter !== 'Semua') {
+        params.department = districtFilter
+      }
+
+      if (searchInput.trim()) {
+        params.search = searchInput
+      }
+
+      const response = await getUsers(params)
+      setUsers(response.data?.users || [])
+      setTotalCount(response.data?.total || 0)
+      setTotalPages(response.data?.last_page || 1)
+    } catch (error) {
+      console.error('Error loading users:', error)
+      toast.error('Gagal memuat data pengguna')
+    } finally {
+      setIsLoading(false)
     }
+  }
 
-    return results
-  }, [users, query, roleFilter, statusFilter, districtFilter, sort])
+  async function loadStatistics() {
+    try {
+      const response = await getUserStatistics()
+      setStatistics(response.data)
+    } catch (error) {
+      console.error('Error loading statistics:', error)
+    }
+  }
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
-  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+  const paginated = users
 
   function handleSort(key) {
     setSort((prev) => ({ key, direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc' }))
   }
 
-  function handleToggleStatus(userId) {
-    setUsers((current) => current.map((user) => (user.id === userId ? { ...user, status: toggleStatus(user.status) } : user)))
-    toast.success('Status pengguna berhasil diperbarui.')
-  }
-
-  function handleAddOfficer(officer) {
-    const newUser = {
-      id: `user-${Date.now()}`,
-      ...officer,
-      dateJoined: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+  async function handleToggleStatus(userId) {
+    try {
+      const response = await toggleUserStatus(userId)
+      if (response.data) {
+        await loadUsers()
+        toast.success(response.message)
+      }
+    } catch (error) {
+      console.error('Error toggling status:', error)
+      toast.error(error.message || 'Gagal mengubah status pengguna')
     }
-    setUsers((current) => [newUser, ...current])
-    setIsAddOpen(false)
-    toast.success('Petugas berhasil ditambahkan.')
   }
 
-  function handleUpdateUser(userId, updates) {
-    setUsers((current) => current.map((user) => (user.id === userId ? { ...user, ...updates } : user)))
-    setEditTarget(null)
-    toast.success('Data pengguna berhasil diperbarui.')
+  async function handleAddOfficer(officer) {
+    try {
+      const response = await createUser(officer)
+      if (response.data) {
+        setIsAddOpen(false)
+        setPage(1)
+        await loadUsers()
+        toast.success('Petugas berhasil ditambahkan.')
+      }
+    } catch (error) {
+      console.error('Error adding officer:', error)
+      toast.error(error.message || 'Gagal menambahkan petugas')
+    }
   }
 
-  function handleDeleteUser(userId) {
-    setUsers((current) => current.filter((user) => user.id !== userId))
-    setDeleteTarget(null)
-    toast.success('Pengguna berhasil dihapus.')
+  async function handleUpdateUser(userId, updates) {
+    try {
+      const response = await updateUser(userId, updates)
+      if (response.data) {
+        setEditTarget(null)
+        await loadUsers()
+        toast.success('Data pengguna berhasil diperbarui.')
+      }
+    } catch (error) {
+      console.error('Error updating user:', error)
+      toast.error(error.message || 'Gagal memperbarui data pengguna')
+    }
+  }
+
+  async function handleDeleteUser(userId) {
+    try {
+      setIsDeleting(true)
+      const response = await deleteUser(userId)
+      if (response) {
+        setDeleteTarget(null)
+        if (users.length === 1 && page > 1) {
+          setPage((current) => current - 1)
+        } else {
+          await loadUsers()
+        }
+        await loadStatistics()
+        toast.success(response.message)
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error)
+      toast.error(error.message || 'Gagal menghapus pengguna')
+    } finally {
+      setIsDeleting(false)
+    }
   }
 
   return {
     paginated,
-    totalCount: filtered.length,
+    totalCount,
     page,
     totalPages,
     onPageChange: setPage,
@@ -121,5 +185,8 @@ export function useUsers() {
     onOpenDelete: setDeleteTarget,
     onCloseDelete: () => setDeleteTarget(null),
     onDeleteUser: handleDeleteUser,
+    isDeleting,
+    isLoading,
+    statistics,
   }
 }

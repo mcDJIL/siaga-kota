@@ -4,7 +4,7 @@ const profile = user ? JSON.parse(user) : null
 export const OFFICER_PROFILE = {
   name: profile?.name || 'User',
   role: profile?.position || 'Koordinator Lapangan',
-  avatar: profile?.avatar_path || 'https://api.builder.io/api/v1/image/assets/TEMP/67cb26c260d4e27b177a34859c876c367dbc32ab?width=76',
+  avatar: profile?.avatar_url || 'https://api.builder.io/api/v1/image/assets/TEMP/67cb26c260d4e27b177a34859c876c367dbc32ab?width=76',
 }
 
 export const STATISTICS = [
