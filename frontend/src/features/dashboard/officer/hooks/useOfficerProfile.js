@@ -82,6 +82,15 @@ export function useOfficerProfile() {
       if (userData) {
         console.log('Updated profile with avatar:', userData)
         setProfile(userData)
+      } else {
+        // Jika response tidak contains user data, fetch ulang
+        console.log('No user data in response, fetching fresh profile...')
+        const freshRes = await me()
+        const freshData = freshRes?.data?.user || freshRes?.data
+        if (freshData) {
+          setProfile(freshData)
+          console.log('Refreshed profile:', freshData)
+        }
       }
       return { success: true, data: userData }
     } catch (err) {
