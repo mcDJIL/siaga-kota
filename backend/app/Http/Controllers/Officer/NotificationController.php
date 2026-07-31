@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Officer;
 
 use App\Http\Controllers\Controller;
+use App\Models\Notification;
+use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -24,39 +26,53 @@ class NotificationController extends Controller
         $page = $request->query('page', 1);
         $perPage = $request->query('per_page', 20);
 
-        // For now, return mock data (will integrate with real notifications later)
-        $notifications = $this->getMockNotifications($user->id);
+        // Build query
+        $query = Notification::where('user_id', $user->id)
+            ->byCategory($category)
+            ->byStatus($status)
+            ->byPriority($priority)
+            ->orderByDesc('created_at');
 
-        // Apply filters
-        if ($category && $category !== 'semua') {
-            $notifications = array_filter($notifications, function ($n) use ($category) {
-                return $n['category'] === $category;
+        // Get total count
+        $total = $query->count();
+
+        // Paginate
+        $notifications = $query
+            ->skip(($page - 1) * $perPage)
+            ->take($perPage)
+            ->with('report')
+            ->get()
+            ->map(function ($notification) {
+                return [
+                    'id' => $notification->id,
+                    'type' => $notification->type,
+                    'category' => $notification->category,
+                    'title' => $notification->title,
+                    'description' => $notification->description,
+                    'time' => NotificationService::getTimeString($notification->created_at),
+                    'status' => $notification->status,
+                    'priority' => $notification->priority,
+                    'reportRoute' => $notification->report_id 
+                        ? ($notification->report?->category?->slug === 'banjir'
+                            ? "/officer/reports/flood/{$notification->report_id}"
+                            : "/officer/reports/waste/{$notification->report_id}")
+                        : null,
+                    'createdAt' => $notification->created_at->toIso8601String(),
+                ];
             });
-        }
 
-        if ($status && $status !== 'semua') {
-            $notifications = array_filter($notifications, function ($n) use ($status) {
-                return $n['status'] === $status;
-            });
-        }
-
-        if ($priority && $priority !== 'semua') {
-            $notifications = array_filter($notifications, function ($n) use ($priority) {
-                return $n['priority'] === $priority;
-            });
-        }
-
-        // Pagination
-        $total = count($notifications);
-        $notifications = array_slice($notifications, ($page - 1) * $perPage, $perPage);
+        // Get unread count
+        $unreadCount = Notification::where('user_id', $user->id)
+            ->where('status', 'unread')
+            ->count();
 
         return response()->json([
             'data' => [
-                'notifications' => array_values($notifications),
+                'notifications' => $notifications->values(),
                 'total' => $total,
                 'page' => $page,
                 'per_page' => $perPage,
-                'unread_count' => $this->getUnreadCount($user->id),
+                'unread_count' => $unreadCount,
             ],
         ]);
     }
@@ -68,12 +84,17 @@ class NotificationController extends Controller
      */
     public function markAsRead(Request $request, string $id): JsonResponse
     {
-        // Mock update - in production, update notification in database
+        $notification = Notification::where('id', $id)
+            ->where('user_id', $request->user()->id)
+            ->firstOrFail();
+
+        $notification->markAsRead();
+
         return response()->json([
             'data' => [
                 'notification' => [
-                    'id' => $id,
-                    'status' => 'read',
+                    'id' => $notification->id,
+                    'status' => $notification->status,
                 ],
             ],
             'message' => 'Notifikasi berhasil ditandai sebagai dibaca.',
@@ -87,11 +108,17 @@ class NotificationController extends Controller
      */
     public function confirm(Request $request, string $id): JsonResponse
     {
+        $notification = Notification::where('id', $id)
+            ->where('user_id', $request->user()->id)
+            ->firstOrFail();
+
+        $notification->markAsConfirmed();
+
         return response()->json([
             'data' => [
                 'notification' => [
-                    'id' => $id,
-                    'status' => 'confirmed',
+                    'id' => $notification->id,
+                    'status' => $notification->status,
                 ],
             ],
             'message' => 'Notifikasi berhasil dikonfirmasi.',
@@ -105,109 +132,20 @@ class NotificationController extends Controller
      */
     public function hide(Request $request, string $id): JsonResponse
     {
+        $notification = Notification::where('id', $id)
+            ->where('user_id', $request->user()->id)
+            ->firstOrFail();
+
+        $notification->hide();
+
         return response()->json([
             'data' => [
                 'notification' => [
-                    'id' => $id,
-                    'status' => 'hidden',
+                    'id' => $notification->id,
+                    'status' => $notification->status,
                 ],
             ],
             'message' => 'Notifikasi berhasil disembunyikan.',
         ]);
-    }
-
-    /**
-     * Get mock notifications for testing
-     */
-    private function getMockNotifications(string $userId): array
-    {
-        return [
-            [
-                'id' => 'n-1',
-                'type' => 'alert',
-                'category' => 'peringatan-banjir',
-                'title' => 'Peringatan: Level air di Pintu Air Manggarai mencapai Siaga 2. Segera koordinasi tim lapangan.',
-                'time' => '2 menit yang lalu',
-                'status' => 'unread',
-                'priority' => 'high',
-                'reportRoute' => '/officer/reports/flood/FL-2201',
-                'createdAt' => now()->subMinutes(2),
-            ],
-            [
-                'id' => 'n-2',
-                'type' => 'new-report',
-                'category' => 'laporan-baru',
-                'title' => 'Laporan Baru #SK-9283: Tumpukan sampah di Jl. Sudirman telah masuk. Butuh verifikasi petugas.',
-                'time' => '15 menit yang lalu',
-                'status' => 'unread',
-                'priority' => 'medium',
-                'reportRoute' => '/officer/reports/waste/SK-9283',
-                'createdAt' => now()->subMinutes(15),
-            ],
-            [
-                'id' => 'n-3',
-                'type' => 'system',
-                'category' => 'sistem',
-                'title' => 'Laporan #SK-8821 telah berhasil diselesaikan oleh Petugas Ahmad.',
-                'time' => '1 jam yang lalu',
-                'status' => 'read',
-                'priority' => 'low',
-                'reportRoute' => '/officer/reports/waste/SK-8821',
-                'createdAt' => now()->subHours(1),
-            ],
-            [
-                'id' => 'n-4',
-                'type' => 'maintenance',
-                'category' => 'maintenance',
-                'title' => 'Jadwal pemeliharaan sensor drainase wilayah Jakarta Pusat besok pukul 08:00 WIB.',
-                'time' => '3 jam yang lalu',
-                'status' => 'read',
-                'priority' => 'medium',
-                'createdAt' => now()->subHours(3),
-            ],
-            [
-                'id' => 'n-5',
-                'type' => 'new-report',
-                'category' => 'laporan-baru',
-                'title' => 'Laporan Baru #SK-9270: Sampah menumpuk di area Tebet Barat. Butuh verifikasi petugas.',
-                'time' => '5 jam yang lalu',
-                'status' => 'unread',
-                'priority' => 'medium',
-                'reportRoute' => '/officer/reports/waste/SK-9270',
-                'createdAt' => now()->subHours(5),
-            ],
-            [
-                'id' => 'n-6',
-                'type' => 'alert',
-                'category' => 'peringatan-banjir',
-                'title' => 'Peringatan: Level air di Kali Ciliwung mencapai Siaga 3. Evakuasi warga sekitar bantaran.',
-                'time' => '6 jam yang lalu',
-                'status' => 'unread',
-                'priority' => 'high',
-                'reportRoute' => '/officer/reports/flood/FL-2198',
-                'createdAt' => now()->subHours(6),
-            ],
-            [
-                'id' => 'n-7',
-                'type' => 'system',
-                'category' => 'sistem',
-                'title' => 'Laporan #SK-8790 telah berhasil diselesaikan oleh Petugas Rina.',
-                'time' => '8 jam yang lalu',
-                'status' => 'read',
-                'priority' => 'low',
-                'reportRoute' => '/officer/reports/waste/SK-8790',
-                'createdAt' => now()->subHours(8),
-            ],
-        ];
-    }
-
-    /**
-     * Get unread notification count
-     */
-    private function getUnreadCount(string $userId): int
-    {
-        return count(array_filter($this->getMockNotifications($userId), function ($n) {
-            return $n['status'] === 'unread';
-        }));
     }
 }

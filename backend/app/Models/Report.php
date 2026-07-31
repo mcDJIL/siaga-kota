@@ -7,6 +7,7 @@ use App\Enums\ReportStatus;
 use App\Enums\WasteType;
 use App\Models\ReportAttachment;
 use App\Models\ReportStatusHistory;
+use App\Services\NotificationService;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -39,6 +40,35 @@ class Report extends Model
 {
     /** @use HasFactory<\Database\Factories\ReportFactory> */
     use HasFactory, HasUlids, SoftDeletes;
+
+    protected static function booted(): void
+    {
+        static::created(function (Report $report) {
+            // Create notification for new report
+            NotificationService::createNewReportNotification($report);
+            
+            // Create flood alert if applicable
+            if ($report->category?->slug === 'banjir' && $report->water_level_cm) {
+                NotificationService::createFloodAlertNotification($report);
+            }
+        });
+
+        static::updating(function (Report $report) {
+            // Check if status changed
+            if ($report->isDirty('status')) {
+                $oldStatus = $report->getOriginal('status');
+                $newStatus = $report->getAttribute('status');
+                
+                // Create status update notification
+                NotificationService::createStatusUpdateNotification($report, $oldStatus, $newStatus);
+                
+                // Create completion notification if completed
+                if ($newStatus === 'selesai') {
+                    NotificationService::createCompletionNotification($report);
+                }
+            }
+        });
+    }
 
     protected function casts(): array
     {
@@ -77,6 +107,11 @@ class Report extends Model
     public function attachments(): HasMany
     {
         return $this->hasMany(ReportAttachment::class);
+    }
+
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(Notification::class);
     }
 
     /**
