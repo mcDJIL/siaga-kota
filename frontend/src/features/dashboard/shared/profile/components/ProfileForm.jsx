@@ -16,7 +16,7 @@ function Field({ label, error, children }) {
   )
 }
 
-export const ProfileForm = forwardRef(function ProfileForm({ profile, onSubmit }, ref) {
+export const ProfileForm = forwardRef(function ProfileForm({ profile, onSubmit, isLoading = false }, ref) {
   const {
     register,
     handleSubmit,
@@ -50,11 +50,11 @@ export const ProfileForm = forwardRef(function ProfileForm({ profile, onSubmit }
         className="grid grid-cols-1 gap-6 sm:grid-cols-2"
       >
         <Field label="Nama Lengkap" error={errors.fullName}>
-          <Input {...register('fullName')} autoComplete="name" error={Boolean(errors.fullName)} />
+          <Input {...register('fullName')} autoComplete="name" error={Boolean(errors.fullName)} disabled={isLoading} />
         </Field>
 
         <Field label="NIP (Nomor Induk Pegawai)" error={errors.nip}>
-          <Input {...register('nip')} autoComplete="off" error={Boolean(errors.nip)} />
+          <Input {...register('nip')} autoComplete="off" error={Boolean(errors.nip)} disabled={isLoading} />
         </Field>
 
         <Field label="Email Kerja">
@@ -62,9 +62,16 @@ export const ProfileForm = forwardRef(function ProfileForm({ profile, onSubmit }
         </Field>
 
         <Field label="Nomor Telepon" error={errors.phone}>
-          <Input {...register('phone')} autoComplete="tel" error={Boolean(errors.phone)} />
+          <Input {...register('phone')} autoComplete="tel" error={Boolean(errors.phone)} disabled={isLoading} />
         </Field>
       </form>
+
+      {isLoading && (
+        <div className="flex items-center justify-center text-sm text-text-muted">
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-border-muted border-t-navy mr-2" />
+          Menyimpan perubahan...
+        </div>
+      )}
     </motion.div>
   )
 })

@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { X } from 'lucide-react'
 import { ChangePasswordForm } from './ChangePasswordForm'
 
-export function ChangePasswordModal({ isOpen, onClose, onSubmit }) {
+export function ChangePasswordModal({ isOpen, onClose, onSubmit, isLoading = false }) {
   return (
     <AnimatePresence>
       {isOpen && (
@@ -29,12 +29,12 @@ export function ChangePasswordModal({ isOpen, onClose, onSubmit }) {
               <h2 id="change-password-heading" className="text-lg font-semibold text-navy">
                 Ubah Kata Sandi
               </h2>
-              <button type="button" onClick={onClose} aria-label="Tutup dialog" className="text-badge-neutral">
+              <button type="button" onClick={onClose} aria-label="Tutup dialog" className="text-badge-neutral" disabled={isLoading}>
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <ChangePasswordForm onSubmit={onSubmit} onCancel={onClose} />
+            <ChangePasswordForm onSubmit={onSubmit} onCancel={onClose} isLoading={isLoading} />
           </motion.div>
         </motion.div>
       )}

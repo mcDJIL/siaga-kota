@@ -148,16 +148,25 @@ class AuthController extends Controller
 
         // Handle avatar upload
         if ($request->hasFile('avatar_path')) {
-            $file = $request->file('avatar_path');
-            $path = $file->store('avatars', 'public');
-            $data['avatar_path'] = '/storage/' . $path;
+            try {
+                $file = $request->file('avatar_path');
+                if ($file && $file->isValid()) {
+                    $path = $file->store('avatars', 'public');
+                    $data['avatar_path'] = '/storage/' . $path;
+                }
+            } catch (\Exception $e) {
+                return response()->json([
+                    'message' => 'Gagal mengunggah avatar: ' . $e->getMessage(),
+                ], 400);
+            }
         }
 
-        $request->user()->fill($data)->save();
+        $user = $request->user();
+        $user->fill($data)->save();
 
         return response()->json([
             'data' => [
-                'user' => new UserResource($request->user()->fresh()),
+                'user' => new UserResource($user->fresh()),
             ],
             'message' => 'Profil berhasil diperbarui.',
         ]);

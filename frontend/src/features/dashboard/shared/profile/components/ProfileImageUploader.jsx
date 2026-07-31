@@ -5,7 +5,7 @@ import { Camera, X } from 'lucide-react'
 import { compressImage } from '../../../../../utils/compressImage'
 import { cn } from '../../../../../lib/cn'
 
-export function ProfileImageUploader({ value, onChange }) {
+export function ProfileImageUploader({ value, onChange, isLoading = false }) {
   const [isCompressing, setIsCompressing] = useState(false)
 
   const onDrop = useCallback(
@@ -26,6 +26,7 @@ export function ProfileImageUploader({ value, onChange }) {
     accept: { 'image/jpeg': ['.jpg', '.jpeg'], 'image/png': ['.png'], 'image/webp': ['.webp'] },
     maxFiles: 1,
     multiple: false,
+    disabled: isLoading || isCompressing,
   })
 
   const handleRemove = (event) => {
@@ -38,9 +39,12 @@ export function ProfileImageUploader({ value, onChange }) {
       {...getRootProps()}
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      whileHover={{ scale: 1.03 }}
+      whileHover={!isLoading && !isCompressing ? { scale: 1.03 } : {}}
       transition={{ duration: 0.3 }}
-      className="relative flex h-24 w-24 cursor-pointer items-center justify-center rounded-full"
+      className={cn(
+        'relative flex h-24 w-24 cursor-pointer items-center justify-center rounded-full',
+        isLoading || isCompressing ? 'cursor-not-allowed opacity-70' : ''
+      )}
       role="button"
       aria-label="Ubah foto profil"
     >
@@ -59,7 +63,7 @@ export function ProfileImageUploader({ value, onChange }) {
         )}
       </div>
 
-      {value && (
+      {value && !isLoading && !isCompressing && (
         <button
           type="button"
           onClick={handleRemove}
@@ -74,9 +78,9 @@ export function ProfileImageUploader({ value, onChange }) {
         <Camera className="h-4 w-4" aria-hidden="true" />
       </span>
 
-      {isCompressing && (
+      {(isCompressing || isLoading) && (
         <span className="absolute inset-0 flex items-center justify-center rounded-full bg-navy/40 text-xs font-semibold text-white">
-          ...
+          {isCompressing ? 'Kompres...' : 'Upload...'}
         </span>
       )}
     </motion.div>
