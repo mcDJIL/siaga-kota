@@ -75,14 +75,18 @@ export function useOfficerProfile() {
     try {
       setLoading(true)
       setError(null)
+      console.log('Uploading avatar:', file)
       const data = await uploadAvatar(file)
+      console.log('Avatar upload response:', data)
       const userData = data?.data?.user || data?.data
       if (userData) {
+        console.log('Updated profile with avatar:', userData)
         setProfile(userData)
       }
       return { success: true, data: userData }
     } catch (err) {
       const message = err.message || 'Gagal mengunggah foto profil'
+      console.error('Avatar upload error:', err)
       setError(message)
       throw err
     } finally {

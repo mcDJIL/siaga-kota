@@ -158,6 +158,16 @@ export async function uploadAvatar(file) {
       throw new Error('File harus dipilih')
     }
 
+    // Validasi tipe file
+    if (!file.type.startsWith('image/')) {
+      throw new Error('File harus berupa gambar')
+    }
+
+    // Validasi ukuran (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      throw new Error('Ukuran file tidak boleh lebih dari 5MB')
+    }
+
     const formData = new FormData()
     formData.append('avatar_path', file)
 
@@ -166,7 +176,13 @@ export async function uploadAvatar(file) {
         'Content-Type': 'multipart/form-data',
       },
     })
+
     const { data } = await axiosClient.patch('/api/v1/auth/me', formData, config)
+
+    if (!data || !data.data) {
+      throw new Error('Response tidak valid dari server')
+    }
+
     return data
   } catch (error) {
     formatAxiosError(error)
