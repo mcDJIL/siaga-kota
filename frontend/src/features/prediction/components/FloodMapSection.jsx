@@ -38,7 +38,7 @@ export function FloodMapSection() {
           zoom={14}
           zoomControl={false}
           scrollWheelZoom={false}
-          className="h-full w-full"
+          className="h-full w-full z-0"
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

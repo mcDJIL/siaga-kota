@@ -19,7 +19,6 @@ export function PredictionPage() {
   return (
     <>
       <HeroPrediction />
-      <WarningBanner />
       {isLoading ? <FloodMapSkeleton /> : <FloodMapSection />}
       {isLoading ? <SystemMetricsSkeleton /> : <SystemMetrics />}
       <section className="mx-auto flex w-full max-w-[1440px] flex-col gap-10 px-4 pb-20 sm:px-8 lg:flex-row">

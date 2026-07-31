@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { Button } from '../../../components/ui/Button'
+import { Link } from 'react-router-dom'
 
 export function CTASection() {
   return (
@@ -15,8 +16,8 @@ export function CTASection() {
           Sudah siap berkontribusi? Ayo daftar sekarang!
         </h2>
         <div className="flex w-full flex-col gap-4 sm:w-auto sm:flex-row">
-          <Button className="w-full bg-accent-green hover:bg-accent-green/90 sm:w-auto">Daftar Sekarang</Button>
-          <Button variant="navy" className="w-full sm:w-auto">
+          <Button as={Link} to='/register' className="w-full bg-accent-green hover:bg-accent-green/90 sm:w-auto">Daftar Sekarang</Button>
+          <Button as={Link} to='/login' variant="navy" className="w-full sm:w-auto">
             Login
           </Button>
         </div>

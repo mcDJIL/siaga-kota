@@ -2,10 +2,7 @@ import { z } from 'zod'
 
 export const REPORT_CATEGORIES = [
   { value: 'banjir', label: 'Banjir' },
-  { value: 'sampah', label: 'Sampah Menumpuk' },
-  { value: 'drainase-tersumbat', label: 'Drainase Tersumbat' },
-  { value: 'tumpukan-sampah', label: 'Tumpukan Sampah' },
-  { value: 'pembuangan-liar', label: 'Pembuangan Sampah Liar' },
+  { value: 'sampah', label: 'Sampah' },
 ]
 
 export const reportSchema = z.object({

@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { cn } from '../../../../lib/cn'
-import { StatusBadge } from '../cards/StatusBadge'
+import { StatusBadge } from '../table/StatusBadge'
 
 export const CATEGORY_STYLES = {
   banjir: { bg: 'bg-[#D6E3FF]', text: 'text-[#001B3C]', label: 'Banjir' },
