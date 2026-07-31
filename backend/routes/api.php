@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\Officer\ReportController;
 use App\Http\Controllers\Ops\ReportController as OpsReportController;
 use App\Http\Controllers\Public\DistrictLookupController;
 use App\Http\Controllers\Public\FloodPredictionController;
@@ -48,8 +47,8 @@ Route::prefix('v1')->group(function (): void {
                     Route::post('/', 'store');
                     Route::get('/{id}', 'show');
                 });
-            });
-                
+        });
+
     Route::middleware(['auth:sanctum', 'role:petugas,sanctum', 'throttle:petugas'])
         ->prefix('ops')
         ->group(function (): void {
