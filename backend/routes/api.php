@@ -106,4 +106,12 @@ Route::prefix('v1')->group(function (): void {
         ->group(function (): void {
             // route internal nanti pakai middleware service token, bukan Sanctum
         });
+
+    // Debug routes (remove in production)
+    if (config('app.debug')) {
+        Route::post('debug/test-upload', [\App\Http\Controllers\DebugController::class, 'testFileUpload']);
+        Route::get('debug/check-storage', [\App\Http\Controllers\DebugController::class, 'checkStoragePaths']);
+        Route::post('debug/test-db-save', [\App\Http\Controllers\DebugController::class, 'testDatabaseSave'])
+            ->middleware('auth:sanctum');
+    }
 });
