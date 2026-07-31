@@ -11,9 +11,10 @@ const REGION_OPTIONS = [
 
 const STATUS_OPTIONS = [
   { value: 'semua', label: 'Semua Status' },
-  { value: 'baru', label: 'Baru' },
-  { value: 'diproses', label: 'Diproses' },
+  { value: 'diverifikasi', label: 'Sudah Terverifikasi' },
+  { value: 'diproses', label: 'Sedang Diproses' },
   { value: 'selesai', label: 'Selesai' },
+  { value: 'ditolak', label: 'Ditolak' },
 ]
 
 const TRIGGER_CLASS = 'w-full justify-between border border-border-muted bg-white px-3 py-2 text-xs font-medium text-text-body'

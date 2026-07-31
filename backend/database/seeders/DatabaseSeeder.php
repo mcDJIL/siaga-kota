@@ -22,6 +22,8 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             DepartmentSeeder::class,
             ReportCategorySeeder::class,
+            DistrictSeeder::class,
+            JemberGeoSeeder::class,
         ]);
 
         $cleaningDepartment = Department::query()
@@ -62,5 +64,11 @@ class DatabaseSeeder extends Seeder
         $citizen->assignRole('warga');
         $officer->assignRole('petugas');
         $admin->assignRole('admin');
+
+        // Seeder yang bergantung pada user demo di atas.
+        $this->call([
+            ReportSeeder::class,
+            AnnouncementSeeder::class,
+        ]);
     }
 }

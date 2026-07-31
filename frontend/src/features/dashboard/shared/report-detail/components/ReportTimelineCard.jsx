@@ -1,7 +1,39 @@
 import { motion } from 'framer-motion'
 import { TimelineStep } from './TimelineStep'
 
-export function ReportTimelineCard({ timeline }) {
+function formatStatusHistoriesToTimeline(statusHistories = []) {
+  if (!statusHistories || statusHistories.length === 0) {
+    return null
+  }
+
+  return statusHistories.map((history, index) => ({
+    id: `status-${index}`,
+    title: history.to_status ? formatStatusLabel(history.to_status) : 'Status Berubah',
+    description: history.note || new Date(history.created_at).toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }),
+    status: index === statusHistories.length - 1 ? 'current' : 'completed',
+  }))
+}
+
+function formatStatusLabel(status) {
+  const labels = {
+    menunggu: 'Menunggu',
+    diverifikasi: 'Terverifikasi',
+    diproses: 'Sedang Diproses',
+    selesai: 'Selesai',
+    ditolak: 'Ditolak',
+  }
+  return labels[status] || status
+}
+
+export function ReportTimelineCard({ statusHistories, fallbackTimeline }) {
+  const timeline = formatStatusHistoriesToTimeline(statusHistories) || fallbackTimeline || []
+
   return (
     <motion.section
       initial={{ opacity: 0, x: 16 }}

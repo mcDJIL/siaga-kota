@@ -56,11 +56,24 @@ class CreateReport
         'photo_path' => null,
       ]);
 
-      // Upload foto utama (foto pertama)
+      // Upload semua foto
       if ($photos && count($photos) > 0) {
+        // Simpan foto pertama sebagai primary photo
         $firstPhoto = $photos[0];
-        $path = $this->storePhoto($firstPhoto, $report->id);
-        $report->update(['photo_path' => $path]);
+        $primaryPath = $this->storePhoto($firstPhoto, $report->id);
+        $report->update(['photo_path' => $primaryPath]);
+
+        // Simpan foto tambahan sebagai attachments
+        if (count($photos) > 1) {
+          foreach (array_slice($photos, 1) as $photo) {
+            $path = $this->storePhoto($photo, $report->id);
+            $report->attachments()->create([
+              'file_path' => $path,
+              'file_type' => 'image',
+              'uploaded_by' => $user->id,
+            ]);
+          }
+        }
       }
 
       // Buat history awal

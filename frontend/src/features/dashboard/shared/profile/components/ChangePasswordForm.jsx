@@ -37,7 +37,7 @@ function PasswordField({ label, error, register, name }) {
   )
 }
 
-export function ChangePasswordForm({ onSubmit, onCancel }) {
+export function ChangePasswordForm({ onSubmit, onCancel, isLoading = false }) {
   const {
     register,
     handleSubmit,
@@ -58,10 +58,10 @@ export function ChangePasswordForm({ onSubmit, onCancel }) {
       </p>
 
       <div className="flex flex-col gap-3 pt-2 sm:flex-row-reverse">
-        <Button type="submit" variant="navy" className="sm:flex-1">
-          Simpan Kata Sandi
+        <Button type="submit" variant="navy" className="sm:flex-1" disabled={isLoading}>
+          {isLoading ? 'Menyimpan...' : 'Simpan Kata Sandi'}
         </Button>
-        <Button type="button" variant="ghost" onClick={onCancel} className="text-text-muted sm:flex-1">
+        <Button type="button" variant="ghost" onClick={onCancel} className="text-text-muted sm:flex-1" disabled={isLoading}>
           Batal
         </Button>
       </div>

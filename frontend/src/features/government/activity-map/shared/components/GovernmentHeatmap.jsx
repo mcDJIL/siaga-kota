@@ -91,7 +91,6 @@ function MapControlsInternal({ homeCenter, homeZoom }) {
 }
 
 export function GovernmentHeatmap({
-  mapRef,
   center,
   zoom,
   heatPoints,
@@ -100,16 +99,10 @@ export function GovernmentHeatmap({
   focusPosition,
   onOpenMarkerDetail,
 }) {
-  const containerRef = useRef(null)
-
-  useEffect(() => {
-    if (mapRef) mapRef.current = containerRef.current
-  }, [mapRef])
-
   return (
-    <div ref={containerRef} className="flex flex-1 flex-col overflow-hidden rounded-xl border border-[#C4C6CF] bg-bg-soft shadow-[0_4px_16px_0_rgba(26,54,93,0.08)]">
+    <div className="flex z-10 flex-1 flex-col overflow-hidden rounded-xl border border-[#C4C6CF] bg-bg-soft shadow-[0_4px_16px_0_rgba(26,54,93,0.08)]">
       <div className="relative flex-1">
-        <MapContainer center={center} zoom={zoom} zoomControl={false} scrollWheelZoom className="h-full w-full">
+        <MapContainer center={center} zoom={zoom} zoomControl={false} scrollWheelZoom className="h-full w-full z-10">
           <TileLayer
             attribution="Tiles &copy; Esri"
             url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"

@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 import { KeyRound, LogOut } from 'lucide-react'
 import { Button } from '../../../../../components/ui/Button'
 
-export function SecurityCard({ onChangePassword, onLogout, onSave }) {
+export function SecurityCard({ onChangePassword, onLogout, onSave, isLoading = false }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -14,10 +14,11 @@ export function SecurityCard({ onChangePassword, onLogout, onSave }) {
 
       <motion.button
         type="button"
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
+        whileHover={!isLoading ? { scale: 1.02 } : {}}
+        whileTap={!isLoading ? { scale: 0.98 } : {}}
         onClick={onChangePassword}
-        className="flex items-center justify-center gap-2 rounded-lg border-2 border-border-muted py-4 text-base text-text-body"
+        disabled={isLoading}
+        className="flex items-center justify-center gap-2 rounded-lg border-2 border-border-muted py-4 text-base text-text-body disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <KeyRound className="h-5 w-5" aria-hidden="true" />
         Ubah Kata Sandi
@@ -25,17 +26,18 @@ export function SecurityCard({ onChangePassword, onLogout, onSave }) {
 
       <motion.button
         type="button"
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
+        whileHover={!isLoading ? { scale: 1.02 } : {}}
+        whileTap={!isLoading ? { scale: 0.98 } : {}}
         onClick={onLogout}
-        className="flex items-center justify-center gap-2 rounded-lg bg-[#FFDAD6] py-4 text-base text-[#93000A]"
+        disabled={isLoading}
+        className="flex items-center justify-center gap-2 rounded-lg bg-[#FFDAD6] py-4 text-base text-[#93000A] disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <LogOut className="h-[18px] w-[18px]" aria-hidden="true" />
         Keluar
       </motion.button>
 
-      <Button type="button" variant="navy" size="block" onClick={onSave}>
-        Simpan Perubahan
+      <Button type="button" variant="navy" size="block" onClick={onSave} disabled={isLoading}>
+        {isLoading ? 'Menyimpan...' : 'Simpan Perubahan'}
       </Button>
     </motion.div>
   )

@@ -33,9 +33,9 @@ services:
     container_name: siagakota-pgsql
     restart: unless-stopped
     ports:
-      - "127.0.0.1:15432:5432"
+      - "0.0.0.0:15432:5432"
     env_file:
-      - .env 
+      - .env
     environment:
       POSTGRES_DB: ${DB_DATABASE:-siagakota_prod}
       POSTGRES_USER: ${DB_USERNAME:-siagakota}

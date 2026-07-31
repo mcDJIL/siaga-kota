@@ -32,6 +32,7 @@ class UserResource extends JsonResource
                 'type' => $this->department->type->value,
             ]),
             'avatar_path' => $this->avatar_path,
+            'avatar_url' => $this->avatar_url,
             'settings' => $this->settings,
             'active' => $this->active,
         ];

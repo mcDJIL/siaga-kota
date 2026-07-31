@@ -1,15 +1,15 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
-import { FLOOD_SEVERITY } from '../../data/floodSeverityData'
-import { SUMMARY_STATS } from '../../data/summaryData'
+import { useFloodSeverityDistribution } from '../../hooks/useFloodSeverityDistribution'
+import { useFloodReportStats } from '../../hooks/useFloodReportStats'
 
-function renderLegend() {
+function renderLegend(data) {
   return (
     <ul className="mt-4 flex flex-wrap items-center justify-center gap-4">
-      {FLOOD_SEVERITY.map((item) => (
+      {data.map((item) => (
         <li key={item.name} className="flex items-center gap-2">
-          <span className="h-3 w-3 rounded-full" style={{ backgroundColor: item.color }} aria-hidden="true" />
+          <span className="h-3 w-3 rounded-full" style={{ backgroundColor: item.color || '#999' }} aria-hidden="true" />
           <span className="text-xs font-semibold tracking-[0.6px] text-text-muted">{item.name}</span>
         </li>
       ))}
@@ -17,9 +17,28 @@ function renderLegend() {
   )
 }
 
-export function FloodSeverityDonutChart() {
+export function FloodSeverityDonutChart({ district = null }) {
   const [activeIndex, setActiveIndex] = useState(null)
-  const totalReports = SUMMARY_STATS.find((stat) => stat.id === 'total-laporan')?.value ?? 0
+  const { severity, loading } = useFloodSeverityDistribution(district)
+  const { stats } = useFloodReportStats()
+
+  const totalReports = stats?.[0]?.value ?? 0
+
+  if (loading) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4, delay: 0.1 }}
+        className="flex flex-col rounded-2xl border border-border-muted/20 bg-white p-6 shadow-[0_4px_12px_0_rgba(26,54,93,0.08)]"
+      >
+        <div className="mb-2 flex items-center justify-between">
+          <h3 className="text-xl font-semibold text-text-body">Tingkat Keparahan</h3>
+        </div>
+        <div className="mx-auto h-64 w-full max-w-xs animate-pulse rounded-lg bg-gray-200" />
+      </motion.div>
+    )
+  }
 
   return (
     <motion.div
@@ -36,7 +55,7 @@ export function FloodSeverityDonutChart() {
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
-              data={FLOOD_SEVERITY}
+              data={severity}
               dataKey="value"
               nameKey="name"
               innerRadius="62%"
@@ -47,12 +66,12 @@ export function FloodSeverityDonutChart() {
               onMouseEnter={(_, index) => setActiveIndex(index)}
               onMouseLeave={() => setActiveIndex(null)}
             >
-              {FLOOD_SEVERITY.map((item, index) => (
-                <Cell key={item.name} fill={item.color} stroke="none" opacity={activeIndex === null || activeIndex === index ? 1 : 0.5} />
+              {severity.map((item, index) => (
+                <Cell key={item.name} fill={item.color || '#999'} stroke="none" opacity={activeIndex === null || activeIndex === index ? 1 : 0.5} />
               ))}
             </Pie>
-            <Tooltip formatter={(value, name) => [`${value}%`, name]} />
-            <Legend content={renderLegend} verticalAlign="bottom" />
+            <Tooltip formatter={(value, name) => [value, name]} />
+            <Legend content={() => renderLegend(severity)} verticalAlign="bottom" />
           </PieChart>
         </ResponsiveContainer>
 
@@ -64,8 +83,8 @@ export function FloodSeverityDonutChart() {
             </>
           ) : (
             <>
-              <span className="text-2xl font-bold text-text-body">{FLOOD_SEVERITY[activeIndex].name}</span>
-              <span className="text-sm font-semibold text-brand-green">{FLOOD_SEVERITY[activeIndex].value}%</span>
+              <span className="text-2xl font-bold text-text-body">{severity[activeIndex]?.name || '-'}</span>
+              <span className="text-sm font-semibold text-brand-green">{severity[activeIndex]?.value || 0}</span>
             </>
           )}
         </div>

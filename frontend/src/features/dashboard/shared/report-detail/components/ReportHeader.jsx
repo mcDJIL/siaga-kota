@@ -5,7 +5,7 @@ import { Button } from '../../../../../components/ui/Button'
 import { cn } from '../../../../../lib/cn'
 import { EmergencyBadge } from './EmergencyBadge'
 
-export function ReportHeader({ reportId, categoryLabel, isEmergency, onToggleEmergency, onPrint }) {
+export function ReportHeader({ reportId, categoryLabel, isEmergency, onToggleEmergency, onPrint, isLoading = false }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: -12 }}
@@ -14,10 +14,10 @@ export function ReportHeader({ reportId, categoryLabel, isEmergency, onToggleEme
       className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between print:hidden"
     >
       <div className="flex flex-col gap-2">
-        <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-base text-badge-neutral">
+        <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 break-words text-base text-badge-neutral">
           <span>Laporan</span>
           <span aria-hidden="true">/</span>
-          <span>Sampah Liar</span>
+          <span>{categoryLabel}</span>
           <span aria-hidden="true">/</span>
           <span className="text-navy">#{reportId}</span>
         </nav>
@@ -39,7 +39,8 @@ export function ReportHeader({ reportId, categoryLabel, isEmergency, onToggleEme
           variant="ghost"
           size="sm"
           onClick={onPrint}
-          className="border border-badge-neutral px-4 py-2 text-base text-text-muted hover:bg-transparent"
+          disabled={isLoading}
+          className="border border-badge-neutral px-4 py-2 text-base text-text-muted hover:bg-transparent disabled:opacity-50"
         >
           <Printer className="h-4 w-4" aria-hidden="true" />
           Cetak Laporan
@@ -48,8 +49,9 @@ export function ReportHeader({ reportId, categoryLabel, isEmergency, onToggleEme
           type="button"
           size="sm"
           onClick={onToggleEmergency}
+          disabled={isLoading}
           className={cn(
-            'px-4 py-2 text-base text-white',
+            'px-4 py-2 text-base text-white disabled:opacity-50',
             isEmergency ? 'bg-badge-neutral hover:bg-text-muted' : 'bg-[#BA1A1A] hover:bg-[#93000A]'
           )}
         >

@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import { PRIORITY_RECOMMENDATIONS } from '../data/priorityRecommendationData'
 
 const PAGE_SIZE = 5
 
-export function usePriorityRecommendation() {
-  const [recommendations, setRecommendations] = useState(PRIORITY_RECOMMENDATIONS)
+export function usePriorityRecommendation(initialRecommendations = []) {
+  const [recommendations, setRecommendations] = useState(initialRecommendations)
   const [searchInput, setSearchInput] = useState('')
   const [query, setQuery] = useState('')
   const [riskFilter, setRiskFilter] = useState('all')
@@ -20,6 +19,11 @@ export function usePriorityRecommendation() {
     }, 300)
     return () => clearTimeout(timer)
   }, [searchInput])
+
+  useEffect(() => {
+    setRecommendations(initialRecommendations)
+    setPage(1)
+  }, [initialRecommendations])
 
   const filtered = useMemo(() => {
     const normalized = query.trim().toLowerCase()

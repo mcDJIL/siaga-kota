@@ -26,10 +26,9 @@ class RoleAccessTest extends TestCase
 
         $response = $this
             ->actingAs($user, 'sanctum')
-            ->getJson('/api/v1/public');
+            ->getJson('/api/v1/public/reports');
 
-        $this->assertNotSame(401, $response->getStatusCode());
-        $this->assertNotSame(403, $response->getStatusCode());
+        $response->assertOk();
     }
 
     public function test_citizen_cannot_enter_ops_group(): void
@@ -45,12 +44,12 @@ class RoleAccessTest extends TestCase
 
         $response = $this
             ->actingAs($user, 'sanctum')
-            ->getJson('/api/v1/ops');
+            ->getJson('/api/v1/ops/reports');
 
         $response->assertForbidden();
     }
 
-    public function test_officer_cannot_enter_admin_group(): void
+    public function test_officer_cannot_enter_public_group(): void
     {
         $this->seed(RoleSeeder::class);
 
@@ -63,8 +62,26 @@ class RoleAccessTest extends TestCase
 
         $response = $this
             ->actingAs($user, 'sanctum')
-            ->getJson('/api/v1/admin');
+            ->getJson('/api/v1/public/reports');
 
         $response->assertForbidden();
+    }
+
+    public function test_officer_can_enter_ops_group(): void
+    {
+        $this->seed(RoleSeeder::class);
+
+        $user = User::factory()->create([
+            'role' => UserRole::Petugas->value,
+            'active' => true,
+        ]);
+
+        $user->assignRole(UserRole::Petugas->value);
+
+        $response = $this
+            ->actingAs($user, 'sanctum')
+            ->getJson('/api/v1/ops/reports');
+
+        $response->assertOk();
     }
 }

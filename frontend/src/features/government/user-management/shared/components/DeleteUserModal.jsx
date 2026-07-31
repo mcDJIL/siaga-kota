@@ -1,7 +1,7 @@
 import { Modal } from '../../../../../components/ui/Modal'
 import { Button } from '../../../../../components/ui/Button'
 
-export function DeleteUserModal({ user, onClose, onConfirm }) {
+export function DeleteUserModal({ user, onClose, onConfirm, isDeleting = false }) {
   return (
     <Modal isOpen={Boolean(user)} onClose={onClose} title="Hapus Pengguna" className="max-w-sm">
       {user && (
@@ -12,15 +12,16 @@ export function DeleteUserModal({ user, onClose, onConfirm }) {
           </p>
 
           <div className="flex justify-end gap-3">
-            <Button variant="ghost" size="sm" onClick={onClose}>
+            <Button variant="ghost" size="sm" onClick={onClose} disabled={isDeleting}>
               Batal
             </Button>
             <Button
               size="sm"
+              disabled={isDeleting}
               onClick={() => onConfirm(user.id)}
               className="bg-[#BA1A1A] text-white hover:bg-[#93000A]"
             >
-              Hapus
+              {isDeleting ? 'Menghapus...' : 'Hapus'}
             </Button>
           </div>
         </div>

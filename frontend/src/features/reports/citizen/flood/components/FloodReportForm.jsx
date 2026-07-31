@@ -157,17 +157,17 @@ export function FloodReportForm() {
 
         <LocationSearchInput onSelect={handleSearchSelect} />
 
-        <div className="relative h-64 overflow-hidden rounded-xl border border-border-muted/30">
+        <div className="relative h-96 overflow-hidden rounded-xl border border-border-muted/30">
           <LocationPickerMap
             position={position}
             onChange={setPosition}
             floodMarkers={floodReports}
             selectedMarkerId={selectedId}
             onSelectMarker={selectMarker}
-            className="h-full w-full"
+            className="h-full w-full z-0"
           />
 
-          <div className="pointer-events-none absolute inset-0 z-[400] hidden items-start justify-between p-3 lg:flex">
+          <div className="pointer-events-none absolute inset-0 z-10 hidden items-start justify-between p-3 lg:flex">
             <FloodStatisticsPanel
               statistics={{
                 todayReports: floodStatistics[0]?.value || floodReports.length || 0,
@@ -178,7 +178,7 @@ export function FloodReportForm() {
             <FloodInfoSidebar markers={floodReports} selectedId={selectedId} onSelect={selectMarker} />
           </div>
 
-          <div className="pointer-events-none absolute right-3 bottom-3 left-3 z-[400] flex items-center gap-2 rounded-lg bg-white/90 p-3 shadow-md backdrop-blur-sm">
+          <div className="pointer-events-none absolute right-3 bottom-3 left-3 z-10 flex items-center gap-2 rounded-lg bg-white/90 p-3 shadow-md backdrop-blur-sm">
             <MapPin className="h-3.5 w-3.5 shrink-0 text-navy" aria-hidden="true" />
             <span className="truncate text-sm text-text-body">{address}</span>
           </div>
@@ -192,7 +192,7 @@ export function FloodReportForm() {
               alertStatus: (floodStatistics[2]?.value || 0) > 0 ? 'KRITIS' : 'NORMAL',
             }}
           />
-          <FloodInfoSidebar markers={floodReports} selectedId={selectedId} onSelect={selectMarker} />
+          <FloodInfoSidebar className='z-10' markers={floodReports} selectedId={selectedId} onSelect={selectMarker} />
         </div>
         {errors.address && <p className="text-sm text-[#BA1A1A]">{errors.address.message}</p>}
       </div>

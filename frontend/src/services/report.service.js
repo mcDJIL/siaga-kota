@@ -36,7 +36,8 @@ function formatAxiosError(error) {
   const message = responseData?.message ?? error.message ?? 'Terjadi kesalahan jaringan.'
   const formatted = new Error(message)
   formatted.response = responseData
-  throw formatted
+  formatted.status = error?.response?.status
+  return formatted
 }
 
 export async function fetchReports({ page = 1, perPage = 100, search = '', category = '', status = '' } = {}) {
@@ -52,10 +53,10 @@ export async function fetchReports({ page = 1, perPage = 100, search = '', categ
 
     const response = await axiosClient.get('/api/v1/public/reports', attachAuthHeader({ params }))
     console.log(response.data);
-    
+
     return response.data
   } catch (error) {
-    formatAxiosError(error)
+    throw formatAxiosError(error)
   }
 }
 
@@ -64,7 +65,7 @@ export async function fetchReport(reportId) {
     const response = await axiosClient.get(`/api/v1/public/reports/${reportId}`, attachAuthHeader())
     return response.data
   } catch (error) {
-    formatAxiosError(error)
+    throw formatAxiosError(error)
   }
 }
 
@@ -75,25 +76,67 @@ export async function submitReport(formData) {
     Object.entries(formData).forEach(([key, value]) => {
       if (value === undefined || value === null) return
 
-      if (key === 'images') {
+      // Handle file uploads (images, photos, files)
+      if (key === 'images' || key === 'photos' || key === 'files') {
         if (Array.isArray(value)) {
-          value.forEach((file) => requestBody.append('photos[]', file))
+          value.forEach((file) => {
+            // Append as photos[] for Laravel array binding
+            if (file instanceof File || file instanceof Blob) {
+              requestBody.append('photos[]', file)
+            }
+          })
         }
         return
       }
 
+      // Handle other arrays
       if (Array.isArray(value)) {
         value.forEach((item) => requestBody.append(`${key}[]`, item))
         return
       }
 
+      // Handle regular values
       requestBody.append(key, String(value))
     })
 
     const config = attachAuthHeader()
+    config.headers = config.headers || {}
+    config.headers['Content-Type'] = 'multipart/form-data'
+
     const response = await axiosClient.post('/api/v1/public/reports', requestBody, config)
     return response.data
   } catch (error) {
-    formatAxiosError(error)
+    throw formatAxiosError(error)
+  }
+}
+
+export async function updateProfile(data) {
+  try {
+    const response = await axiosClient.patch('/api/v1/auth/me', data, attachAuthHeader())
+    return response.data
+  } catch (error) {
+    throw formatAxiosError(error)
+  }
+}
+
+export async function changePassword(oldPassword, newPassword) {
+  try {
+    const response = await axiosClient.post(
+      '/api/v1/auth/change-password',
+      { current_password: oldPassword, password: newPassword, password_confirmation: newPassword },
+      attachAuthHeader()
+    )
+    return response.data
+  } catch (error) {
+    throw formatAxiosError(error)
+  }
+}
+
+export async function deleteAccount() {
+  try {
+    const response = await axiosClient.delete('/api/v1/auth/me', attachAuthHeader())
+    return response.data
+  } catch (error) {
+    throw formatAxiosError(error)
   }
 }

@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { ErrorBoundary } from './components/common/ErrorBoundary'
 import ProtectedRoute from './components/common/ProtectedRoute'
+import PublicAuthRoute from './components/common/PublicAuthRoute'
 import { LandingLayout } from './layouts/LandingLayout'
 import { AuthLayout } from './layouts/AuthLayout'
 import { DashboardLayout } from './layouts/DashboardLayout'
@@ -22,6 +23,7 @@ import { ForgotPasswordPage } from './features/auth/pages/ForgotPasswordPage'
 import { OfficerDashboardPage } from './features/dashboard/officer/pages/OfficerDashboardPage'
 import { OfficerWasteReportDetailPage } from './features/dashboard/officer/pages/OfficerWasteReportDetailPage'
 import { OfficerFloodReportsPage } from './features/dashboard/officer/pages/OfficerFloodReportsPage'
+import { OfficerFloodReportDetailPage } from './features/dashboard/officer/pages/OfficerFloodReportDetailPage'
 import { OfficerActivityMapPage } from './features/dashboard/officer/pages/OfficerActivityMapPage'
 import { OfficerNotificationPage } from './features/dashboard/officer/pages/OfficerNotificationPage'
 import { OfficerProfilePage } from './features/dashboard/officer/pages/OfficerProfilePage'
@@ -31,6 +33,7 @@ import { CitizenWasteReportPage } from './features/dashboard/citizen/reports/was
 import { CitizenFloodReportPage } from './features/reports/citizen/flood/pages/CitizenFloodReportPage'
 import { CitizenMapPage } from './features/map/citizen/map/pages/CitizenMapPage'
 import { CitizenReportTrackingPage } from './features/reports/citizen/reports/pages/CitizenReportTrackingPage'
+import { CitizenReportDetailPage } from './features/reports/citizen/reports/pages/CitizenReportDetailPage'
 import { CitizenGamificationPage } from './features/gamification/citizen/gamification/pages/CitizenGamificationPage'
 import { CitizenBadgeCollectionPage } from './features/gamification/citizen/gamification/pages/CitizenBadgeCollectionPage'
 import { CitizenProfilePage } from './features/profile/citizen/profile/pages/CitizenProfilePage'
@@ -64,9 +67,9 @@ function App() {
           <Route path="/about" element={<LandingLayout><AboutPage /></LandingLayout>} />
 
           {/* Authentication */}
-          <Route path="/login" element={<AuthLayout><LoginPage /></AuthLayout>} />
-          <Route path="/register" element={<AuthLayout><RegisterPage /></AuthLayout>} />
-          <Route path="/forgot-password" element={<AuthLayout><ForgotPasswordPage /></AuthLayout>} />
+          <Route path="/login" element={<PublicAuthRoute><AuthLayout><LoginPage /></AuthLayout></PublicAuthRoute>} />
+          <Route path="/register" element={<PublicAuthRoute><AuthLayout><RegisterPage /></AuthLayout></PublicAuthRoute>} />
+          <Route path="/forgot-password" element={<PublicAuthRoute><AuthLayout><ForgotPasswordPage /></AuthLayout></PublicAuthRoute>} />
 
           {/* Citizen Routes */}
           <Route
@@ -140,6 +143,21 @@ function App() {
                   logoutHref="/login"
                 >
                   <CitizenReportTrackingPage />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/citizen/reports/:id"
+            element={
+              <ProtectedRoute allowedRoles={["citizen"]}>
+                <DashboardLayout
+                  navItems={CITIZEN_NAV_ITEMS}
+                  profile={CITIZEN_PROFILE}
+                  profileHref="/citizen/profile"
+                  logoutHref="/login"
+                >
+                  <CitizenReportDetailPage />
                 </DashboardLayout>
               </ProtectedRoute>
             }
@@ -221,6 +239,16 @@ function App() {
               <ProtectedRoute allowedRoles={["officer"]}>
                 <DashboardLayout>
                   <OfficerFloodReportsPage />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/officer/reports/flood/:reportId"
+            element={
+              <ProtectedRoute allowedRoles={["officer"]}>
+                <DashboardLayout>
+                  <OfficerFloodReportDetailPage />
                 </DashboardLayout>
               </ProtectedRoute>
             }

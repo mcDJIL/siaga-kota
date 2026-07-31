@@ -5,10 +5,9 @@ const AUTH_TOKEN_KEY = 'siagakota_auth_token'
 
 const axiosClient = axios.create({
   baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
 })
+
+axiosClient.defaults.headers.common['Content-Type'] = 'application/json'
 
 function getAuthToken() {
   if (typeof window === 'undefined') {
@@ -123,6 +122,66 @@ export async function resetPassword({ email, token, password, password_confirmat
       password,
       password_confirmation,
     })
+    return data
+  } catch (error) {
+    formatAxiosError(error)
+  }
+}
+
+export async function updatePassword({ current_password, password, password_confirmation }) {
+  try {
+    const { data } = await axiosClient.patch(
+      '/api/v1/auth/me/password',
+      { current_password, password, password_confirmation },
+      attachAuthHeader()
+    )
+    return data
+  } catch (error) {
+    formatAxiosError(error)
+  }
+}
+
+export async function updateProfile(payload) {
+  try {
+    const config = attachAuthHeader()
+    const { data } = await axiosClient.patch('/api/v1/auth/me', payload, config)
+    return data
+  } catch (error) {
+    formatAxiosError(error)
+  }
+}
+
+export async function uploadAvatar(file) {
+  try {
+    if (!file) {
+      throw new Error('File harus dipilih')
+    }
+
+    // Validasi tipe file
+    if (!file.type.startsWith('image/')) {
+      throw new Error('File harus berupa gambar')
+    }
+
+    // Validasi ukuran (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      throw new Error('Ukuran file tidak boleh lebih dari 5MB')
+    }
+
+    const formData = new FormData()
+    formData.append('avatar_path', file)
+
+    const token = getAuthToken()
+
+    const { data } = await axios.post(`${API_BASE_URL}/api/v1/auth/me/avatar`, formData, {
+      headers: {
+        Authorization: token ? `Bearer ${token}` : undefined,
+      },
+    })
+
+    if (!data || !data.data) {
+      throw new Error('Response tidak valid dari server')
+    }
+
     return data
   } catch (error) {
     formatAxiosError(error)

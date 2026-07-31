@@ -4,11 +4,10 @@ import { DISTRICT_OPTIONS } from '../../data/districtFloodData'
 
 export const STATUS_FILTER_OPTIONS = [
   'Semua Status',
-  'Menunggu Verifikasi',
+  'Menunggu',
   'Terverifikasi',
+  'Diproses',
   'Selesai',
-  'Ditolak',
-  'Perlu Tindak Lanjut',
 ]
 export const SEVERITY_FILTER_OPTIONS = ['Semua Keparahan', 'Tinggi', 'Sedang', 'Rendah']
 export const WATER_LEVEL_FILTER_OPTIONS = ['Semua Tinggi Air', '0-30 cm', '31-70 cm', '71 cm+']

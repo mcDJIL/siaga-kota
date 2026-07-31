@@ -14,7 +14,10 @@ function createReportIcon(color, isSelected) {
 }
 
 export function ReportMarker({ report, isSelected = false, onSelect }) {
-  const color = CATEGORY_COLORS[report.category] ?? '#74777F'
+  const categorySlug = report.category?.slug || report.category
+  const color = CATEGORY_COLORS[categorySlug] ?? '#74777F'
+  const locationText = report.location?.address || report.location || 'Lokasi tidak tersedia'
+  const reportDate = report.created_at ? new Date(report.created_at).toLocaleDateString('id-ID') : 'Tanpa tanggal'
 
   return (
     <Marker
@@ -22,7 +25,7 @@ export function ReportMarker({ report, isSelected = false, onSelect }) {
       icon={createReportIcon(color, isSelected)}
       eventHandlers={{ click: () => onSelect?.(report.id) }}
     >
-      <MarkerPopup title={report.title} description={`${report.location} \u00b7 ${report.reportedAt}`} />
+      <MarkerPopup title={report.title} description={`${locationText} \u00b7 ${reportDate}`} />
     </Marker>
   )
 }

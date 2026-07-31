@@ -42,7 +42,7 @@ export function ReporterInformationCard({ report }) {
 
       <div className="flex flex-col gap-1">
         <p className="text-base text-badge-neutral">Deskripsi Laporan</p>
-        <p className="text-base leading-relaxed text-text-muted">{report.description}</p>
+        <p className="break-words text-base leading-relaxed text-text-muted">{report.description}</p>
       </div>
     </motion.section>
   )

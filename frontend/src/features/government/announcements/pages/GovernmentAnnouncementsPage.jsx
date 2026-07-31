@@ -23,6 +23,7 @@ export function GovernmentAnnouncementsPage() {
     onOpenDelete,
     onCloseDelete,
     onDelete,
+    isLoading,
   } = useAnnouncements()
 
   return (
@@ -51,6 +52,7 @@ export function GovernmentAnnouncementsPage() {
           onStatusFilterChange={onStatusFilterChange}
           onOpenEdit={onOpenEdit}
           onOpenDelete={onOpenDelete}
+          isLoading={isLoading}
         />
       </div>
 

@@ -19,9 +19,11 @@ export function GovernmentExportDataPage() {
     format,
     onFormatChange,
     isExporting,
+    isLoading,
     onExportNow,
     onRefresh,
     onDownload,
+    downloadingIds,
   } = useExportHistory()
 
   return (
@@ -61,6 +63,8 @@ export function GovernmentExportDataPage() {
         onPageChange={onPageChange}
         onRefresh={onRefresh}
         onDownload={onDownload}
+        downloadingIds={downloadingIds}
+        isLoading={isLoading}
       />
     </div>
   )

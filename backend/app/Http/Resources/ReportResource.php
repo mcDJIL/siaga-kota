@@ -82,16 +82,31 @@ class ReportResource extends JsonResource
 
     private function parseLocationForResponse($location)
     {
-        if (!$location) return null;
-        
-        preg_match('/POINT\(([^ ]+) ([^ ]+)\)/', $location, $matches);
-        
-        return [
-            'latitude' => $matches[2] ?? null,
-            'longitude' => $matches[1] ?? null,
-            'address' => $this->address,
-        ];
+        if (! $location) {
+            return null;
+        }
+
+        $location = (string) $location;
+
+        // Terima format "POINT(lng lat)" maupun "POINT (lng lat)".
+        if (preg_match('/POINT\s*\(([^ ]+)\s+([^ ]+)\)/', $location, $matches)) {
+            $lng = (float) $matches[1];
+            $lat = (float) $matches[2];
+
+            if ($lng === 0.0 && $lat === 0.0) {
+                return null;
+            }
+
+            return [
+                'latitude' => $lat,
+                'longitude' => $lng,
+                'address' => $this->address,
+            ];
+        }
+
+        return null;
     }
+
     private function getStatusLabel(): string
     {
         return match ($this->status->value) {

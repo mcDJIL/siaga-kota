@@ -4,7 +4,7 @@ import { X } from 'lucide-react'
 import { Button } from '../../../../components/ui/Button'
 import { OfficerSelector } from './OfficerSelector'
 
-export function AssignOfficerModal({ isOpen, task, officers, onClose, onAssign }) {
+export function AssignOfficerModal({ isOpen, task, officers, onClose, onAssign, isLoading = false }) {
   const [selectedOfficerId, setSelectedOfficerId] = useState(null)
 
   useEffect(() => {
@@ -22,7 +22,7 @@ export function AssignOfficerModal({ isOpen, task, officers, onClose, onAssign }
           role="dialog"
           aria-modal="true"
           aria-labelledby="assign-modal-heading"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-navy/50 p-4"
+          className="fixed inset-0 z-[400] flex items-center justify-center bg-navy/50 p-4"
           onClick={onClose}
         >
           <motion.div
@@ -48,17 +48,17 @@ export function AssignOfficerModal({ isOpen, task, officers, onClose, onAssign }
             <OfficerSelector officers={officers} selectedOfficerId={selectedOfficerId} onSelect={setSelectedOfficerId} />
 
             <div className="flex gap-3 pt-2">
-              <Button type="button" variant="ghost" onClick={onClose} className="flex-1 text-text-muted">
+              <Button type="button" variant="ghost" onClick={onClose} disabled={isLoading} className="flex-1 text-text-muted">
                 Batal
               </Button>
               <Button
                 type="button"
                 variant="navy"
-                disabled={!selectedOfficerId}
+                disabled={!selectedOfficerId || isLoading}
                 onClick={() => onAssign(selectedOfficerId)}
                 className="flex-1 disabled:opacity-40"
               >
-                Tugaskan
+                {isLoading ? 'Menugaskan...' : 'Tugaskan'}
               </Button>
             </div>
           </motion.div>

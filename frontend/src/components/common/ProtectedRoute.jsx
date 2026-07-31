@@ -78,7 +78,15 @@ export default function ProtectedRoute({ children, allowedRoles = [] }) {
     }
   }, [location.pathname, allowedRoles])
 
-  if (loading) return null
+  if (loading)
+    return (
+      <div className="flex h-screen items-center justify-center bg-bg-soft">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-border-muted border-t-navy" />
+          <p className="text-sm text-text-muted">Memuat aplikasi...</p>
+        </div>
+      </div>
+    )
   if (allowed) return children
   return <Navigate to={redirectTo} replace />
 }

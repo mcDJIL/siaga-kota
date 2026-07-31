@@ -11,7 +11,6 @@ import { DeleteAccountModal } from '../../../shared/components/DeleteAccountModa
 import { useProfile } from '../../../shared/hooks/useProfile'
 import { useNotificationSettings } from '../../../shared/hooks/useNotificationSettings'
 import {
-  ACTIVITY_RANK,
   COMMUNITY_RANKINGS,
   CONTRIBUTION_BADGES,
   CONTRIBUTION_STATS,
@@ -74,7 +73,6 @@ export function CitizenProfilePage() {
           <ProfileCard profile={profile} onAvatarChange={updateAvatar} />
           <ContributionBadgeList badges={CONTRIBUTION_BADGES} />
           <RecentPointActivity activities={RECENT_POINT_ACTIVITY} />
-          <CommunityRankCard rankings={COMMUNITY_RANKINGS} activityRank={ACTIVITY_RANK} />
           <ContributionStats stats={CONTRIBUTION_STATS} profile={profile} />
         </div>
 

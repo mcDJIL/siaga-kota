@@ -2,13 +2,14 @@ import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
+import { Loader2 } from 'lucide-react'
 import { Input } from '../../../../components/ui/Input'
 import { Select } from '../../../../components/ui/Select'
 import { Button } from '../../../../components/ui/Button'
 import { DEPARTMENT_OPTIONS } from '../data/governmentProfileData'
 import { profileSchema } from '../utils/profileValidation'
 
-export function ProfileForm({ profile, onSave }) {
+export function ProfileForm({ profile, onSave, isLoading }) {
   const {
     register,
     handleSubmit,
@@ -16,14 +17,19 @@ export function ProfileForm({ profile, onSave }) {
   } = useForm({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      name: profile.name,
-      phone: profile.phone,
-      department: DEPARTMENT_OPTIONS.includes(profile.department) ? profile.department : DEPARTMENT_OPTIONS[0],
+      name: profile?.name || '',
+      phone: profile?.phone || '',
+      department: profile?.department ? (DEPARTMENT_OPTIONS.includes(profile.department) ? profile.department : DEPARTMENT_OPTIONS[0]) : DEPARTMENT_OPTIONS[0],
+    },
+    values: {
+      name: profile?.name || '',
+      phone: profile?.phone || '',
+      department: profile?.department ? (DEPARTMENT_OPTIONS.includes(profile.department) ? profile.department : DEPARTMENT_OPTIONS[0]) : DEPARTMENT_OPTIONS[0],
     },
   })
 
-  function onSubmit(values) {
-    onSave(values)
+  async function onSubmit(values) {
+    await onSave(values)
   }
 
   function onInvalid() {
@@ -44,7 +50,7 @@ export function ProfileForm({ profile, onSave }) {
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
         <label className="flex flex-col gap-2 text-sm font-medium text-text-body" htmlFor="profile-name">
           Nama Lengkap
-          <Input id="profile-name" {...register('name')} error={Boolean(errors.name)} />
+          <Input id="profile-name" {...register('name')} error={Boolean(errors.name)} disabled={isLoading} />
           {errors.name && <span className="text-xs text-[#BA1A1A]">{errors.name.message}</span>}
         </label>
 
@@ -53,28 +59,23 @@ export function ProfileForm({ profile, onSave }) {
           <Input id="profile-email" type="email" value={profile.email} disabled readOnly className="opacity-60" />
         </label>
 
-        <label className="flex flex-col gap-2 text-sm font-medium text-text-body" htmlFor="profile-phone">
+        <label className="flex flex-col col-span-2 gap-2 text-sm font-medium text-text-body" htmlFor="profile-phone">
           Nomor Telepon
-          <Input id="profile-phone" {...register('phone')} error={Boolean(errors.phone)} />
+          <Input id="profile-phone" {...register('phone')} error={Boolean(errors.phone)} disabled={isLoading} />
           {errors.phone && <span className="text-xs text-[#BA1A1A]">{errors.phone.message}</span>}
-        </label>
-
-        <label className="flex flex-col gap-2 text-sm font-medium text-text-body" htmlFor="profile-department">
-          Departemen
-          <Select id="profile-department" {...register('department')}>
-            {DEPARTMENT_OPTIONS.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </Select>
-          {errors.department && <span className="text-xs text-[#BA1A1A]">{errors.department.message}</span>}
         </label>
       </div>
 
       <div className="flex justify-end">
-        <Button type="submit" variant="navy">
-          Simpan Perubahan
+        <Button type="submit" variant="navy" disabled={isLoading}>
+          {isLoading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              Menyimpan...
+            </>
+          ) : (
+            'Simpan Perubahan'
+          )}
         </Button>
       </div>
     </motion.form>

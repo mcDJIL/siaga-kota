@@ -1,81 +1,131 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { EXPORT_HISTORY } from '../data/exportHistoryData'
-import { buildExportFilename } from '../utils/exportFormatter'
-import { FORMAT_MIME_TYPES } from '../utils/formatColor'
+import {
+  createDataExport,
+  downloadDataExport,
+  getExportHistory,
+} from '../../../../services/export-data.service'
+import { EXPORT_STATUS } from '../data/exportHistoryData'
 
 const PAGE_SIZE = 10
 
 export function useExportHistory() {
-  const [history, setHistory] = useState(EXPORT_HISTORY)
+  const [history, setHistory] = useState([])
   const [page, setPage] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
+  const [totalPages, setTotalPages] = useState(1)
   const [isExporting, setIsExporting] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [downloadingIds, setDownloadingIds] = useState(new Set())
 
-  const [dataType, setDataType] = useState('Semua Sektor')
-  const [startDate, setStartDate] = useState('2023-10-01')
-  const [endDate, setEndDate] = useState('2023-10-31')
-  const [format, setFormat] = useState('PDF')
+  const [dataType, setDataType] = useState('all')
+  const [startDate, setStartDate] = useState(() => {
+    const date = new Date()
+    date.setDate(date.getDate() - 30)
+    return date.toISOString().slice(0, 10)
+  })
+  const [endDate, setEndDate] = useState(() => new Date().toISOString().slice(0, 10))
+  const [format, setFormat] = useState('pdf')
 
-  const totalPages = Math.max(1, Math.ceil(history.length / PAGE_SIZE))
-  const paginated = useMemo(
-    () => history.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
-    [history, page]
-  )
+  useEffect(() => {
+    loadHistory()
+  }, [page])
 
-  function handleExportNow() {
+  async function loadHistory() {
+    try {
+      setIsLoading(true)
+      const response = await getExportHistory({
+        per_page: PAGE_SIZE,
+        page,
+      })
+
+      setHistory(response.data?.items || [])
+      setTotalCount(response.data?.total || 0)
+      setTotalPages(response.data?.last_page || 1)
+    } catch (error) {
+      console.error('Error loading export history:', error)
+      toast.error(error.message || 'Gagal memuat riwayat ekspor')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  async function handleExportNow() {
     if (!dataType || !startDate || !endDate || !format) {
       toast.error('Lengkapi konfigurasi ekspor.')
       return
     }
 
-    setIsExporting(true)
-    window.setTimeout(() => {
-      const newRecord = {
-        id: `exp-${Date.now()}`,
-        dataType: `${dataType} (${new Date(startDate).toLocaleDateString('id-ID', { month: 'short', year: 'numeric' })})`,
+    try {
+      setIsExporting(true)
+      await createDataExport({
+        data_type: dataType,
         format,
-        status: 'Selesai',
-        exportedAt: new Date().toISOString(),
-      }
-      setHistory((current) => [newRecord, ...current])
+        date_from: startDate,
+        date_to: endDate,
+      })
       setPage(1)
+      await loadHistory()
+      toast.success('Ekspor sedang diproses. Segarkan riwayat untuk melihat statusnya.')
+    } catch (error) {
+      console.error('Error creating export:', error)
+      toast.error(error.message || 'Gagal membuat ekspor')
+    } finally {
       setIsExporting(false)
-      toast.success('Ekspor berhasil dibuat.')
-    }, 2000)
+    }
   }
 
-  function handleRefresh() {
-    setHistory((current) => [...current])
+  async function handleRefresh() {
+    await loadHistory()
     toast.success('Riwayat berhasil diperbarui.')
   }
 
-  function handleDownload(record) {
-    if (record.status !== 'Selesai') return
+  async function handleDownload(record) {
+    if (record.status !== EXPORT_STATUS.COMPLETED) return
+    if (downloadingIds.has(record.id)) return
 
-    const filename = buildExportFilename(record.dataType, record.format)
-    const blob = new Blob([`Dummy export file for ${record.dataType}`], {
-      type: FORMAT_MIME_TYPES[record.format],
-    })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = filename
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
+    try {
+      setDownloadingIds((prev) => new Set(prev).add(record.id))
 
-    toast.success('Download dimulai.')
+      const blob = await downloadDataExport(record)
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = record.filename || 'export-data'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      toast.success('Download dimulai.')
+    } catch (error) {
+      console.error('Error downloading export:', error)
+      toast.error(error.message || 'Gagal mengunduh ekspor')
+    } finally {
+      setDownloadingIds((prev) => {
+        const next = new Set(prev)
+        next.delete(record.id)
+        return next
+      })
+    }
+  }
+
+  function handleDataTypeChange(value) {
+    setDataType(value)
+  }
+
+  function handlePageChange(nextPage) {
+    setPage(Math.min(Math.max(nextPage, 1), totalPages))
   }
 
   return {
-    paginated,
-    totalCount: history.length,
+    paginated: history,
+    totalCount,
     page,
     totalPages,
-    onPageChange: setPage,
+    onPageChange: handlePageChange,
     dataType,
-    onDataTypeChange: setDataType,
+    onDataTypeChange: handleDataTypeChange,
     startDate,
     onStartDateChange: setStartDate,
     endDate,
@@ -83,8 +133,10 @@ export function useExportHistory() {
     format,
     onFormatChange: setFormat,
     isExporting,
+    isLoading,
     onExportNow: handleExportNow,
     onRefresh: handleRefresh,
     onDownload: handleDownload,
+    downloadingIds,
   }
 }

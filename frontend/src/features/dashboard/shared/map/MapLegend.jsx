@@ -10,7 +10,7 @@ export function MapLegend({ items = DEFAULT_ITEMS, showSyncStatus = true, synced
     <div
       className={
         className ??
-        'pointer-events-none absolute bottom-4 left-4 flex flex-col gap-3 rounded-lg border border-navy/10 bg-white/90 p-4 shadow-[0_10px_15px_-3px_rgba(0,0,0,0.10),0_4px_6px_-4px_rgba(0,0,0,0.10)] backdrop-blur-md'
+        'pointer-events-none z-[400] absolute bottom-4 left-4 flex flex-col gap-3 rounded-lg border border-navy/10 bg-white/90 p-4 shadow-[0_10px_15px_-3px_rgba(0,0,0,0.10),0_4px_6px_-4px_rgba(0,0,0,0.10)] backdrop-blur-md'
       }
     >
       <ul className="flex flex-wrap gap-3">

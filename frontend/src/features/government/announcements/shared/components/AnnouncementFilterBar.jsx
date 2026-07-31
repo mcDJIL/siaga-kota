@@ -12,10 +12,10 @@ export function AnnouncementFilterBar({ statusFilter, onStatusFilterChange }) {
         onChange={(event) => onStatusFilterChange(event.target.value)}
         className="w-auto rounded-full border-0 bg-transparent py-1.5 pr-8 pl-1 text-xs font-semibold tracking-[0.6px] text-text-body"
       >
-        <option value="Semua">Semua Status</option>
+        <option value="all">Semua Status</option>
         {STATUS_OPTIONS.map((option) => (
-          <option key={option} value={option}>
-            {option}
+          <option key={option.value} value={option.value}>
+            {option.label}
           </option>
         ))}
       </Select>

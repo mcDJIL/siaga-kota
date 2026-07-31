@@ -11,10 +11,13 @@ import {
   Waves,
 } from 'lucide-react'
 
+const user = localStorage.getItem('user')
+const profile = user ? JSON.parse(user) : null
+
 export const CITIZEN_PROFILE = {
-  name: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).name : 'User',
-  role: 'Masyarakat',
-  avatar: 'https://api.builder.io/api/v1/image/assets/TEMP/67cb26c260d4e27b177a34859c876c367dbc32ab?width=76',
+  name: profile?.name || 'User',
+  role: profile?.position || 'Warga',
+  avatar: profile?.avatar_url || 'https://api.builder.io/api/v1/image/assets/TEMP/67cb26c260d4e27b177a34859c876c367dbc32ab?width=76',
 }
 
 export const CITIZEN_NAV_ITEMS = [

@@ -3,18 +3,17 @@ import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { Select } from '../../../../../components/ui/Select'
-import { MONTH_OPTIONS, REPORT_TYPE_OPTIONS, YEAR_OPTIONS, getMonthlyTrend } from '../../data/monthlyTrendData'
+import { MONTH_OPTIONS, REPORT_TYPE_OPTIONS, YEAR_OPTIONS } from '../../data/monthlyTrendData'
 
-export function MonthlyTrendChart() {
-  const [year, setYear] = useState(2026)
+export function MonthlyTrendChart({ data = [], selectedYear = 2026, onYearChange = () => {} }) {
   const [month, setMonth] = useState('Jun')
   const [reportType, setReportType] = useState('all')
 
-  const data = useMemo(() => {
-    const trend = getMonthlyTrend(year)
+  const chartData = useMemo(() => {
+    if (!data || data.length === 0) return []
     const monthIndex = MONTH_OPTIONS.indexOf(month)
-    return trend.slice(0, monthIndex + 1)
-  }, [year, month])
+    return data.slice(0, monthIndex + 1)
+  }, [data, month])
 
   return (
     <motion.div
@@ -45,9 +44,9 @@ export function MonthlyTrendChart() {
 
           <Select
             aria-label="Pilih tahun"
-            value={year}
+            value={selectedYear}
             onChange={(event) => {
-              setYear(Number(event.target.value))
+              onYearChange(Number(event.target.value))
               toast.success('Filter berhasil diterapkan.')
             }}
             className="py-2 pr-8 pl-3 text-xs"
@@ -94,7 +93,7 @@ export function MonthlyTrendChart() {
 
       <div className="h-64 w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ left: -10 }}>
+          <LineChart data={chartData} margin={{ left: -10 }}>
             <CartesianGrid stroke="#C4C6CF" vertical={false} />
             <XAxis dataKey="month" tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: '#43474E', fontWeight: 600 }} />
             <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: '#43474E', fontWeight: 600 }} />

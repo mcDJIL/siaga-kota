@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { Modal } from '../../../../components/ui/Modal'
 import { Input } from '../../../../components/ui/Input'
 import { Button } from '../../../../components/ui/Button'
@@ -14,7 +14,7 @@ const FIELDS = [
   { name: 'confirmPassword', label: 'Konfirmasi Password Baru' },
 ]
 
-export function ChangePasswordModal({ isOpen, onClose, onSuccess }) {
+export function ChangePasswordModal({ isOpen, onClose, onSuccess, isLoading }) {
   const [visibleFields, setVisibleFields] = useState({})
 
   const {
@@ -31,10 +31,14 @@ export function ChangePasswordModal({ isOpen, onClose, onSuccess }) {
     setVisibleFields((current) => ({ ...current, [field]: !current[field] }))
   }
 
-  function onSubmit() {
-    reset()
-    setVisibleFields({})
-    onSuccess()
+  async function onSubmit(values) {
+    try {
+      await onSuccess(values.currentPassword, values.newPassword)
+      reset()
+      setVisibleFields({})
+    } catch (error) {
+      // Error is already handled in hook
+    }
   }
 
   function onInvalid() {
@@ -42,9 +46,11 @@ export function ChangePasswordModal({ isOpen, onClose, onSuccess }) {
   }
 
   function handleClose() {
-    reset()
-    setVisibleFields({})
-    onClose()
+    if (!isLoading) {
+      reset()
+      setVisibleFields({})
+      onClose()
+    }
   }
 
   return (
@@ -59,13 +65,15 @@ export function ChangePasswordModal({ isOpen, onClose, onSuccess }) {
                 type={visibleFields[name] ? 'text' : 'password'}
                 {...register(name)}
                 error={Boolean(errors[name])}
+                disabled={isLoading}
                 className="pr-11"
               />
               <button
                 type="button"
                 onClick={() => toggleVisibility(name)}
+                disabled={isLoading}
                 aria-label={visibleFields[name] ? `Sembunyikan ${label}` : `Tampilkan ${label}`}
-                className="absolute top-1/2 right-3 -translate-y-1/2 text-text-muted hover:text-text-body"
+                className="absolute top-1/2 right-3 -translate-y-1/2 text-text-muted hover:text-text-body disabled:opacity-50"
               >
                 {visibleFields[name] ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
               </button>
@@ -75,11 +83,18 @@ export function ChangePasswordModal({ isOpen, onClose, onSuccess }) {
         ))}
 
         <div className="mt-2 flex justify-end gap-3">
-          <Button type="button" variant="ghost" onClick={handleClose}>
+          <Button type="button" variant="ghost" onClick={handleClose} disabled={isLoading}>
             Batal
           </Button>
-          <Button type="submit" variant="navy">
-            Simpan
+          <Button type="submit" variant="navy" disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                Menyimpan...
+              </>
+            ) : (
+              'Simpan'
+            )}
           </Button>
         </div>
       </form>

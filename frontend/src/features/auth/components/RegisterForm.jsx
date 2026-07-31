@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
@@ -35,6 +36,7 @@ function TextField({ id, label, icon: Icon, error, register, className, ...props
 }
 
 export function RegisterForm() {
+  const [isLoading, setIsLoading] = useState(false)
   const {
     register,
     handleSubmit,
@@ -46,6 +48,7 @@ export function RegisterForm() {
 
   const onSubmit = async (data) => {
     try {
+      setIsLoading(true)
       const payload = await registerUser({
         name: data.fullName,
         email: data.email,
@@ -56,10 +59,11 @@ export function RegisterForm() {
 
       console.log('Registrasi berhasil:', payload.data.user)
       alert('Registrasi berhasil. Silakan login.')
-      // TODO: redirect ke halaman login di sini
     } catch (error) {
       console.error('Registrasi gagal:', error)
       alert(error.response?.message ?? error.message)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -135,9 +139,9 @@ export function RegisterForm() {
         {...register('agree')}
       />
 
-      <Button type="submit" variant="secondary" size="md" className="w-full rounded-lg py-3 text-xl font-semibold">
-        Daftar
-        <RegisterArrowIcon className="h-4 w-[22px]" />
+      <Button type="submit" variant="secondary" size="md" className="w-full rounded-lg py-3 text-xl font-semibold" disabled={isLoading}>
+        {isLoading ? 'Memproses...' : 'Daftar'}
+        {!isLoading && <RegisterArrowIcon className="h-4 w-[22px]" />}
       </Button>
 
       <p className="text-center text-base text-text-muted">

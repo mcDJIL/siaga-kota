@@ -27,22 +27,24 @@ export function ReportPrintTemplate({ report, timeline, isEmergency, handlingNot
             {report.coordinates.lat}, {report.coordinates.lng}
           </dd>
         </dl>
-        <p className="mt-3 text-sm text-text-body">
+        <p className="mt-3 break-words text-sm text-text-body">
           <span className="font-semibold text-text-muted">Deskripsi: </span>
           {report.description}
         </p>
       </section>
 
-      <section className="mb-6">
-        <h2 className="mb-2 text-base font-bold text-navy">Status Penanganan</h2>
-        <ol className="flex flex-col gap-1 text-sm text-text-body">
-          {timeline.map((step) => (
-            <li key={step.id}>
-              <span className="font-semibold">{step.title}</span> — {step.description}
-            </li>
-          ))}
-        </ol>
-      </section>
+      {timeline && timeline.length > 0 && (
+        <section className="mb-6">
+          <h2 className="mb-2 text-base font-bold text-navy">Status Penanganan</h2>
+          <ol className="flex flex-col gap-1 text-sm text-text-body">
+            {timeline.map((step) => (
+              <li key={step.id}>
+                <span className="font-semibold">{step.title}</span> — {step.description}
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
 
       <section className="mb-6">
         <h2 className="mb-2 text-base font-bold text-navy">Foto Kejadian</h2>

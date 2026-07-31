@@ -89,26 +89,27 @@ def build_feature_frame_from_payload(payload: dict[str, float | int | str | dict
     weather_history = payload.get('weather_history', []) if isinstance(payload.get('weather_history'), list) else []
     reports = payload.get('reports', {}) if isinstance(payload.get('reports'), dict) else {}
 
-    elevation = float(district_profile.get('elevation', 0))
-    drainage_score = float(district_profile.get('drainage_score', 0))
-    population_density = float(district_profile.get('population_density', 0))
+    elevation = float(payload.get('elevation', district_profile.get('elevation', 0)))
+    river_distance = float(payload.get('river_distance', district_profile.get('river_distance', max(0.0, 1000.0 - elevation))))
+    drainage_score = float(payload.get('drainage_score', district_profile.get('drainage_score', 0)))
+    population_density = float(payload.get('population_density', district_profile.get('population_density', 0)))
 
     rainfall_values = [float(item.get('rainfall', 0)) for item in weather_history if isinstance(item, dict)]
     humidity_values = [float(item.get('humidity', 0)) for item in weather_history if isinstance(item, dict)]
     temperature_values = [float(item.get('temperature', 0)) for item in weather_history if isinstance(item, dict)]
 
-    rainfall_today = rainfall_values[-1] if rainfall_values else 0.0
-    rainfall_last_3_days = sum(rainfall_values[-3:]) if len(rainfall_values) >= 3 else sum(rainfall_values)
-    rainfall_last_7_days = sum(rainfall_values[-7:]) if len(rainfall_values) >= 7 else sum(rainfall_values)
-    humidity_avg = sum(humidity_values[-3:]) / len(humidity_values[-3:]) if humidity_values else 0.0
-    temperature_avg = sum(temperature_values[-3:]) / len(temperature_values[-3:]) if temperature_values else 0.0
+    rainfall_today = float(payload.get('rainfall_today', rainfall_values[-1] if rainfall_values else 0.0))
+    rainfall_last_3_days = float(payload.get('rainfall_last_3_days', sum(rainfall_values[-3:]) if len(rainfall_values) >= 3 else sum(rainfall_values)))
+    rainfall_last_7_days = float(payload.get('rainfall_last_7_days', sum(rainfall_values[-7:]) if len(rainfall_values) >= 7 else sum(rainfall_values)))
+    humidity_avg = float(payload.get('humidity', sum(humidity_values[-3:]) / len(humidity_values[-3:]) if humidity_values else 0.0))
+    temperature_avg = float(payload.get('temperature', sum(temperature_values[-3:]) / len(temperature_values[-3:]) if temperature_values else 0.0))
 
     flood_reports_24h = float(reports.get('flood_reports_24h', payload.get('flood_reports_24h', 0)))
     waste_reports_24h = float(reports.get('waste_reports_24h', payload.get('waste_reports_24h', 0)))
 
     feature_values = {
         'TopographyDrainage': elevation,
-        'RiverManagement': max(0.0, 1000.0 - elevation),
+        'RiverManagement': river_distance,
         'Deforestation': max(0.0, rainfall_last_7_days / 1000.0),
         'DamsQuality': max(0.0, 1.0 - (drainage_score / 2.0)),
         'Siltation': max(0.0, rainfall_last_3_days / 200.0),
@@ -129,10 +130,10 @@ def build_feature_frame_from_payload(payload: dict[str, float | int | str | dict
         'waste_reports_24h': waste_reports_24h,
         'population_density': population_density,
         'elevation': elevation,
-        'river_distance': max(0.0, 1000.0 - elevation),
+        'river_distance': river_distance,
         'drainage_score': drainage_score,
         'climate_stress_index': rainfall_today * (humidity_avg / 100.0),
-        'drainage_risk_index': (elevation + (1000.0 - elevation) + drainage_score * 100.0) / 3.0,
+        'drainage_risk_index': (elevation + river_distance + drainage_score * 100.0) / 3.0,
         'development_pressure': population_density / 1000.0,
         'ecological_pressure': (rainfall_last_7_days / 100.0) + (humidity_avg / 100.0),
         'preparedness_gap': max(0.0, humidity_avg - 80.0),

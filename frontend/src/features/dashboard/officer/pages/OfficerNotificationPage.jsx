@@ -1,47 +1,33 @@
-import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { NotificationHeader } from '../components/notifications/NotificationHeader'
 import { NotificationCategoryTabs } from '../components/notifications/NotificationCategoryTabs'
 import { NotificationList } from '../components/notifications/NotificationList'
 import { NotificationFilter } from '../../shared/notifications/components/NotificationFilter'
 import { NotificationLoadMore } from '../../shared/notifications/components/NotificationLoadMore'
-import { INITIAL_NOTIFICATIONS, MORE_NOTIFICATIONS } from '../data/notificationData'
-import { READ_STATUS_OPTIONS, PRIORITY_OPTIONS } from '../data/notificationTabs'
+import { NotificationLoadingSkeleton } from '../../shared/notifications/components/NotificationLoadingSkeleton'
+import { useOfficerNotifications } from '../hooks/useOfficerNotifications'
+import { READ_STATUS_OPTIONS, PRIORITY_OPTIONS, NOTIFICATION_TABS } from '../data/notificationTabs'
 
 export function OfficerNotificationPage() {
   const navigate = useNavigate()
-  const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS)
-  const [activeTab, setActiveTab] = useState('semua')
-  const [readStatus, setReadStatus] = useState('semua')
-  const [priority, setPriority] = useState('semua')
-  const [hasMore, setHasMore] = useState(true)
-
-  const filteredNotifications = useMemo(() => {
-    return notifications.filter((notification) => {
-      if (notification.status === 'hidden') return false
-      if (activeTab !== 'semua' && notification.category !== activeTab) return false
-      if (readStatus !== 'semua') {
-        const isRead = notification.status !== 'unread'
-        if (readStatus === 'unread' && isRead) return false
-        if (readStatus === 'read' && !isRead) return false
-      }
-      if (priority !== 'semua' && notification.priority !== priority) return false
-      return true
-    })
-  }, [notifications, activeTab, readStatus, priority])
-
-  const unreadCount = useMemo(
-    () => notifications.filter((notification) => notification.status === 'unread').length,
-    [notifications]
-  )
-
-  const updateStatus = (id, status) => {
-    setNotifications((current) => current.map((item) => (item.id === id ? { ...item, status } : item)))
-  }
+  const {
+    notifications,
+    loading,
+    error,
+    page,
+    hasMore,
+    filters,
+    unreadCount,
+    setPage,
+    updateFilters,
+    markAsRead,
+    confirm,
+    hide,
+  } = useOfficerNotifications()
 
   const handleViewDetail = (notification) => {
     if (notification.status === 'unread') {
-      updateStatus(notification.id, 'read')
+      markAsRead(notification.id)
     }
     if (notification.reportRoute) {
       navigate(notification.reportRoute)
@@ -49,8 +35,50 @@ export function OfficerNotificationPage() {
   }
 
   const handleLoadMore = () => {
-    setNotifications((current) => [...current, ...MORE_NOTIFICATIONS])
-    setHasMore(false)
+    setPage(page + 1)
+  }
+
+  const handleCategoryChange = (category) => {
+    updateFilters({
+      ...filters,
+      category,
+    })
+  }
+
+  const handleReadStatusChange = (status) => {
+    updateFilters({
+      ...filters,
+      status,
+    })
+  }
+
+  const handlePriorityChange = (priority) => {
+    updateFilters({
+      ...filters,
+      priority,
+    })
+  }
+
+  if (loading && notifications.length === 0) {
+    return (
+      <div className="flex flex-col gap-6 p-4 sm:p-8">
+        <NotificationHeader unreadCount={0} />
+        <NotificationLoadingSkeleton />
+      </div>
+    )
+  }
+
+  if (error && notifications.length === 0) {
+    return (
+      <div className="flex flex-col gap-6 p-4 sm:p-8">
+        <NotificationHeader unreadCount={0} />
+        <div className="flex items-center justify-center rounded-lg border border-border-muted bg-bg-soft p-8">
+          <p className="text-center text-text-muted">
+            {error}
+          </p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -58,27 +86,34 @@ export function OfficerNotificationPage() {
       <NotificationHeader unreadCount={unreadCount} />
 
       <div className="flex flex-col gap-4">
-        <NotificationCategoryTabs activeTab={activeTab} onChange={setActiveTab} />
+        <NotificationCategoryTabs activeTab={filters.category} onChange={handleCategoryChange} />
         <NotificationFilter
-          readStatus={readStatus}
-          onReadStatusChange={setReadStatus}
+          readStatus={filters.status}
+          onReadStatusChange={handleReadStatusChange}
           readStatusOptions={READ_STATUS_OPTIONS}
-          priority={priority}
-          onPriorityChange={setPriority}
+          priority={filters.priority}
+          onPriorityChange={handlePriorityChange}
           priorityOptions={PRIORITY_OPTIONS}
         />
       </div>
 
       <NotificationList
-        notifications={filteredNotifications}
+        notifications={notifications}
         onViewDetail={handleViewDetail}
-        onHide={(id) => updateStatus(id, 'hidden')}
-        onMarkRead={(id) => updateStatus(id, 'read')}
-        onConfirm={(id) => updateStatus(id, 'confirmed')}
-        onComplete={(id) => updateStatus(id, 'completed')}
+        onHide={hide}
+        onMarkRead={markAsRead}
+        onConfirm={confirm}
       />
 
-      <NotificationLoadMore onLoadMore={handleLoadMore} hasMore={hasMore} />
+      {loading && notifications.length > 0 && (
+        <div className="flex items-center justify-center py-4">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-border-muted border-t-navy" />
+        </div>
+      )}
+
+      {!loading && hasMore && (
+        <NotificationLoadMore onLoadMore={handleLoadMore} hasMore={hasMore} />
+      )}
     </div>
   )
 }

@@ -51,9 +51,9 @@ export function LocationCard() {
       </div>
 
       <div className="relative h-[257px] overflow-hidden rounded-xl border border-[#F1F5F9]">
-        <LocationPickerMap position={position} onChange={setPosition} className="h-full w-full" />
+        <LocationPickerMap position={position} onChange={setPosition} className="h-full w-full z-0" />
 
-        <div className="pointer-events-none absolute bottom-3 left-3 z-[400] flex items-center gap-1 rounded-lg border border-white/50 bg-white/90 px-3 py-2 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.10),0_2px_4px_-2px_rgba(0,0,0,0.10)] backdrop-blur-sm">
+        <div className="pointer-events-none absolute bottom-3 left-3 z-10 flex items-center gap-1 rounded-lg border border-white/50 bg-white/90 px-3 py-2 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.10),0_2px_4px_-2px_rgba(0,0,0,0.10)] backdrop-blur-sm">
           <MapPin className="h-3 w-3 shrink-0 text-navy" aria-hidden="true" />
           <span className="text-xs font-bold text-navy">{address}</span>
         </div>

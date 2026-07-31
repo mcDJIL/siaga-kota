@@ -7,6 +7,7 @@ use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class AuthenticationTest extends TestCase
@@ -153,6 +154,61 @@ class AuthenticationTest extends TestCase
         $response
             ->assertOk()
             ->assertJsonPath('data.user.id', $user->id);
+    }
+
+    public function test_authenticated_user_can_update_password(): void
+    {
+        $this->seed(RoleSeeder::class);
+
+        $user = User::factory()->create([
+            'email' => 'warga.test@example.com',
+            'password' => 'password123',
+            'role' => UserRole::Warga->value,
+            'active' => true,
+        ]);
+
+        $user->assignRole(UserRole::Warga->value);
+
+        $response = $this
+            ->actingAs($user, 'sanctum')
+            ->patchJson('/api/v1/auth/me/password', [
+                'current_password' => 'password123',
+                'password' => 'new-password123',
+                'password_confirmation' => 'new-password123',
+            ]);
+
+        $response
+            ->assertOk()
+            ->assertJsonPath('message', 'Password berhasil diperbarui.')
+            ->assertJsonPath('data.user.id', $user->id);
+
+        $this->assertTrue(Hash::check('new-password123', $user->fresh()->password));
+    }
+
+    public function test_authenticated_user_cannot_update_password_with_wrong_current_password(): void
+    {
+        $this->seed(RoleSeeder::class);
+
+        $user = User::factory()->create([
+            'email' => 'warga.test@example.com',
+            'password' => 'password123',
+            'role' => UserRole::Warga->value,
+            'active' => true,
+        ]);
+
+        $user->assignRole(UserRole::Warga->value);
+
+        $response = $this
+            ->actingAs($user, 'sanctum')
+            ->patchJson('/api/v1/auth/me/password', [
+                'current_password' => 'wrong-password',
+                'password' => 'new-password123',
+                'password_confirmation' => 'new-password123',
+            ]);
+
+        $response
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['current_password']);
     }
 
     public function test_guest_cannot_fetch_profile(): void

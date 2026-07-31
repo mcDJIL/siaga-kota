@@ -7,7 +7,9 @@ use App\Http\Requests\Auth\ForgotPasswordRequest;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\ResetPasswordRequest;
+use App\Http\Requests\Auth\UpdatePasswordRequest;
 use App\Http\Requests\Auth\UpdateProfileRequest;
+use App\Http\Requests\Auth\UploadAvatarRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
@@ -15,7 +17,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Role;
 
@@ -141,17 +143,84 @@ class AuthController extends Controller
 
         unset($data['password_confirmation']);
 
-        if (! array_key_exists('password', $data)) {
+        if (! array_key_exists('password', $data) || empty($data['password'])) {
             unset($data['password']);
         }
 
-        $request->user()->fill($data)->save();
+        $user = $request->user();
+        $user->fill($data)->save();
+        $user = $user->fresh();
 
         return response()->json([
             'data' => [
-                'user' => new UserResource($request->user()->fresh()),
+                'user' => new UserResource($user),
             ],
             'message' => 'Profil berhasil diperbarui.',
+        ]);
+    }
+
+    public function uploadAvatar(UploadAvatarRequest $request): JsonResponse
+    {
+        try {
+            $file = $request->file('avatar_path');
+
+            if (!$file || !$file->isValid()) {
+                return response()->json([
+                    'message' => 'File tidak valid.',
+                ], 400);
+            }
+
+            $path = $file->store('avatars', 'public');
+
+            if (!$path) {
+                return response()->json([
+                    'message' => 'Gagal menyimpan file ke storage.',
+                ], 400);
+            }
+
+            $user = $request->user();
+
+            if ($user->avatar_path) {
+                Storage::disk('public')->delete($user->avatar_path);
+            }
+
+            $user->avatar_path = 'storage/' . $path;
+            $user->save();
+
+            return response()->json([
+                'data' => [
+                    'user' => new UserResource($user->fresh()),
+                ],
+                'message' => 'Foto profil berhasil diperbarui.',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Gagal mengunggah avatar: ' . $e->getMessage(),
+            ], 400);
+        }
+    }
+
+    /**
+     * @group Auth
+     * @authenticated
+     * @bodyParam current_password string required Password saat ini.
+     * @bodyParam password string required Password baru minimal 8 karakter.
+     * @bodyParam password_confirmation string required Konfirmasi password baru.
+     */
+    public function updatePassword(UpdatePasswordRequest $request): JsonResponse
+    {
+        $data = $request->validated();
+
+        $user = $request->user();
+        $user->forceFill([
+            'password' => $data['password'],
+        ])->save();
+
+        return response()->json([
+            'data' => [
+                'user' => new UserResource($user->fresh()),
+            ],
+            'message' => 'Password berhasil diperbarui.',
         ]);
     }
 
@@ -188,7 +257,7 @@ class AuthController extends Controller
             function (User $user, string $password) {
                 $user->forceFill([
                     'password' => $password,
-                    'remember_token' => Str::random(60),
+                    'remember_token' => \Illuminate\Support\Str::random(60),
                 ])->save();
 
                 event(new PasswordReset($user));

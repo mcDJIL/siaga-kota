@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
@@ -14,6 +15,7 @@ import { useNavigate } from 'react-router-dom'
 
 export function LoginForm() {
   const navigate = useNavigate()
+  const [isLoading, setIsLoading] = useState(false)
   const {
     register,
     handleSubmit,
@@ -25,10 +27,10 @@ export function LoginForm() {
 
   const onSubmit = async (data) => {
     try {
+      setIsLoading(true)
       const payload = await login({ email: data.identifier, password: data.password })
       saveAuthToken(payload.data.token)
       localStorage.setItem('user', JSON.stringify(payload.data.user))
-      // attempt to fetch current user (me) to determine role and redirect
       try {
         const who = await me()
         const user = who?.data?.user ?? who?.data ?? payload?.data?.user
@@ -49,6 +51,8 @@ export function LoginForm() {
     } catch (error) {
       console.error('Login gagal:', error)
       alert(error.response?.message ?? error.message)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -103,9 +107,9 @@ export function LoginForm() {
 
       <RememberMeCheckbox id="rememberMe" label="Ingat Saya" {...register('rememberMe')} />
 
-      <Button type="submit" variant="secondary" size="md" className="w-full rounded-lg py-3 text-xl font-semibold">
-        Masuk
-        <LoginArrowIcon className="h-[18px] w-[18px]" />
+      <Button type="submit" variant="secondary" size="md" className="w-full rounded-lg py-3 text-xl font-semibold" disabled={isLoading}>
+        {isLoading ? 'Memproses...' : 'Masuk'}
+        {!isLoading && <LoginArrowIcon className="h-[18px] w-[18px]" />}
       </Button>
 
       <div className="flex items-center gap-4 py-1">
@@ -113,8 +117,6 @@ export function LoginForm() {
         <span className="text-sm font-medium tracking-[0.14px] text-text-muted">Atau masuk dengan</span>
         <span className="h-px flex-1 bg-border-muted" />
       </div>
-
-      <GoogleButton />
 
       <p className="text-center text-base text-text-muted">
         Belum punya akun?{' '}
