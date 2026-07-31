@@ -15,7 +15,7 @@ export function ProfileImageUploader({ value, onChange }) {
 
       setIsCompressing(true)
       const compressed = await compressImage(file)
-      onChange?.(URL.createObjectURL(compressed))
+      onChange?.(compressed)
       setIsCompressing(false)
     },
     [onChange]

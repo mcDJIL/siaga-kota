@@ -154,6 +154,10 @@ export async function updateProfile(payload) {
 
 export async function uploadAvatar(file) {
   try {
+    if (!file) {
+      throw new Error('File harus dipilih')
+    }
+
     const formData = new FormData()
     formData.append('avatar_path', file)
 

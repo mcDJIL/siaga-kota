@@ -78,8 +78,10 @@ export function OfficerProfilePage() {
   const handleAvatarChange = async (file) => {
     try {
       setIsSubmitting(true)
-      await uploadAvatar(file)
-      showToast('Foto profil berhasil diperbarui.')
+      if (file) {
+        await uploadAvatar(file)
+        showToast('Foto profil berhasil diperbarui.')
+      }
     } catch (err) {
       showErrorToast(err.message || 'Gagal mengunggah foto profil')
     } finally {

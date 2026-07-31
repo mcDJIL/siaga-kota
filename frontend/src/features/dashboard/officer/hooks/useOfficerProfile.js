@@ -6,22 +6,35 @@ export function useOfficerProfile() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  const fetchProfile = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const data = await me()
-      setProfile(data.data)
-    } catch (err) {
-      setError(err.message || 'Gagal memuat profil')
-      console.error('Error fetching profile:', err)
-    } finally {
-      setLoading(false)
-    }
-  }
-
   useEffect(() => {
+    let mounted = true
+
+    async function fetchProfile() {
+      try {
+        setLoading(true)
+        setError(null)
+        const response = await me()
+        if (mounted) {
+          const userData = response?.data?.user || response?.data
+          setProfile(userData)
+        }
+      } catch (err) {
+        if (mounted) {
+          setError(err.message || 'Gagal memuat profil')
+          console.error('Error fetching profile:', err)
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false)
+        }
+      }
+    }
+
     fetchProfile()
+
+    return () => {
+      mounted = false
+    }
   }, [])
 
   const handleUpdateProfile = async (updateData) => {
@@ -29,8 +42,11 @@ export function useOfficerProfile() {
       setLoading(true)
       setError(null)
       const data = await updateProfile(updateData)
-      setProfile(data.data)
-      return { success: true, data: data.data }
+      const userData = data?.data?.user || data?.data
+      if (userData) {
+        setProfile(userData)
+      }
+      return { success: true, data: userData }
     } catch (err) {
       const message = err.message || 'Gagal memperbarui profil'
       setError(message)
@@ -60,8 +76,11 @@ export function useOfficerProfile() {
       setLoading(true)
       setError(null)
       const data = await uploadAvatar(file)
-      setProfile(data.data)
-      return { success: true, data: data.data }
+      const userData = data?.data?.user || data?.data
+      if (userData) {
+        setProfile(userData)
+      }
+      return { success: true, data: userData }
     } catch (err) {
       const message = err.message || 'Gagal mengunggah foto profil'
       setError(message)
@@ -76,7 +95,6 @@ export function useOfficerProfile() {
       setLoading(true)
       setError(null)
       await logout()
-      // Clear token akan di-handle di komponen
       return { success: true }
     } catch (err) {
       const message = err.message || 'Gagal logout'
@@ -91,7 +109,6 @@ export function useOfficerProfile() {
     profile,
     loading,
     error,
-    fetchProfile,
     updateProfile: handleUpdateProfile,
     updatePassword: handleUpdatePassword,
     uploadAvatar: handleUploadAvatar,

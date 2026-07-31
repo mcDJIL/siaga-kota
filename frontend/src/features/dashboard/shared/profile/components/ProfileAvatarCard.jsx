@@ -1,7 +1,15 @@
+import { useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { ProfileImageUploader } from './ProfileImageUploader'
 
 export function ProfileAvatarCard({ profile, avatar, onAvatarChange }) {
+  const previewUrl = useMemo(() => {
+    if (avatar instanceof File) {
+      return URL.createObjectURL(avatar)
+    }
+    return avatar
+  }, [avatar])
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -9,7 +17,7 @@ export function ProfileAvatarCard({ profile, avatar, onAvatarChange }) {
       transition={{ duration: 0.35 }}
       className="flex flex-col items-center gap-1 rounded-xl bg-white p-6 text-center shadow-[0_1px_2px_0_rgba(0,0,0,0.05)]"
     >
-      <ProfileImageUploader value={avatar} onChange={onAvatarChange} />
+      <ProfileImageUploader value={previewUrl} onChange={onAvatarChange} />
 
       <h2 className="pt-4 text-xl font-semibold text-text-body">{profile.displayName}</h2>
       <p className="text-base font-bold text-navy">{profile.employeeId}</p>
