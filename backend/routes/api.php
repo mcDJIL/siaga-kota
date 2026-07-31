@@ -2,8 +2,11 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Officer\ReportController;
+use App\Http\Controllers\Ops\ReportController as OpsReportController;
 use App\Http\Controllers\Public\DistrictLookupController;
 use App\Http\Controllers\Public\FloodPredictionController;
+use App\Http\Controllers\Public\MapController;
+use App\Http\Controllers\Public\ReportController as PublicReportController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -22,12 +25,22 @@ Route::prefix('v1')->group(function (): void {
         });
     });
 
-    Route::middleware(['auth:sanctum', 'role:warga,petugas,admin,sanctum', 'throttle:warga'])
+    // all authenticated users
+    Route::middleware(['auth:sanctum', 'throttle:warga'])
+        ->prefix('map')
+        ->controller(MapController::class)
+        ->group(function (): void {
+            Route::get('/points', 'points');
+            Route::get('/heatmap', 'heatmap');
+        });
+
+    // warga only
+    Route::middleware(['auth:sanctum', 'role:warga,sanctum', 'throttle:warga'])
         ->prefix('public')
         ->group(function (): void {
             Route::get('districts', [DistrictLookupController::class, 'index']);
             Route::post('flood-prediction', [FloodPredictionController::class, 'predict']);
-            Route::controller(\App\Http\Controllers\Public\ReportController::class)
+            Route::controller(PublicReportController::class)
                 ->prefix('reports')
                 ->group(function (): void {
                     Route::get('/', 'index');
@@ -59,6 +72,18 @@ Route::prefix('v1')->group(function (): void {
                     Route::post('/tasks/{reportId}/assign', 'assignOfficer');
                     Route::get('/statistics', 'getStatistics');
                 });
+            Route::controller(OpsReportController::class)
+                ->prefix('reports')
+                ->group(function (): void {
+                    Route::get('/', 'index');
+                    Route::get('/{id}', 'show');
+                    Route::patch('/{id}/status', 'updateStatus');
+                    Route::post('/{id}/attachments', 'uploadHandlingPhotos');
+                    Route::post('/{id}/emergency', 'markEmergency');
+                    Route::post('/{id}/assign', 'assign');
+                });
+
+            Route::get('/operators', [OpsReportController::class, 'operators']);
         });
 
     Route::middleware(['auth:sanctum', 'role:admin,sanctum', 'throttle:admin'])
