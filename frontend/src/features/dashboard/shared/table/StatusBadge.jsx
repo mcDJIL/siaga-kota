@@ -13,9 +13,12 @@ const STATUS_LABELS = {
 }
 
 export function StatusBadge({ status }) {
+  const style = STATUS_STYLES[status] || 'bg-text-muted/10 text-text-muted'
+  const label = STATUS_LABELS[status] || (status ? status.charAt(0).toUpperCase() + status.slice(1) : 'Unknown')
+
   return (
-    <span className={cn('inline-flex w-fit items-center rounded-full px-2 py-0.5 text-base', STATUS_STYLES[status])}>
-      {STATUS_LABELS[status]}
+    <span className={cn('inline-flex w-fit items-center rounded-full px-2 py-0.5 text-base', style)}>
+      {label}
     </span>
   )
 }

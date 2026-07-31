@@ -2,9 +2,16 @@ import { useState } from 'react'
 import { Trash2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { WasteReportsTable } from '../components/WasteReportsTable'
-import { WASTE_REPORTS, WASTE_REPORTS_TOTAL } from '../data/wasteReports'
+import { useWasteReports } from '../hooks/useWasteReports'
 
 export function OfficerWasteReportsPage() {
+  const [status, setStatus] = useState('')
+  const [search, setSearch] = useState('')
+  const { reports, loading, error, totalCount, currentPage, setCurrentPage } = useWasteReports({
+    status,
+    search,
+  })
+
   return (
     <div className="flex flex-col gap-6 p-4 sm:p-8">
       <motion.div
@@ -27,7 +34,16 @@ export function OfficerWasteReportsPage() {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4, delay: 0.1 }}
       >
-        <WasteReportsTable reports={WASTE_REPORTS} totalCount={WASTE_REPORTS_TOTAL} />
+        <WasteReportsTable
+          reports={reports}
+          totalCount={totalCount}
+          loading={loading}
+          error={error}
+          onStatusChange={setStatus}
+          onSearchChange={setSearch}
+          currentPage={currentPage}
+          onPageChange={setCurrentPage}
+        />
       </motion.div>
     </div>
   )

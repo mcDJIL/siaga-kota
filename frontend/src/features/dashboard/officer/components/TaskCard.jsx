@@ -4,7 +4,7 @@ import { Button } from '../../../../components/ui/Button'
 import { cn } from '../../../../lib/cn'
 
 const PRIORITY_STYLES = {
-  urgent: {
+  mendesak: {
     border: 'border-[#BA1A1A]/30',
     bg: 'bg-[#FFDAD6]/10',
     badgeBg: 'bg-[#FEE2E2]',
@@ -12,7 +12,7 @@ const PRIORITY_STYLES = {
     label: 'Sangat Mendesak',
     opacity: '',
   },
-  high: {
+  tinggi: {
     border: 'border-border-muted',
     bg: 'bg-white',
     badgeBg: 'bg-[#FFEDD5]',
@@ -20,7 +20,7 @@ const PRIORITY_STYLES = {
     label: 'Prioritas Tinggi',
     opacity: '',
   },
-  medium: {
+  sedang: {
     border: 'border-border-muted',
     bg: 'bg-white',
     badgeBg: 'bg-[#FEF9C3]',
@@ -28,10 +28,18 @@ const PRIORITY_STYLES = {
     label: 'Menengah',
     opacity: 'opacity-80',
   },
+  rendah: {
+    border: 'border-border-muted',
+    bg: 'bg-white',
+    badgeBg: 'bg-[#E0F2FE]',
+    badgeText: 'text-[#0C4A6E]',
+    label: 'Prioritas Rendah',
+    opacity: 'opacity-70',
+  },
 }
 
 export function TaskCard({ task, isSelected, onSelect, onDispatch, onViewDetail }) {
-  const styles = PRIORITY_STYLES[task.priority]
+  const styles = PRIORITY_STYLES[task.priority] || PRIORITY_STYLES.sedang
 
   return (
     <motion.article
@@ -57,7 +65,7 @@ export function TaskCard({ task, isSelected, onSelect, onDispatch, onViewDetail 
         >
           {styles.label}
         </span>
-        <span className="text-[10px] font-medium text-text-muted">{task.reportedAt}</span>
+        <span className="text-[10px] font-medium text-text-muted">{task.code}</span>
       </div>
 
       <h4 className="text-sm font-bold text-text-body">{task.title}</h4>
@@ -65,7 +73,7 @@ export function TaskCard({ task, isSelected, onSelect, onDispatch, onViewDetail 
 
       <div className="flex items-center gap-2 pt-1">
         <MapPin className="h-2.5 w-2.5 shrink-0 text-navy" aria-hidden="true" />
-        <span className="text-[11px] font-medium text-text-muted">{task.location}</span>
+        <span className="text-[11px] font-medium text-text-muted">{task.location?.address || 'Lokasi tidak tersedia'}</span>
       </div>
 
       <div className="flex items-start gap-2 pt-1">

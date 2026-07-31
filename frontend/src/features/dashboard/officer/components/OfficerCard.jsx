@@ -4,11 +4,13 @@ import { cn } from '../../../../lib/cn'
 const STATUS_STYLES = {
   tersedia: 'bg-brand-green/10 text-brand-green',
   bertugas: 'bg-badge-gold/10 text-[#4D3E00]',
+  'tidak-aktif': 'bg-gray-100 text-gray-600',
 }
 
 const STATUS_LABELS = {
   tersedia: 'Tersedia',
   bertugas: 'Bertugas',
+  'tidak-aktif': 'Tidak Aktif',
 }
 
 export function OfficerCard({ officer }) {
@@ -19,16 +21,16 @@ export function OfficerCard({ officer }) {
       transition={{ duration: 0.3 }}
       className="flex items-center gap-3 rounded-xl border border-border-muted p-4"
     >
-      <img src={officer.avatar} alt={officer.name} className="h-10 w-10 shrink-0 rounded-full object-cover" />
+      <img src={officer.avatar_path || '/default-avatar.png'} alt={officer.name} className="h-10 w-10 shrink-0 rounded-full object-cover" />
       <div className="flex flex-1 flex-col gap-0.5 overflow-hidden">
         <div className="flex items-center justify-between gap-2">
           <span className="truncate text-sm font-bold text-navy">{officer.name}</span>
-          <span className={cn('rounded-full px-2 py-0.5 text-[10px] font-bold uppercase', STATUS_STYLES[officer.status])}>
-            {STATUS_LABELS[officer.status]}
+          <span className={cn('rounded-full px-2 py-0.5 text-[10px] font-bold uppercase', STATUS_STYLES[officer.status] || STATUS_STYLES.tersedia)}>
+            {STATUS_LABELS[officer.status] || STATUS_LABELS.tersedia}
           </span>
         </div>
-        <span className="truncate text-xs text-text-muted">{officer.currentTask ?? 'Tidak ada tugas aktif'}</span>
-        <span className="text-xs text-badge-neutral">{officer.distance} dari lokasi</span>
+        <span className="truncate text-xs text-text-muted">{officer.current_task?.title ?? 'Tidak ada tugas aktif'}</span>
+        <span className="text-xs text-badge-neutral">{officer.department?.name ?? 'Tidak ada divisi'}</span>
       </div>
     </motion.div>
   )

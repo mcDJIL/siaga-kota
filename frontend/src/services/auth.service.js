@@ -128,3 +128,43 @@ export async function resetPassword({ email, token, password, password_confirmat
     formatAxiosError(error)
   }
 }
+
+export async function updatePassword({ current_password, password, password_confirmation }) {
+  try {
+    const { data } = await axiosClient.patch(
+      '/api/v1/auth/me/password',
+      { current_password, password, password_confirmation },
+      attachAuthHeader()
+    )
+    return data
+  } catch (error) {
+    formatAxiosError(error)
+  }
+}
+
+export async function updateProfile(payload) {
+  try {
+    const config = attachAuthHeader()
+    const { data } = await axiosClient.patch('/api/v1/auth/me', payload, config)
+    return data
+  } catch (error) {
+    formatAxiosError(error)
+  }
+}
+
+export async function uploadAvatar(file) {
+  try {
+    const formData = new FormData()
+    formData.append('avatar_path', file)
+
+    const config = attachAuthHeader({
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+    const { data } = await axiosClient.patch('/api/v1/auth/me', formData, config)
+    return data
+  } catch (error) {
+    formatAxiosError(error)
+  }
+}

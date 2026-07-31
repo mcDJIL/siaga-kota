@@ -45,11 +45,15 @@ export function FloodReportPrintTemplate({ reports, statistics, dangerLevel, reg
           <tbody>
             {reports.map((report) => (
               <tr key={report.id} className="border-b border-border-muted">
-                <td className="py-2 pr-4">{report.id}</td>
-                <td className="py-2 pr-4">{DANGER_LABELS[report.danger]}</td>
-                <td className="py-2 pr-4">{report.location}</td>
-                <td className="py-2 pr-4">{report.waterHeight}</td>
-                <td className="py-2 pr-4">{report.reporter}</td>
+                <td className="py-2 pr-4">{report.code || report.id}</td>
+                <td className="py-2 pr-4">{DANGER_LABELS[report.priority || report.danger]}</td>
+                <td className="py-2 pr-4">
+                  {typeof report.location === 'string'
+                    ? report.location
+                    : report.location?.address || '-'}
+                </td>
+                <td className="py-2 pr-4">{report.water_level_cm || report.waterHeight || '-'}</td>
+                <td className="py-2 pr-4">{report.reporter?.name || report.reporter || '-'}</td>
                 <td className="py-2 pr-4">{STATUS_LABELS[report.status]}</td>
               </tr>
             ))}

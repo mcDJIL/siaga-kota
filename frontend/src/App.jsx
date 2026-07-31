@@ -23,6 +23,7 @@ import { ForgotPasswordPage } from './features/auth/pages/ForgotPasswordPage'
 import { OfficerDashboardPage } from './features/dashboard/officer/pages/OfficerDashboardPage'
 import { OfficerWasteReportDetailPage } from './features/dashboard/officer/pages/OfficerWasteReportDetailPage'
 import { OfficerFloodReportsPage } from './features/dashboard/officer/pages/OfficerFloodReportsPage'
+import { OfficerFloodReportDetailPage } from './features/dashboard/officer/pages/OfficerFloodReportDetailPage'
 import { OfficerActivityMapPage } from './features/dashboard/officer/pages/OfficerActivityMapPage'
 import { OfficerNotificationPage } from './features/dashboard/officer/pages/OfficerNotificationPage'
 import { OfficerProfilePage } from './features/dashboard/officer/pages/OfficerProfilePage'
@@ -238,6 +239,16 @@ function App() {
               <ProtectedRoute allowedRoles={["officer"]}>
                 <DashboardLayout>
                   <OfficerFloodReportsPage />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/officer/reports/flood/:reportId"
+            element={
+              <ProtectedRoute allowedRoles={["officer"]}>
+                <DashboardLayout>
+                  <OfficerFloodReportDetailPage />
                 </DashboardLayout>
               </ProtectedRoute>
             }

@@ -36,7 +36,8 @@ function formatAxiosError(error) {
   const message = responseData?.message ?? error.message ?? 'Terjadi kesalahan jaringan.'
   const formatted = new Error(message)
   formatted.response = responseData
-  throw formatted
+  formatted.status = error?.response?.status
+  return formatted
 }
 
 export async function fetchReports({ page = 1, perPage = 100, search = '', category = '', status = '' } = {}) {
@@ -52,10 +53,10 @@ export async function fetchReports({ page = 1, perPage = 100, search = '', categ
 
     const response = await axiosClient.get('/api/v1/public/reports', attachAuthHeader({ params }))
     console.log(response.data);
-    
+
     return response.data
   } catch (error) {
-    formatAxiosError(error)
+    throw formatAxiosError(error)
   }
 }
 
@@ -64,7 +65,7 @@ export async function fetchReport(reportId) {
     const response = await axiosClient.get(`/api/v1/public/reports/${reportId}`, attachAuthHeader())
     return response.data
   } catch (error) {
-    formatAxiosError(error)
+    throw formatAxiosError(error)
   }
 }
 
@@ -94,7 +95,7 @@ export async function submitReport(formData) {
     const response = await axiosClient.post('/api/v1/public/reports', requestBody, config)
     return response.data
   } catch (error) {
-    formatAxiosError(error)
+    throw formatAxiosError(error)
   }
 }
 
@@ -103,7 +104,7 @@ export async function updateProfile(data) {
     const response = await axiosClient.patch('/api/v1/auth/me', data, attachAuthHeader())
     return response.data
   } catch (error) {
-    formatAxiosError(error)
+    throw formatAxiosError(error)
   }
 }
 
@@ -116,7 +117,7 @@ export async function changePassword(oldPassword, newPassword) {
     )
     return response.data
   } catch (error) {
-    formatAxiosError(error)
+    throw formatAxiosError(error)
   }
 }
 
@@ -125,6 +126,6 @@ export async function deleteAccount() {
     const response = await axiosClient.delete('/api/v1/auth/me', attachAuthHeader())
     return response.data
   } catch (error) {
-    formatAxiosError(error)
+    throw formatAxiosError(error)
   }
 }

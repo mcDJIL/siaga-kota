@@ -1,9 +1,16 @@
 import { motion } from 'framer-motion'
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { PerformanceLegend } from './PerformanceLegend'
-import { WEEKLY_PERFORMANCE } from '../../data/chartData'
+import { useDashboardContext } from '../../context/DashboardContext'
+import { ChartSkeleton } from '../skeletons/ChartSkeleton'
 
 export function WeeklyPerformanceChart() {
+  const { weeklyData, loading } = useDashboardContext()
+
+  if (loading) {
+    return <ChartSkeleton />
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -18,7 +25,7 @@ export function WeeklyPerformanceChart() {
 
       <div className="h-40 w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={WEEKLY_PERFORMANCE} barGap={4}>
+          <BarChart data={weeklyData} barGap={4}>
             <CartesianGrid vertical={false} stroke="#E5EEFF" />
             <XAxis dataKey="day" tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: '#43474E', fontWeight: 700 }} />
             <YAxis hide />

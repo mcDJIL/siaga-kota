@@ -6,6 +6,9 @@ import { TaskTabs } from './TaskTabs'
 import { TaskCard } from './TaskCard'
 import { OfficerCard } from './OfficerCard'
 import { ActivityStatistics } from './ActivityStatistics'
+import { TaskCardSkeleton } from './TaskCardSkeleton'
+import { OfficerCardSkeleton } from './OfficerCardSkeleton'
+import { ActivityStatisticsSkeleton } from './ActivityStatisticsSkeleton'
 
 function ActivitySidebarContent({
   tasks,
@@ -23,14 +26,38 @@ function ActivitySidebarContent({
   onViewDetail,
   totalTasks,
   tasksTrend,
+  tasksLoading = false,
+  officersLoading = false,
 }) {
+  const isLoading = activeTab === 'tasks' ? tasksLoading : officersLoading
+  const itemsCount = activeTab === 'tasks' ? tasks.length : officers.length
+
   return (
     <div className="flex h-full flex-col">
       <FilterPanel region={region} onRegionChange={onRegionChange} status={status} onStatusChange={onStatusChange} />
       <TaskTabs activeTab={activeTab} onChange={onTabChange} officersCount={officersTotal} />
 
       <div className="flex-1 overflow-y-auto p-4">
-        {activeTab === 'tasks' ? (
+        {isLoading ? (
+          <div className="flex flex-col gap-4">
+            {Array.from({ length: 3 }).map((_, index) => (
+              activeTab === 'tasks' ? (
+                <TaskCardSkeleton key={index} />
+              ) : (
+                <OfficerCardSkeleton key={index} />
+              )
+            ))}
+          </div>
+        ) : itemsCount === 0 ? (
+          <div className="flex flex-col items-center justify-center gap-2 rounded-lg bg-bg-blue-soft p-6 text-center">
+            <p className="text-sm font-medium text-text-muted">
+              {activeTab === 'tasks' ? 'Tidak ada laporan' : 'Tidak ada petugas'}
+            </p>
+            <p className="text-xs text-badge-neutral">
+              {activeTab === 'tasks' ? 'Coba ubah filter untuk melihat laporan lain' : 'Tidak ada petugas tersedia'}
+            </p>
+          </div>
+        ) : activeTab === 'tasks' ? (
           <div className="flex flex-col gap-4">
             {tasks.map((task) => (
               <TaskCard
@@ -52,7 +79,7 @@ function ActivitySidebarContent({
         )}
       </div>
 
-      <ActivityStatistics total={totalTasks} trend={tasksTrend} />
+      {isLoading ? <ActivityStatisticsSkeleton /> : <ActivityStatistics total={totalTasks} trend={tasksTrend} />}
     </div>
   )
 }

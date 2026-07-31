@@ -71,7 +71,15 @@ export default function PublicAuthRoute({ children }) {
     }
   }, [])
 
-  if (loading) return null
+  if (loading)
+    return (
+      <div className="flex h-screen items-center justify-center bg-bg-soft">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-border-muted border-t-navy" />
+          <p className="text-sm text-text-muted">Memuat aplikasi...</p>
+        </div>
+      </div>
+    )
   if (isAuthenticated) return <Navigate to={redirectTo} replace />
   return children
 }

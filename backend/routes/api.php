@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Officer\ReportController;
 use App\Http\Controllers\Public\DistrictLookupController;
 use App\Http\Controllers\Public\FloodPredictionController;
 use Illuminate\Support\Facades\Route;
@@ -21,7 +22,7 @@ Route::prefix('v1')->group(function (): void {
         });
     });
 
-    Route::middleware(['auth:sanctum', 'role:warga,sanctum', 'throttle:warga'])
+    Route::middleware(['auth:sanctum', 'role:warga,petugas,admin,sanctum', 'throttle:warga'])
         ->prefix('public')
         ->group(function (): void {
             Route::get('districts', [DistrictLookupController::class, 'index']);
@@ -33,11 +34,32 @@ Route::prefix('v1')->group(function (): void {
                     Route::post('/', 'store');
                     Route::get('/{id}', 'show');
                 });
-        });
-
+            });
+                
     Route::middleware(['auth:sanctum', 'role:petugas,sanctum', 'throttle:petugas'])
         ->prefix('ops')
-        ->group(function (): void {});
+        ->group(function (): void {
+            Route::controller(ReportController::class)
+                ->prefix('reports')
+                ->group(function (): void {
+                    Route::get('/', 'index');
+                    Route::get('/waste', 'wasteReports');
+                    Route::get('/flood', 'floodReports');
+                    Route::get('/{id}', 'show');
+                    Route::patch('/{id}/emergency', 'toggleEmergency');
+                    Route::post('/{id}/handling', 'storeHandling');
+                });
+
+            Route::controller(\App\Http\Controllers\Officer\ActivityMapController::class)
+                ->prefix('activity-map')
+                ->group(function (): void {
+                    Route::get('/tasks', 'getActiveTasks');
+                    Route::get('/officers', 'getOfficers');
+                    Route::get('/officers/{id}', 'getOfficer');
+                    Route::post('/tasks/{reportId}/assign', 'assignOfficer');
+                    Route::get('/statistics', 'getStatistics');
+                });
+        });
 
     Route::middleware(['auth:sanctum', 'role:admin,sanctum', 'throttle:admin'])
         ->prefix('admin')

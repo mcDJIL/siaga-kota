@@ -1,8 +1,14 @@
 import { useMap } from 'react-leaflet'
 import { LocateFixed, Minus, Plus } from 'lucide-react'
 
-export function MapControlButtons({ homeCenter, homeZoom }) {
+export function MapControlButtons({ homeCenter, homeZoom, userLocation = null }) {
   const map = useMap()
+
+  const handleCenterToUser = () => {
+    if (userLocation?.latitude && userLocation?.longitude) {
+      map.flyTo([userLocation.latitude, userLocation.longitude], 16, { duration: 0.6 })
+    }
+  }
 
   return (
     <div className="absolute top-6 right-6 z-[400] flex flex-col gap-3">
@@ -19,14 +25,17 @@ export function MapControlButtons({ homeCenter, homeZoom }) {
           <Minus className="h-3.5 w-3.5" aria-hidden="true" />
         </button>
       </div>
-      <button
-        type="button"
-        aria-label="Kembali ke lokasi awal"
-        onClick={() => map.flyTo(homeCenter, homeZoom, { duration: 0.6 })}
-        className="rounded-xl border border-border-muted bg-white p-3 text-text-body shadow-[0_10px_15px_-3px_rgba(0,0,0,0.10),0_4px_6px_-4px_rgba(0,0,0,0.10)]"
-      >
-        <LocateFixed className="h-[22px] w-[22px]" aria-hidden="true" />
-      </button>
+      {userLocation && (
+        <button
+          type="button"
+          aria-label="Ke lokasi Anda"
+          onClick={handleCenterToUser}
+          className="rounded-xl border border-border-muted bg-white p-3 text-navy hover:bg-bg-blue-soft transition-colors shadow-[0_10px_15px_-3px_rgba(0,0,0,0.10),0_4px_6px_-4px_rgba(0,0,0,0.10)]"
+          title="Pusat map ke lokasi Anda"
+        >
+          <LocateFixed className="h-[22px] w-[22px]" aria-hidden="true" />
+        </button>
+      )}
     </div>
   )
 }

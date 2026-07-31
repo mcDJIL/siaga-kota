@@ -30,14 +30,26 @@ export function CitizenReportDetailPage() {
 
     async function loadReport() {
       try {
+        if (!id) {
+          if (mounted) {
+            setIsLoading(false)
+            setReport(null)
+          }
+          return
+        }
+
         const data = await fetchReport(id)
         if (mounted) {
-          setReport(data.data)
+          setReport(data?.data || null)
           setIsLoading(false)
         }
       } catch (err) {
-        toast.error('Gagal memuat detail laporan')
-        if (mounted) setIsLoading(false)
+        console.error('Error loading report:', err)
+        toast.error(err?.message || 'Gagal memuat detail laporan')
+        if (mounted) {
+          setIsLoading(false)
+          setReport(null)
+        }
       }
     }
 
@@ -58,7 +70,29 @@ export function CitizenReportDetailPage() {
   if (!report) {
     return (
       <div className="flex flex-col gap-8 p-4 sm:p-8">
-        <div className="text-center">Laporan tidak ditemukan</div>
+        <div className="flex items-center gap-4">
+          <button
+            type="button"
+            onClick={() => navigate('/citizen/reports')}
+            className="flex h-10 w-10 items-center justify-center rounded-lg hover:bg-bg-blue-soft"
+          >
+            <ArrowLeft className="h-5 w-5 text-navy" />
+          </button>
+          <div>
+            <h1 className="text-3xl font-bold text-navy">Laporan tidak ditemukan</h1>
+            <p className="text-text-muted">ID: {id}</p>
+          </div>
+        </div>
+        <div className="rounded-xl bg-white p-6 shadow-sm">
+          <p className="text-text-body">Laporan dengan ID ini tidak ditemukan atau tidak dapat diakses.</p>
+          <button
+            type="button"
+            onClick={() => navigate('/citizen/reports')}
+            className="mt-4 px-4 py-2 rounded-lg bg-navy text-white font-semibold hover:bg-navy/90"
+          >
+            Kembali ke Daftar Laporan
+          </button>
+        </div>
       </div>
     )
   }
