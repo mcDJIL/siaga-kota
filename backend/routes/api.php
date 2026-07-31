@@ -72,6 +72,15 @@ Route::prefix('v1')->group(function (): void {
                     Route::post('/tasks/{reportId}/assign', 'assignOfficer');
                     Route::get('/statistics', 'getStatistics');
                 });
+
+            Route::controller(\App\Http\Controllers\Officer\NotificationController::class)
+                ->prefix('notifications')
+                ->group(function (): void {
+                    Route::get('/', 'index');
+                    Route::patch('/{id}/read', 'markAsRead');
+                    Route::patch('/{id}/confirm', 'confirm');
+                    Route::patch('/{id}/hide', 'hide');
+                });
             Route::controller(OpsReportController::class)
                 ->prefix('reports')
                 ->group(function (): void {
