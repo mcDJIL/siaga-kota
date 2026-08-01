@@ -2,15 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\DeleteUserAccount;
 use App\Enums\UserRole;
+use App\Http\Requests\Auth\DeleteAccountRequest;
 use App\Http\Requests\Auth\ForgotPasswordRequest;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\ResetPasswordRequest;
+use App\Http\Requests\Auth\StorePushSubscriptionRequest;
 use App\Http\Requests\Auth\UpdatePasswordRequest;
 use App\Http\Requests\Auth\UpdateProfileRequest;
 use App\Http\Requests\Auth\UploadAvatarRequest;
 use App\Http\Resources\UserResource;
+use App\Models\PushSubscription;
 use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\JsonResponse;
@@ -18,8 +22,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rule;
-use Spatie\Permission\Models\Role;
 
 class AuthController extends Controller
 {
@@ -184,7 +186,9 @@ class AuthController extends Controller
                 Storage::disk('public')->delete($user->avatar_path);
             }
 
-            $user->avatar_path = 'storage/' . $path;
+            // Simpan path relatif terhadap disk public; accessor avatar_url yang
+            // menambahkan prefix "storage/" saat membangun URL.
+            $user->avatar_path = $path;
             $user->save();
 
             return response()->json([
@@ -271,8 +275,76 @@ class AuthController extends Controller
         ], $status === Password::PASSWORD_RESET ? 200 : 422);
     }
 
-    private function userPayload(User $user): array
+    /**
+     * Danger Zone: hapus akun sendiri (soft delete + purge data personal).
+     *
+     * @group Auth
+     * @authenticated
+     * @bodyParam password string required Password akun untuk konfirmasi.
+     */
+    public function destroy(
+        DeleteAccountRequest $request,
+        DeleteUserAccount $deleteAccount
+    ): JsonResponse {
+        $deleteAccount->execute($request->user());
+
+        return response()->json([
+            'message' => 'Akun Anda berhasil dihapus.',
+        ]);
+    }
+
+    /**
+     * Daftarkan langganan Web Push milik pengguna.
+     *
+     * @group Auth
+     * @authenticated
+     * @bodyParam endpoint string required Endpoint push dari browser.
+     * @bodyParam keys object required Kunci enkripsi (p256dh, auth).
+     */
+    public function subscribePush(StorePushSubscriptionRequest $request): JsonResponse
     {
-        return $user->only(['id', 'name', 'email', 'phone', 'role', 'active']);
+        $data = $request->validated();
+
+        $subscription = PushSubscription::query()->updateOrCreate(
+            ['endpoint' => $data['endpoint']],
+            [
+                'user_id' => $request->user()->id,
+                'keys_p256dh' => $data['keys']['p256dh'],
+                'keys_auth' => $data['keys']['auth'],
+                'payload_encoding' => $data['content_encoding'] ?? 'aes128gcm',
+            ],
+        );
+
+        return response()->json([
+            'data' => [
+                'id' => $subscription->id,
+                'endpoint' => $subscription->endpoint,
+            ],
+            'message' => 'Langganan notifikasi berhasil didaftarkan.',
+        ], 201);
+    }
+
+    /**
+     * Hentikan langganan Web Push.
+     *
+     * @group Auth
+     * @authenticated
+     * @bodyParam endpoint string Endpoint yang ingin dihapus. Jika kosong, seluruh langganan pengguna dihapus.
+     */
+    public function unsubscribePush(Request $request): JsonResponse
+    {
+        $endpoint = $request->string('endpoint')->toString();
+
+        $deleted = $request->user()
+            ->pushSubscriptions()
+            ->when($endpoint !== '', fn ($q) => $q->where('endpoint', $endpoint))
+            ->delete();
+
+        return response()->json([
+            'data' => [
+                'deleted' => $deleted,
+            ],
+            'message' => 'Langganan notifikasi berhasil dihentikan.',
+        ]);
     }
 }

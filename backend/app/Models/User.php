@@ -91,4 +91,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Report::class, 'assigned_to');
     }
+
+    public function pushSubscriptions(): HasMany
+    {
+        return $this->hasMany(PushSubscription::class);
+    }
 }

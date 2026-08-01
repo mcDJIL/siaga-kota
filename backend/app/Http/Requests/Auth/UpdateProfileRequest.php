@@ -29,7 +29,7 @@ class UpdateProfileRequest extends FormRequest
             'email' => [
                 'sometimes',
                 'string',
-                'email:rfc,dns',
+                'email',
                 'max:255',
                 Rule::unique('users', 'email')->ignore($user?->id),
             ],
