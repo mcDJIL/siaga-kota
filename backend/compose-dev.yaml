@@ -54,14 +54,32 @@ services:
                 condition: service_healthy
         networks:
             - siagakota
+    reverb:
+        build:
+            context: .
+            dockerfile: Dockerfile.dev
+        ports:
+            - '${REVERB_SERVER_PORT}:8080'
+        env_file:
+            - .env
+        volumes:
+            - '.:/var/www/html'
+        working_dir: /var/www/html
+        command: php artisan reverb:start --host=0.0.0.0 --port=8080
+        restart: unless-stopped
+        depends_on:
+            redis:
+                condition: service_healthy
+        networks:
+            - siagakota
     pgsql:
         image: 'postgis/postgis:16-3.4-alpine'
         ports:
-            - '${DB_PORT:-5432}:5432'
+            - '${DB_PORT}:5432'
         environment:
-            POSTGRES_DB: '${DB_DATABASE:-siagakota}'
-            POSTGRES_USER: '${DB_USERNAME:-siagakota}'
-            POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
+            POSTGRES_DB: '${DB_DATABASE}'
+            POSTGRES_USER: '${DB_USERNAME}'
+            POSTGRES_PASSWORD: '${DB_PASSWORD}'
         volumes:
             - 'pgsql-data:/var/lib/postgresql/data'
         networks:
@@ -72,15 +90,15 @@ services:
                 - pg_isready
                 - '-q'
                 - '-d'
-                - '${DB_DATABASE:-siagakota}'
+                - '${DB_DATABASE}'
                 - '-U'
-                - '${DB_USERNAME:-siagakota}'
+                - '${DB_USERNAME}'
             retries: 3
             timeout: 5s
     redis:
         image: 'redis:alpine'
         ports:
-            - '${REDIS_PORT:-6379}:6379'
+            - '${REDIS_PORT}:6379'
         volumes:
             - 'redis-data:/data'
         networks:
