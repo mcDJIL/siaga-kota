@@ -18,6 +18,7 @@ class MapController extends Controller
 {
     /**
      * @group Public - Map
+     *
      * @authenticated
      */
     public function points(Request $request): JsonResponse
@@ -49,8 +50,8 @@ class MapController extends Controller
         if (empty($layers) || in_array('reports', $layers)) {
             $reports = Report::query()
                 ->with('category')
-                ->when($request->filled('status'), fn($q) => $q->where('status', $request->status))
-                ->when($request->filled('category'), fn($q) => $q->where('category_id', $request->category))
+                ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
+                ->when($request->filled('category'), fn ($q) => $q->where('category_id', $request->category))
                 ->when($request->filled('since'), function ($q) use ($request) {
                     $hours = (int) str_replace('h', '', $request->since);
                     $q->where('created_at', '>=', now()->subHours($hours));
@@ -87,6 +88,7 @@ class MapController extends Controller
 
     /**
      * @group Public - Map
+     *
      * @authenticated
      */
     public function heatmap(Request $request): JsonResponse
@@ -106,6 +108,7 @@ class MapController extends Controller
                     'intensity' => $report->intensity,
                 ];
             }
+
             return null;
         })->filter();
 

@@ -43,12 +43,12 @@ class WasteReportController extends Controller
                         )
                         ->first();
 
-                    $totalReports = (int)$stats->total_all;
-                    $completedReports = (int)$stats->completed_all;
-                    $currentPeriodTotal = (int)$stats->total_current;
-                    $currentPeriodCompleted = (int)$stats->completed_current;
-                    $previousPeriodTotal = (int)$stats->total_previous;
-                    $previousPeriodCompleted = (int)$stats->completed_previous;
+                    $totalReports = (int) $stats->total_all;
+                    $completedReports = (int) $stats->completed_all;
+                    $currentPeriodTotal = (int) $stats->total_current;
+                    $currentPeriodCompleted = (int) $stats->completed_current;
+                    $previousPeriodTotal = (int) $stats->total_previous;
+                    $previousPeriodCompleted = (int) $stats->completed_previous;
                     $averageResponseTime = $stats->avg_response_all ? round($stats->avg_response_all) : 0;
                     $previousAvgResponseTime = $stats->avg_response_previous ? round($stats->avg_response_previous) : $averageResponseTime;
 
@@ -59,7 +59,7 @@ class WasteReportController extends Controller
                     $totalTrendClassName = $totalTrend >= 0
                         ? 'bg-brand-green-light/50 text-brand-green'
                         : 'bg-[#FFDAD6]/50 text-[#BA1A1A]';
-                    $totalTrendValue = ($totalTrend >= 0 ? '+' : '') . $totalTrend . '%';
+                    $totalTrendValue = ($totalTrend >= 0 ? '+' : '').$totalTrend.'%';
 
                     // Completed trend
                     $completedTrend = $previousPeriodCompleted > 0
@@ -68,11 +68,11 @@ class WasteReportController extends Controller
                     $completedTrendClassName = $completedTrend >= 0
                         ? 'bg-brand-green-light/50 text-brand-green'
                         : 'bg-[#FFDAD6]/50 text-[#BA1A1A]';
-                    $completedTrendValue = ($completedTrend >= 0 ? '+' : '') . $completedTrend . '%';
+                    $completedTrendValue = ($completedTrend >= 0 ? '+' : '').$completedTrend.'%';
 
                     // Response time trend
                     $responseTrendHours = $previousAvgResponseTime - $averageResponseTime;
-                    $responseTrendValue = ($responseTrendHours >= 0 ? '+' : '') . $responseTrendHours . 'h';
+                    $responseTrendValue = ($responseTrendHours >= 0 ? '+' : '').$responseTrendHours.'h';
                     $responseTrendClassName = $responseTrendHours <= 0
                         ? 'bg-brand-green-light/50 text-brand-green'
                         : 'bg-[#FFDAD6]/50 text-[#BA1A1A]';
@@ -88,7 +88,7 @@ class WasteReportController extends Controller
 
                     // Completion rate trend
                     $completionRateTrend = $currentCompletionRate - $previousCompletionRate;
-                    $completionRateTrendValue = ($completionRateTrend >= 0 ? '+' : '') . $completionRateTrend . '%';
+                    $completionRateTrendValue = ($completionRateTrend >= 0 ? '+' : '').$completionRateTrend.'%';
                     $completionRateTrendClassName = $completionRateTrend >= 0
                         ? 'bg-brand-green-light/50 text-brand-green'
                         : 'bg-[#FFDAD6]/50 text-[#BA1A1A]';
@@ -143,7 +143,7 @@ class WasteReportController extends Controller
     public function getWasteCategoryDistribution(): JsonResponse
     {
         $categories = Report::selectRaw('category_id, COUNT(*) as count')
-            ->whereHas('category', fn($q) => $q->where('slug', 'sampah'))
+            ->whereHas('category', fn ($q) => $q->where('slug', 'sampah'))
             ->groupBy('category_id')
             ->with('category')
             ->get()
@@ -154,7 +154,8 @@ class WasteReportController extends Controller
                     'B3' => '#002045',
                     'Lainnya' => '#DCE9FF',
                 ];
-                $total = Report::whereHas('category', fn($q) => $q->where('slug', 'sampah'))->count();
+                $total = Report::whereHas('category', fn ($q) => $q->where('slug', 'sampah'))->count();
+
                 return [
                     'name' => $item->category?->name ?? 'Unknown',
                     'value' => $total > 0 ? round(($item->count / $total) * 100) : 0,
@@ -174,13 +175,13 @@ class WasteReportController extends Controller
     public function getDistrictReportStats(): JsonResponse
     {
         $districtData = Report::selectRaw('address as district, COUNT(*) as reports')
-            ->whereHas('category', fn($q) => $q->where('slug', 'sampah'))
+            ->whereHas('category', fn ($q) => $q->where('slug', 'sampah'))
             ->whereNotNull('address')
             ->groupBy('address')
             ->orderByDesc('reports')
             ->limit(5)
             ->get()
-            ->map(fn($d) => ['district' => $d->district, 'reports' => (int)$d->reports])
+            ->map(fn ($d) => ['district' => $d->district, 'reports' => (int) $d->reports])
             ->toArray();
 
         return response()->json([
@@ -194,9 +195,9 @@ class WasteReportController extends Controller
     {
         $district = $request->query('district', null);
         $perPage = $request->query('per_page', 10);
-        
-        $query = Report::selectRaw("*, ST_AsText(location) as location_text")
-            ->whereHas('category', fn($q) => $q->where('slug', 'sampah'))
+
+        $query = Report::selectRaw('*, ST_AsText(location) as location_text')
+            ->whereHas('category', fn ($q) => $q->where('slug', 'sampah'))
             ->with(['category', 'user'])
             ->latest('created_at');
 
@@ -206,8 +207,9 @@ class WasteReportController extends Controller
 
         $reports = $query->limit($perPage)->get()->map(function ($report) {
             $locationText = $report->address ?? $this->parseGeometryPoint($report->location_text);
+
             return [
-                'id' => '#WST-' . substr($report->id, -4),
+                'id' => '#WST-'.substr($report->id, -4),
                 'location' => $locationText,
                 'category' => $report->category?->name ?? 'Unknown',
                 'status' => $report->status ?? 'menunggu',
@@ -222,8 +224,8 @@ class WasteReportController extends Controller
         return response()->json([
             'data' => [
                 'reports' => $reports,
-                'total' => Report::whereHas('category', fn($q) => $q->where('slug', 'sampah'))->count(),
-                'completed' => Report::whereHas('category', fn($q) => $q->where('slug', 'sampah'))
+                'total' => Report::whereHas('category', fn ($q) => $q->where('slug', 'sampah'))->count(),
+                'completed' => Report::whereHas('category', fn ($q) => $q->where('slug', 'sampah'))
                     ->where('status', 'selesai')
                     ->count(),
             ],
@@ -235,8 +237,10 @@ class WasteReportController extends Controller
         if (preg_match('/POINT\(([\d.-]+)\s+([\d.-]+)\)/', $pointText, $matches)) {
             $longitude = $matches[1];
             $latitude = $matches[2];
+
             return "Koordinat: {$latitude}, {$longitude}";
         }
+
         return 'Lokasi tidak tersedia';
     }
 }

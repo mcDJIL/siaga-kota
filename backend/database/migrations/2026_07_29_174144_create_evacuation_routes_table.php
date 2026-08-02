@@ -20,16 +20,16 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        DB::statement("
+        DB::statement('
             ALTER TABLE evacuation_routes 
             ADD COLUMN path geometry(LineString, 4326) NOT NULL
-        ");
+        ');
 
-        DB::statement("
+        DB::statement('
             CREATE INDEX evacuation_routes_path_idx 
             ON evacuation_routes 
             USING GIST (path)
-        ");
+        ');
     }
 
     /**

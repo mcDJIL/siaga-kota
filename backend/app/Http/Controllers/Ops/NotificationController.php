@@ -14,6 +14,7 @@ class NotificationController extends Controller
      * Daftar notifikasi petugas (tab: alert/laporan_baru/sistem/maintenance).
      *
      * @group Ops - Notifications
+     *
      * @authenticated
      */
     public function index(Request $request): JsonResponse
@@ -58,6 +59,7 @@ class NotificationController extends Controller
 
     /**
      * @group Ops - Notifications
+     *
      * @authenticated
      */
     public function markAsRead(Request $request, string $id): JsonResponse
@@ -71,6 +73,7 @@ class NotificationController extends Controller
 
     /**
      * @group Ops - Notifications
+     *
      * @authenticated
      */
     public function confirm(Request $request, string $id): JsonResponse
@@ -84,6 +87,7 @@ class NotificationController extends Controller
 
     /**
      * @group Ops - Notifications
+     *
      * @authenticated
      */
     public function hide(Request $request, string $id): JsonResponse

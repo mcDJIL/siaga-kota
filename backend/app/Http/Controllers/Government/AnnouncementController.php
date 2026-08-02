@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Government;
 use App\Enums\AnnouncementAudience;
 use App\Enums\AnnouncementStatus;
 use App\Enums\AnnouncementType;
+use App\Events\AnnouncementPublished;
 use App\Http\Controllers\Controller;
 use App\Models\Announcement;
 use Illuminate\Database\Eloquent\Builder;
@@ -16,6 +17,7 @@ class AnnouncementController extends Controller
 {
     /**
      * @group Admin - Announcements
+     *
      * @authenticated
      */
     public function index(Request $request): JsonResponse
@@ -63,6 +65,7 @@ class AnnouncementController extends Controller
 
     /**
      * @group Admin - Announcements
+     *
      * @authenticated
      */
     public function show(string $id): JsonResponse
@@ -77,6 +80,7 @@ class AnnouncementController extends Controller
 
     /**
      * @group Admin - Announcements
+     *
      * @authenticated
      */
     public function store(Request $request): JsonResponse
@@ -107,6 +111,10 @@ class AnnouncementController extends Controller
 
         $announcement = Announcement::query()->create($validated);
 
+        if ($announcement->status === AnnouncementStatus::Published) {
+            AnnouncementPublished::dispatch($announcement);
+        }
+
         return response()->json([
             'data' => $this->formatAnnouncement($announcement->load('creator:id,name')),
             'message' => 'Pengumuman berhasil dibuat.',
@@ -115,6 +123,7 @@ class AnnouncementController extends Controller
 
     /**
      * @group Admin - Announcements
+     *
      * @authenticated
      */
     public function update(Request $request, string $id): JsonResponse
@@ -133,21 +142,30 @@ class AnnouncementController extends Controller
         ]);
 
         $isPublishing = ($validated['status'] ?? null) === AnnouncementStatus::Published->value;
+        $wasPublished = $announcement->status === AnnouncementStatus::Published;
 
         if ($isPublishing && ! $announcement->published_at) {
             $validated['published_at'] ??= now();
         }
 
         $announcement->update($validated);
+        $announcement = $announcement->fresh();
+
+        // Siarkan hanya pada transisi menjadi published, bukan setiap penyuntingan
+        // pengumuman yang sudah publik.
+        if ($isPublishing && ! $wasPublished) {
+            AnnouncementPublished::dispatch($announcement);
+        }
 
         return response()->json([
-            'data' => $this->formatAnnouncement($announcement->fresh()->load('creator:id,name')),
+            'data' => $this->formatAnnouncement($announcement->load('creator:id,name')),
             'message' => 'Pengumuman berhasil diperbarui.',
         ]);
     }
 
     /**
      * @group Admin - Announcements
+     *
      * @authenticated
      */
     public function destroy(string $id): JsonResponse
@@ -164,25 +182,34 @@ class AnnouncementController extends Controller
 
     /**
      * @group Admin - Announcements
+     *
      * @authenticated
      */
     public function publish(string $id): JsonResponse
     {
         $announcement = Announcement::query()->findOrFail($id);
+        $wasPublished = $announcement->status === AnnouncementStatus::Published;
 
         $announcement->update([
             'status' => AnnouncementStatus::Published->value,
             'published_at' => $announcement->published_at ?? now(),
         ]);
 
+        $announcement = $announcement->fresh();
+
+        if (! $wasPublished) {
+            AnnouncementPublished::dispatch($announcement);
+        }
+
         return response()->json([
-            'data' => $this->formatAnnouncement($announcement->fresh()->load('creator:id,name')),
+            'data' => $this->formatAnnouncement($announcement->load('creator:id,name')),
             'message' => 'Pengumuman berhasil dipublikasikan.',
         ]);
     }
 
     /**
      * @group Admin - Announcements
+     *
      * @authenticated
      */
     public function archive(string $id): JsonResponse
@@ -203,6 +230,7 @@ class AnnouncementController extends Controller
      * Pengumuman publik: hanya yang berstatus `published` dan belum kedaluwarsa.
      *
      * @group Public - Announcements
+     *
      * @unauthenticated
      */
     public function getPublic(Request $request): JsonResponse

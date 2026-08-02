@@ -6,7 +6,6 @@ use App\Enums\UserRole;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
@@ -234,7 +233,7 @@ class AuthenticationTest extends TestCase
         $token = $user->createToken('auth-token')->plainTextToken;
 
         $response = $this
-            ->withHeader('Authorization', 'Bearer ' . $token)
+            ->withHeader('Authorization', 'Bearer '.$token)
             ->postJson('/api/v1/auth/logout');
 
         $response

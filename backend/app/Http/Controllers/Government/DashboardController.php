@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Government;
 
 use App\Http\Controllers\Controller;
 use App\Models\Announcement;
+use App\Models\Department;
 use App\Models\Report;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -14,9 +15,9 @@ class DashboardController extends Controller
     public function getDashboardStats(): JsonResponse
     {
         $totalReports = Report::count();
-        $wasteReports = Report::whereHas('category', fn($q) => $q->where('slug', 'sampah'))->count();
-        $floodReports = Report::whereHas('category', fn($q) => $q->where('slug', 'banjir'))->count();
-        
+        $wasteReports = Report::whereHas('category', fn ($q) => $q->where('slug', 'sampah'))->count();
+        $floodReports = Report::whereHas('category', fn ($q) => $q->where('slug', 'banjir'))->count();
+
         $completedReports = Report::where('status', 'selesai')->count();
 
         $completionRate = $totalReports > 0 ? round(($completedReports / $totalReports) * 100) : 0;
@@ -27,7 +28,7 @@ class DashboardController extends Controller
             ->count();
         $totalTrend = $lastMonthTotal > 0 ? round((($totalReports - $lastMonthTotal) / $lastMonthTotal) * 100) : 0;
 
-        $lastMonthFlood = Report::whereHas('category', fn($q) => $q->where('slug', 'banjir'))
+        $lastMonthFlood = Report::whereHas('category', fn ($q) => $q->where('slug', 'banjir'))
             ->whereMonth('created_at', Carbon::now()->subMonth()->month)
             ->whereYear('created_at', Carbon::now()->subMonth()->year)
             ->count();
@@ -46,7 +47,7 @@ class DashboardController extends Controller
                         'trend' => [
                             'direction' => $totalTrend >= 0 ? 'up' : 'down',
                             'color' => 'success',
-                            'text' => ($totalTrend >= 0 ? '+' : '') . $totalTrend . '% dari bulan lalu',
+                            'text' => ($totalTrend >= 0 ? '+' : '').$totalTrend.'% dari bulan lalu',
                         ],
                     ],
                     [
@@ -56,7 +57,7 @@ class DashboardController extends Controller
                         'icon' => 'Trash2',
                         'iconBg' => 'bg-brand-green-light',
                         'iconColor' => 'text-brand-green-dark',
-                        'description' => $totalReports > 0 ? round(($wasteReports / $totalReports) * 100) . '% dari total laporan' : '0% dari total laporan',
+                        'description' => $totalReports > 0 ? round(($wasteReports / $totalReports) * 100).'% dari total laporan' : '0% dari total laporan',
                     ],
                     [
                         'id' => 'laporan-banjir',
@@ -68,14 +69,14 @@ class DashboardController extends Controller
                         'trend' => [
                             'direction' => $floodTrend >= 0 ? 'up' : 'down',
                             'color' => 'danger',
-                            'text' => ($floodTrend >= 0 ? '+' : '') . $floodTrend . '% dari bulan lalu',
+                            'text' => ($floodTrend >= 0 ? '+' : '').$floodTrend.'% dari bulan lalu',
                         ],
                     ],
                 ],
                 'completion' => [
                     'label' => 'Tingkat Penyelesaian',
                     'value' => $completionRate,
-                    'description' => $completedReports . ' dari ' . $totalReports . ' laporan terselesaikan',
+                    'description' => $completedReports.' dari '.$totalReports.' laporan terselesaikan',
                 ],
             ],
         ]);
@@ -84,17 +85,17 @@ class DashboardController extends Controller
     public function getMonthlyTrend(): JsonResponse
     {
         $year = request()->query('year', Carbon::now()->year);
-        
+
         $monthlyData = [];
         for ($month = 1; $month <= 12; $month++) {
             $startDate = Carbon::createFromDate($year, $month, 1)->startOfMonth();
             $endDate = Carbon::createFromDate($year, $month, 1)->endOfMonth();
 
-            $wasteCount = Report::whereHas('category', fn($q) => $q->where('slug', 'sampah'))
+            $wasteCount = Report::whereHas('category', fn ($q) => $q->where('slug', 'sampah'))
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->count();
 
-            $floodCount = Report::whereHas('category', fn($q) => $q->where('slug', 'banjir'))
+            $floodCount = Report::whereHas('category', fn ($q) => $q->where('slug', 'banjir'))
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->count();
 
@@ -115,14 +116,14 @@ class DashboardController extends Controller
 
     public function getRecentReports(): JsonResponse
     {
-        $reports = Report::selectRaw("*, ST_AsText(location) as location_text")
+        $reports = Report::selectRaw('*, ST_AsText(location) as location_text')
             ->with(['category', 'assignedOperator.department', 'user'])
             ->latest('created_at')
             ->limit(5)
             ->get()
             ->map(function ($report) {
                 return [
-                    'id' => '#RPT-' . substr($report->id, -4),
+                    'id' => '#RPT-'.substr($report->id, -4),
                     'type' => $report->category?->slug ?? 'unknown',
                     'typeLabel' => $report->category?->name ?? 'Unknown',
                     'location' => $report->address ?? $this->parseGeometryPoint($report->location_text),
@@ -145,7 +146,7 @@ class DashboardController extends Controller
 
     public function getDepartmentPerformance(): JsonResponse
     {
-        $departments = \App\Models\Department::with(['assignedReports'])
+        $departments = Department::with(['assignedReports'])
             ->get()
             ->map(function ($dept) {
                 $totalAssigned = $dept->assignedReports()->count();
@@ -157,11 +158,11 @@ class DashboardController extends Controller
                     'id' => $dept->id,
                     'name' => $dept->name,
                     'value' => $totalAssigned > 0 ? round(($completed / $totalAssigned) * 100) : 0,
-                    'description' => $completed . '/' . $totalAssigned . ' laporan selesai',
+                    'description' => $completed.'/'.$totalAssigned.' laporan selesai',
                 ];
             })
             ->sortByDesc('value')
-            ->filter(fn($dept) => $dept['value'] > 0)
+            ->filter(fn ($dept) => $dept['value'] > 0)
             ->take(5)
             ->values();
 
@@ -205,8 +206,10 @@ class DashboardController extends Controller
         if (preg_match('/POINT\(([\d.-]+)\s+([\d.-]+)\)/', $pointText, $matches)) {
             $longitude = $matches[1];
             $latitude = $matches[2];
+
             return "Koordinat: {$latitude}, {$longitude}";
         }
+
         return 'Lokasi tidak tersedia';
     }
 }

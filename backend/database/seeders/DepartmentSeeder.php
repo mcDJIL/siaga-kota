@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Enums\DepartmentType;
 use App\Models\Department;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DepartmentSeeder extends Seeder

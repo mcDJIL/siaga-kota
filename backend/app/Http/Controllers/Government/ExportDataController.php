@@ -20,6 +20,7 @@ class ExportDataController extends Controller
      * Riwayat ekspor sesuai UI "Ekspor Data & Laporan".
      *
      * @group Admin - Exports
+     *
      * @authenticated
      */
     public function index(Request $request): JsonResponse
@@ -50,6 +51,7 @@ class ExportDataController extends Controller
      * Buat job ekspor asinkron. Berkas diproses di queue sesuai PLAN §5.8.
      *
      * @group Admin - Exports
+     *
      * @authenticated
      */
     public function store(Request $request): JsonResponse
@@ -88,6 +90,7 @@ class ExportDataController extends Controller
 
     /**
      * @group Admin - Exports
+     *
      * @authenticated
      */
     public function download(string $id): StreamedResponse

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\AnnouncementAudience;
 use App\Enums\AnnouncementStatus;
 use App\Enums\AnnouncementType;
+use Database\Factories\AnnouncementFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
@@ -26,6 +27,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 ])]
 class Announcement extends Model
 {
+    /** @use HasFactory<AnnouncementFactory> */
     use HasFactory, HasUlids, SoftDeletes;
 
     protected function casts(): array

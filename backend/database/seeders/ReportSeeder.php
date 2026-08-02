@@ -2,11 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Enums\WasteType;
 use App\Models\Report;
 use App\Models\ReportCategory;
 use App\Models\User;
-use App\Enums\ReportStatus;
-use App\Enums\WasteType;
 use Illuminate\Database\Seeder;
 
 class ReportSeeder extends Seeder
@@ -17,8 +16,8 @@ class ReportSeeder extends Seeder
     public function run(): void
     {
         $citizen = User::where('email', 'warga@example.com')->first();
-        
-        if (!$citizen) {
+
+        if (! $citizen) {
             return;
         }
 
@@ -58,12 +57,14 @@ class ReportSeeder extends Seeder
         // Create waste reports
         foreach (array_chunk($wasteReports, count($locations)) as $chunk) {
             foreach ($chunk as $index => $reportData) {
-                if ($index >= count($locations)) break;
-                
+                if ($index >= count($locations)) {
+                    break;
+                }
+
                 $location = $locations[$index];
-                
+
                 Report::create([
-                    'code' => 'RPT-WASTE-' . str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT),
+                    'code' => 'RPT-WASTE-'.str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT),
                     'user_id' => $citizen->id,
                     'category_id' => $wasteCategory->id,
                     'waste_type' => WasteType::cases()[mt_rand(0, count(WasteType::cases()) - 1)],
@@ -81,12 +82,14 @@ class ReportSeeder extends Seeder
         // Create flood reports
         foreach (array_chunk($floodReports, count($locations)) as $chunk) {
             foreach ($chunk as $index => $reportData) {
-                if ($index >= count($locations)) break;
-                
+                if ($index >= count($locations)) {
+                    break;
+                }
+
                 $location = $locations[$index];
-                
+
                 Report::create([
-                    'code' => 'RPT-FLOOD-' . str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT),
+                    'code' => 'RPT-FLOOD-'.str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT),
                     'user_id' => $citizen->id,
                     'category_id' => $floodCategory->id,
                     'title' => $reportData['title'],

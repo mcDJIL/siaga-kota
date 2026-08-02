@@ -5,9 +5,8 @@ namespace App\Models;
 use App\Enums\ReportPriority;
 use App\Enums\ReportStatus;
 use App\Enums\WasteType;
-use App\Models\ReportAttachment;
-use App\Models\ReportStatusHistory;
 use App\Services\NotificationService;
+use Database\Factories\ReportFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -39,7 +38,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 ])]
 class Report extends Model
 {
-    /** @use HasFactory<\Database\Factories\ReportFactory> */
+    /** @use HasFactory<ReportFactory> */
     use HasFactory, HasUlids, SoftDeletes;
 
     protected static function booted(): void
@@ -47,7 +46,7 @@ class Report extends Model
         static::created(function (Report $report) {
             // Create notification for new report
             NotificationService::createNewReportNotification($report);
-            
+
             // Create flood alert if applicable
             if ($report->category?->slug === 'banjir' && $report->water_level_cm) {
                 NotificationService::createFloodAlertNotification($report);
@@ -55,20 +54,39 @@ class Report extends Model
         });
 
         static::updating(function (Report $report) {
-            // Check if status changed
-            if ($report->isDirty('status')) {
-                $oldStatus = $report->getOriginal('status');
-                $newStatus = $report->getAttribute('status');
-                
-                // Create status update notification
-                NotificationService::createStatusUpdateNotification($report, $oldStatus, $newStatus);
-                
-                // Create completion notification if completed
-                if ($newStatus === 'selesai') {
-                    NotificationService::createCompletionNotification($report);
-                }
+            if (! $report->isDirty('status')) {
+                return;
+            }
+
+            // Kolom status di-cast ke enum ReportStatus, sehingga getOriginal()
+            // maupun getAttribute() dapat mengembalikan instance enum. Normalkan
+            // ke string agar cocok dengan signature NotificationService.
+            $oldStatus = self::normalizeStatus($report->getOriginal('status'));
+            $newStatus = self::normalizeStatus($report->getAttribute('status'));
+
+            if ($newStatus === null) {
+                return;
+            }
+
+            NotificationService::createStatusUpdateNotification($report, $oldStatus, $newStatus);
+
+            if ($newStatus === ReportStatus::Selesai->value) {
+                NotificationService::createCompletionNotification($report);
             }
         });
+    }
+
+    /**
+     * Ubah nilai status menjadi string kanonik, terlepas dari apakah nilainya
+     * berupa enum ReportStatus atau string mentah dari database.
+     */
+    private static function normalizeStatus(mixed $status): ?string
+    {
+        return match (true) {
+            $status instanceof ReportStatus => $status->value,
+            is_string($status) => $status,
+            default => null,
+        };
     }
 
     protected function casts(): array
@@ -165,6 +183,7 @@ class Report extends Model
     public function getLatitudeAttribute(): ?float
     {
         $coords = $this->parsePointCoordinates();
+
         return $coords['latitude'] ?? null;
     }
 
@@ -174,6 +193,7 @@ class Report extends Model
     public function getLongitudeAttribute(): ?float
     {
         $coords = $this->parsePointCoordinates();
+
         return $coords['longitude'] ?? null;
     }
 

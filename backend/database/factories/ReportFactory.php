@@ -27,7 +27,7 @@ class ReportFactory extends Factory
         $lng = fake()->longitude(113.0, 114.0);
 
         return [
-            'code' => 'RPT-' . fake()->unique()->numerify('####'),
+            'code' => 'RPT-'.fake()->unique()->numerify('####'),
             'user_id' => User::factory(),
             'category_id' => ReportCategory::factory(),
             'waste_type' => fake()->optional()->randomElement(WasteType::cases())?->value,
@@ -46,14 +46,14 @@ class ReportFactory extends Factory
 
     public function menunggu(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => ReportStatus::Menunggu->value,
         ]);
     }
 
     public function diproses(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => ReportStatus::Diproses->value,
             'processed_at' => now(),
         ]);
@@ -61,7 +61,7 @@ class ReportFactory extends Factory
 
     public function selesai(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => ReportStatus::Selesai->value,
             'processed_at' => now()->subDays(2),
             'resolved_at' => now(),

@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use Database\Factories\WasteBankFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\Expression;
 
 #[Fillable([
     'name',
@@ -17,7 +19,7 @@ use Illuminate\Database\Eloquent\Model;
 ])]
 class WasteBank extends Model
 {
-    /** @use HasFactory<\Database\Factories\WasteBankFactory> */
+    /** @use HasFactory<WasteBankFactory> */
     use HasFactory, HasUlids;
 
     protected function casts(): array
@@ -32,7 +34,7 @@ class WasteBank extends Model
     {
         $location = $this->attributes['location'] ?? null;
 
-        if (! $location || $location instanceof \Illuminate\Database\Query\Expression) {
+        if (! $location || $location instanceof Expression) {
             return null;
         }
 
@@ -47,7 +49,7 @@ class WasteBank extends Model
     {
         $location = $this->attributes['location'] ?? null;
 
-        if (! $location || $location instanceof \Illuminate\Database\Query\Expression) {
+        if (! $location || $location instanceof Expression) {
             return null;
         }
 

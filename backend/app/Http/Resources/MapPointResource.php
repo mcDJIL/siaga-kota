@@ -29,7 +29,7 @@ class MapPointResource extends JsonResource
                 'contact' => $this->contact ?? null,
                 'type' => $this->type ?? null,
                 'status' => $this->status ?? null,
-                'category' => $this->when(isset($this->category), fn() => [
+                'category' => $this->when(isset($this->category), fn () => [
                     'slug' => $this->category->slug,
                     'name' => $this->category->name,
                     'icon' => $this->category->icon,

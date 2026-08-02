@@ -21,11 +21,11 @@ class FloodReportController extends Controller
         $lastMonthEnd = Carbon::now()->subMonth()->endOfMonth();
 
         // Total reports this month
-        $totalReports = Report::whereHas('category', fn($q) => $q->where('slug', 'banjir'))
+        $totalReports = Report::whereHas('category', fn ($q) => $q->where('slug', 'banjir'))
             ->whereBetween('created_at', [$currentMonthStart, $currentMonthEnd])
             ->count();
 
-        $totalReportsLastMonth = Report::whereHas('category', fn($q) => $q->where('slug', 'banjir'))
+        $totalReportsLastMonth = Report::whereHas('category', fn ($q) => $q->where('slug', 'banjir'))
             ->whereBetween('created_at', [$lastMonthStart, $lastMonthEnd])
             ->count();
 
@@ -34,12 +34,12 @@ class FloodReportController extends Controller
             : 0;
 
         // Completed reports this month
-        $completedReports = Report::whereHas('category', fn($q) => $q->where('slug', 'banjir'))
+        $completedReports = Report::whereHas('category', fn ($q) => $q->where('slug', 'banjir'))
             ->where('status', 'selesai')
             ->whereBetween('created_at', [$currentMonthStart, $currentMonthEnd])
             ->count();
 
-        $completedReportsLastMonth = Report::whereHas('category', fn($q) => $q->where('slug', 'banjir'))
+        $completedReportsLastMonth = Report::whereHas('category', fn ($q) => $q->where('slug', 'banjir'))
             ->where('status', 'selesai')
             ->whereBetween('created_at', [$lastMonthStart, $lastMonthEnd])
             ->count();
@@ -49,7 +49,7 @@ class FloodReportController extends Controller
             : 0;
 
         // Calculate average response time (minutes from created to selesai status)
-        $avgResponseTime = Report::whereHas('category', fn($q) => $q->where('slug', 'banjir'))
+        $avgResponseTime = Report::whereHas('category', fn ($q) => $q->where('slug', 'banjir'))
             ->where('status', 'selesai')
             ->whereBetween('created_at', [$currentMonthStart, $currentMonthEnd])
             ->selectRaw('AVG(EXTRACT(EPOCH FROM (updated_at - created_at))/60) as avg_minutes')
@@ -57,7 +57,7 @@ class FloodReportController extends Controller
 
         $avgResponseTime = round($avgResponseTime ?? 0);
 
-        $avgResponseTimeLastMonth = Report::whereHas('category', fn($q) => $q->where('slug', 'banjir'))
+        $avgResponseTimeLastMonth = Report::whereHas('category', fn ($q) => $q->where('slug', 'banjir'))
             ->where('status', 'selesai')
             ->whereBetween('created_at', [$lastMonthStart, $lastMonthEnd])
             ->selectRaw('AVG(EXTRACT(EPOCH FROM (updated_at - created_at))/60) as avg_minutes')
@@ -69,13 +69,13 @@ class FloodReportController extends Controller
             : 0;
 
         // Prevented incidents = reports with high water level that were handled quickly
-        $preventedIncidents = Report::whereHas('category', fn($q) => $q->where('slug', 'banjir'))
+        $preventedIncidents = Report::whereHas('category', fn ($q) => $q->where('slug', 'banjir'))
             ->where('water_level_cm', '>', 70)
             ->where('status', 'selesai')
             ->whereBetween('created_at', [$currentMonthStart, $currentMonthEnd])
             ->count();
 
-        $preventedIncidentsLastMonth = Report::whereHas('category', fn($q) => $q->where('slug', 'banjir'))
+        $preventedIncidentsLastMonth = Report::whereHas('category', fn ($q) => $q->where('slug', 'banjir'))
             ->where('water_level_cm', '>', 70)
             ->where('status', 'selesai')
             ->whereBetween('created_at', [$lastMonthStart, $lastMonthEnd])
@@ -98,8 +98,8 @@ class FloodReportController extends Controller
                         'iconBg' => 'bg-navy/10',
                         'iconColor' => 'text-navy',
                         'trend' => [
-                            'value' => ($totalTrend >= 0 ? '+' : '') . $totalTrend . '%',
-                            'className' => $totalTrend >= 0 ? 'bg-[#FFDAD6]/50 text-[#BA1A1A]' : 'bg-brand-green-light/50 text-brand-green'
+                            'value' => ($totalTrend >= 0 ? '+' : '').$totalTrend.'%',
+                            'className' => $totalTrend >= 0 ? 'bg-[#FFDAD6]/50 text-[#BA1A1A]' : 'bg-brand-green-light/50 text-brand-green',
                         ],
                     ],
                     [
@@ -111,8 +111,8 @@ class FloodReportController extends Controller
                         'iconBg' => 'bg-brand-green-light/30',
                         'iconColor' => 'text-brand-green',
                         'trend' => [
-                            'value' => ($completedTrend >= 0 ? '+' : '') . $completedTrend . '%',
-                            'className' => 'bg-brand-green-light/50 text-brand-green'
+                            'value' => ($completedTrend >= 0 ? '+' : '').$completedTrend.'%',
+                            'className' => 'bg-brand-green-light/50 text-brand-green',
                         ],
                         'showProgress' => true,
                     ],
@@ -125,8 +125,8 @@ class FloodReportController extends Controller
                         'iconBg' => 'bg-badge-gold/20',
                         'iconColor' => 'text-[#715C00]',
                         'trend' => [
-                            'value' => ($responseTrend <= 0 ? '' : '+') . $responseTrend . 'm',
-                            'className' => $responseTrend <= 0 ? 'bg-brand-green-light/50 text-brand-green' : 'bg-[#FFDAD6]/50 text-[#BA1A1A]'
+                            'value' => ($responseTrend <= 0 ? '' : '+').$responseTrend.'m',
+                            'className' => $responseTrend <= 0 ? 'bg-brand-green-light/50 text-brand-green' : 'bg-[#FFDAD6]/50 text-[#BA1A1A]',
                         ],
                     ],
                     [
@@ -137,8 +137,8 @@ class FloodReportController extends Controller
                         'iconBg' => 'bg-navy/10',
                         'iconColor' => 'text-navy',
                         'trend' => [
-                            'value' => ($preventedTrend >= 0 ? '+' : '') . $preventedTrend . '%',
-                            'className' => 'bg-brand-green-light/50 text-brand-green'
+                            'value' => ($preventedTrend >= 0 ? '+' : '').$preventedTrend.'%',
+                            'className' => 'bg-brand-green-light/50 text-brand-green',
                         ],
                         'footnote' => 'Laporan tinggi yang terselesaikan',
                     ],
@@ -150,13 +150,13 @@ class FloodReportController extends Controller
     public function getDistrictFloodDistribution(): JsonResponse
     {
         $districts = Report::selectRaw('address as district, COUNT(*) as reports')
-            ->whereHas('category', fn($q) => $q->where('slug', 'banjir'))
+            ->whereHas('category', fn ($q) => $q->where('slug', 'banjir'))
             ->whereNotNull('address')
             ->groupBy('address')
             ->orderByDesc('reports')
             ->limit(7)
             ->get()
-            ->map(fn($d) => ['district' => $d->district, 'reports' => (int)$d->reports])
+            ->map(fn ($d) => ['district' => $d->district, 'reports' => (int) $d->reports])
             ->toArray();
 
         return response()->json([
@@ -170,7 +170,7 @@ class FloodReportController extends Controller
     {
         $district = $request->query('district', null);
 
-        $query = Report::whereHas('category', fn($q) => $q->where('slug', 'banjir'));
+        $query = Report::whereHas('category', fn ($q) => $q->where('slug', 'banjir'));
 
         if ($district && $district !== 'Semua District') {
             $query->where('address', 'like', "%{$district}%");
@@ -201,8 +201,8 @@ class FloodReportController extends Controller
         $status = $request->query('status', null);
         $perPage = $request->query('per_page', 10);
 
-        $query = Report::selectRaw("*, ST_AsText(location) as location_text")
-            ->whereHas('category', fn($q) => $q->where('slug', 'banjir'))
+        $query = Report::selectRaw('*, ST_AsText(location) as location_text')
+            ->whereHas('category', fn ($q) => $q->where('slug', 'banjir'))
             ->with(['category', 'user'])
             ->latest('created_at');
 
@@ -216,10 +216,11 @@ class FloodReportController extends Controller
 
         $reports = $query->limit($perPage)->get()->map(function ($report) {
             $locationText = $report->address ?? $this->parseGeometryPoint($report->location_text);
+
             return [
-                'id' => '#FLD-' . substr($report->id, -4),
+                'id' => '#FLD-'.substr($report->id, -4),
                 'location' => $locationText,
-                'waterLevel' => (int)($report->water_level_cm ?? 0),
+                'waterLevel' => (int) ($report->water_level_cm ?? 0),
                 'severity' => $this->determineSeverity($report->water_level_cm ?? 0),
                 'status' => $report->status ?? 'menunggu',
                 'time' => $report->created_at->format('d M, H:i'),
@@ -234,8 +235,8 @@ class FloodReportController extends Controller
         return response()->json([
             'data' => [
                 'reports' => $reports,
-                'total' => Report::whereHas('category', fn($q) => $q->where('slug', 'banjir'))->count(),
-                'completed' => Report::whereHas('category', fn($q) => $q->where('slug', 'banjir'))
+                'total' => Report::whereHas('category', fn ($q) => $q->where('slug', 'banjir'))->count(),
+                'completed' => Report::whereHas('category', fn ($q) => $q->where('slug', 'banjir'))
                     ->where('status', 'selesai')
                     ->count(),
             ],
@@ -244,15 +245,20 @@ class FloodReportController extends Controller
 
     private function determineSeverity(int $waterLevel): string
     {
-        if ($waterLevel > 70) return 'Tinggi';
-        if ($waterLevel > 30) return 'Sedang';
+        if ($waterLevel > 70) {
+            return 'Tinggi';
+        }
+        if ($waterLevel > 30) {
+            return 'Sedang';
+        }
+
         return 'Rendah';
     }
 
     public function verifyReport(string $id): JsonResponse
     {
         try {
-            $report = Report::whereHas('category', fn($q) => $q->where('slug', 'banjir'))
+            $report = Report::whereHas('category', fn ($q) => $q->where('slug', 'banjir'))
                 ->findOrFail($id);
 
             if ($report->status !== 'menunggu') {
@@ -280,7 +286,7 @@ class FloodReportController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal memverifikasi laporan: ' . $e->getMessage(),
+                'message' => 'Gagal memverifikasi laporan: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -292,7 +298,7 @@ class FloodReportController extends Controller
                 'status' => 'required|in:menunggu,terverifikasi,diproses,selesai',
             ]);
 
-            $report = Report::whereHas('category', fn($q) => $q->where('slug', 'banjir'))
+            $report = Report::whereHas('category', fn ($q) => $q->where('slug', 'banjir'))
                 ->findOrFail($id);
 
             $oldStatus = $report->status;
@@ -300,7 +306,7 @@ class FloodReportController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Status laporan berhasil diubah dari ' . $oldStatus . ' menjadi ' . $request->status,
+                'message' => 'Status laporan berhasil diubah dari '.$oldStatus.' menjadi '.$request->status,
                 'data' => [
                     'id' => $report->id,
                     'status' => $report->status,
@@ -310,7 +316,7 @@ class FloodReportController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal mengubah status laporan: ' . $e->getMessage(),
+                'message' => 'Gagal mengubah status laporan: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -320,8 +326,10 @@ class FloodReportController extends Controller
         if (preg_match('/POINT\(([\d.-]+)\s+([\d.-]+)\)/', $pointText, $matches)) {
             $longitude = $matches[1];
             $latitude = $matches[2];
+
             return "Koordinat: {$latitude}, {$longitude}";
         }
+
         return 'Lokasi tidak tersedia';
     }
 }

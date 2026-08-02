@@ -3,16 +3,12 @@
 namespace App\Http\Controllers\Government;
 
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\Public\FloodPredictionController;
-use App\Http\Controllers\Public\DistrictLookupController;
 use App\Models\District;
 use App\Models\Report;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
 class ActivityMapController extends Controller
@@ -47,7 +43,7 @@ class ActivityMapController extends Controller
     public function getWasteReports(Request $request): array
     {
         $query = Report::query()
-            ->whereHas('category', fn($q) => $q->where('slug', 'sampah'))
+            ->whereHas('category', fn ($q) => $q->where('slug', 'sampah'))
             ->with('category')
             ->where('deleted_at', null);
 
@@ -82,7 +78,7 @@ class ActivityMapController extends Controller
     public function getFloodReports(Request $request): array
     {
         $query = Report::query()
-            ->whereHas('category', fn($q) => $q->where('slug', 'banjir'))
+            ->whereHas('category', fn ($q) => $q->where('slug', 'banjir'))
             ->with('category')
             ->where('deleted_at', null);
 
@@ -124,7 +120,7 @@ class ActivityMapController extends Controller
         foreach ($districts as $district) {
             try {
                 // Get weather history dari report data terakhir
-                $recentFloodReports = Report::whereHas('category', fn($q) => $q->where('slug', 'banjir'))
+                $recentFloodReports = Report::whereHas('category', fn ($q) => $q->where('slug', 'banjir'))
                     ->where('address', 'like', "%{$district->name}%")
                     ->latest('created_at')
                     ->limit(7)
@@ -141,12 +137,12 @@ class ActivityMapController extends Controller
                 }
 
                 // Prepare prediction request
-                $floodReports24h = Report::whereHas('category', fn($q) => $q->where('slug', 'banjir'))
+                $floodReports24h = Report::whereHas('category', fn ($q) => $q->where('slug', 'banjir'))
                     ->where('address', 'like', "%{$district->name}%")
                     ->where('created_at', '>=', now()->subDay())
                     ->count();
 
-                $wasteReports24h = Report::whereHas('category', fn($q) => $q->where('slug', 'sampah'))
+                $wasteReports24h = Report::whereHas('category', fn ($q) => $q->where('slug', 'sampah'))
                     ->where('address', 'like', "%{$district->name}%")
                     ->where('created_at', '>=', now()->subDay())
                     ->count();
@@ -184,9 +180,9 @@ class ActivityMapController extends Controller
                     }
 
                     $predictions[] = [
-                        'id' => 'ai-flood-' . $district->slug,
+                        'id' => 'ai-flood-'.$district->slug,
                         'type' => 'ai',
-                        'title' => 'Prediksi Banjir - ' . $district->name,
+                        'title' => 'Prediksi Banjir - '.$district->name,
                         'description' => "Risiko banjir: {$floodRisk}% | Laporan banjir 24h: {$floodReports24h}",
                         'position' => [$district->latitude, $district->longitude],
                         'location' => $district->name,
@@ -199,9 +195,9 @@ class ActivityMapController extends Controller
             } catch (\Exception $e) {
                 // Fallback jika ML API tidak tersedia
                 $predictions[] = [
-                    'id' => 'ai-flood-' . $district->slug,
+                    'id' => 'ai-flood-'.$district->slug,
                     'type' => 'ai',
-                    'title' => 'Prediksi Banjir - ' . $district->name,
+                    'title' => 'Prediksi Banjir - '.$district->name,
                     'description' => 'Data prediksi sedang diproses',
                     'position' => [$district->latitude, $district->longitude],
                     'location' => $district->name,
@@ -258,17 +254,17 @@ class ActivityMapController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Gagal membuat laporan: ' . $e->getMessage(),
+                'message' => 'Gagal membuat laporan: '.$e->getMessage(),
             ], 500);
         }
     }
 
     private function generatePDF(string $layer, array $mapData): string
     {
-        $filename = 'activity-map-report-' . now()->format('Y-m-d-His') . '.pdf';
-        $filepath = storage_path('app/public/reports/' . $filename);
+        $filename = 'activity-map-report-'.now()->format('Y-m-d-His').'.pdf';
+        $filepath = storage_path('app/public/reports/'.$filename);
 
-        if (!is_dir(dirname($filepath))) {
+        if (! is_dir(dirname($filepath))) {
             mkdir(dirname($filepath), 0755, true);
         }
 
@@ -289,15 +285,15 @@ class ActivityMapController extends Controller
             table{width:100%;border-collapse:collapse;margin-bottom:14px} th,td{border:1px solid #d1d5db;padding:6px;text-align:left;vertical-align:top}
             th{background:#f3f4f6}.risk-Tinggi{color:#b91c1c}.risk-Sedang{color:#b45309}.risk-Rendah{color:#047857}
         </style></head><body>';
-        $html .= '<h1>Laporan Peta Aktivitas</h1><div class="muted">Dibuat pada ' . e(now()->format('d M Y H:i')) . '</div>';
-        $html .= '<table class="summary"><tr><td><strong>' . count($mapData['waste'] ?? []) . '</strong><br>Laporan Sampah</td><td><strong>' . count($mapData['flood'] ?? []) . '</strong><br>Laporan Banjir</td><td><strong>' . count($mapData['ai'] ?? []) . '</strong><br>Prediksi AI</td><td><strong>' . count($mapData['districts'] ?? []) . '</strong><br>Kecamatan</td></tr></table>';
+        $html .= '<h1>Laporan Peta Aktivitas</h1><div class="muted">Dibuat pada '.e(now()->format('d M Y H:i')).'</div>';
+        $html .= '<table class="summary"><tr><td><strong>'.count($mapData['waste'] ?? []).'</strong><br>Laporan Sampah</td><td><strong>'.count($mapData['flood'] ?? []).'</strong><br>Laporan Banjir</td><td><strong>'.count($mapData['ai'] ?? []).'</strong><br>Prediksi AI</td><td><strong>'.count($mapData['districts'] ?? []).'</strong><br>Kecamatan</td></tr></table>';
 
         foreach ($sections as $key => $title) {
-            $html .= '<h2>' . e($title) . '</h2><table><thead><tr><th>Judul</th><th>Lokasi</th><th>Status</th><th>Risiko</th><th>Waktu</th></tr></thead><tbody>';
+            $html .= '<h2>'.e($title).'</h2><table><thead><tr><th>Judul</th><th>Lokasi</th><th>Status</th><th>Risiko</th><th>Waktu</th></tr></thead><tbody>';
 
             foreach (($mapData[$key] ?? []) as $item) {
                 $risk = $item['riskLevel'] ?? '-';
-                $html .= '<tr><td>' . e($item['title'] ?? '-') . '</td><td>' . e($item['location'] ?? '-') . '</td><td>' . e($item['status'] ?? '-') . '</td><td class="risk-' . e($risk) . '">' . e($risk) . '</td><td>' . e($item['createdAt'] ?? '-') . '</td></tr>';
+                $html .= '<tr><td>'.e($item['title'] ?? '-').'</td><td>'.e($item['location'] ?? '-').'</td><td>'.e($item['status'] ?? '-').'</td><td class="risk-'.e($risk).'">'.e($risk).'</td><td>'.e($item['createdAt'] ?? '-').'</td></tr>';
             }
 
             if (empty($mapData[$key])) {
@@ -310,7 +306,7 @@ class ActivityMapController extends Controller
         $html .= '<h2>Statistik Kecamatan</h2><table><thead><tr><th>Kecamatan</th><th>Status</th><th>Skor Risiko</th><th>Sampah</th><th>Banjir</th><th>Aksi</th></tr></thead><tbody>';
 
         foreach (($mapData['districts'] ?? []) as $district) {
-            $html .= '<tr><td>' . e($district['name'] ?? '-') . '</td><td>' . e($district['status'] ?? '-') . '</td><td>' . e($district['riskScore'] ?? '-') . '</td><td>' . e($district['wasteCount'] ?? 0) . '</td><td>' . e($district['floodCount'] ?? 0) . '</td><td>' . e($district['action'] ?? '-') . '</td></tr>';
+            $html .= '<tr><td>'.e($district['name'] ?? '-').'</td><td>'.e($district['status'] ?? '-').'</td><td>'.e($district['riskScore'] ?? '-').'</td><td>'.e($district['wasteCount'] ?? 0).'</td><td>'.e($district['floodCount'] ?? 0).'</td><td>'.e($district['action'] ?? '-').'</td></tr>';
         }
 
         if (empty($mapData['districts'])) {
@@ -321,7 +317,7 @@ class ActivityMapController extends Controller
 
         Pdf::loadHTML($html)->setPaper('a4', 'landscape')->save($filepath);
 
-        return '/storage/reports/' . $filename;
+        return '/storage/reports/'.$filename;
     }
 
     private function assessRiskLevel(string $status, string $type, ?int $waterLevel = null): string
@@ -380,11 +376,11 @@ class ActivityMapController extends Controller
             $districts = District::all();
 
             foreach ($districts as $district) {
-                $wasteCount = Report::whereHas('category', fn($q) => $q->where('slug', 'sampah'))
+                $wasteCount = Report::whereHas('category', fn ($q) => $q->where('slug', 'sampah'))
                     ->where('address', 'like', "%{$district->name}%")
                     ->count();
 
-                $floodCount = Report::whereHas('category', fn($q) => $q->where('slug', 'banjir'))
+                $floodCount = Report::whereHas('category', fn ($q) => $q->where('slug', 'banjir'))
                     ->where('address', 'like', "%{$district->name}%")
                     ->count();
 
@@ -406,7 +402,7 @@ class ActivityMapController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Gagal memperbarui statistik: ' . $e->getMessage(),
+                'message' => 'Gagal memperbarui statistik: '.$e->getMessage(),
             ], 500);
         }
     }

@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use Database\Factories\EvacuationRouteFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\Expression;
 
 #[Fillable([
     'name',
@@ -15,7 +17,7 @@ use Illuminate\Database\Eloquent\Model;
 ])]
 class EvacuationRoute extends Model
 {
-    /** @use HasFactory<\Database\Factories\EvacuationRouteFactory> */
+    /** @use HasFactory<EvacuationRouteFactory> */
     use HasFactory, HasUlids;
 
     protected function casts(): array
@@ -33,14 +35,16 @@ class EvacuationRoute extends Model
     {
         $path = $this->attributes['path'] ?? null;
 
-        if (! $path || $path instanceof \Illuminate\Database\Query\Expression) {
+        if (! $path || $path instanceof Expression) {
             return null;
         }
 
         if (preg_match('/LINESTRING\(([^)]+)\)/', $path, $matches)) {
             $coords = explode(',', $matches[1]);
+
             return array_map(function ($coord) {
                 [$lng, $lat] = explode(' ', trim($coord));
+
                 return [(float) $lng, (float) $lat];
             }, $coords);
         }

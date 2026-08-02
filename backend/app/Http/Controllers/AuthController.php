@@ -22,12 +22,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
     /**
      * @group Auth
+     *
      * @unauthenticated
+     *
      * @bodyParam name string required Nama pengguna.
      * @bodyParam email string required Email pengguna.
      * @bodyParam phone string required Nomor telepon pengguna.
@@ -66,7 +69,9 @@ class AuthController extends Controller
 
     /**
      * @group Auth
+     *
      * @unauthenticated
+     *
      * @bodyParam email string required Email pengguna.
      * @bodyParam password string required Password akun.
      */
@@ -95,7 +100,7 @@ class AuthController extends Controller
         ])->save();
 
         $user->load('department');
-        
+
         $token = $user->createToken('auth-token')->plainTextToken;
 
         return response()->json([
@@ -109,6 +114,7 @@ class AuthController extends Controller
 
     /**
      * @group Auth
+     *
      * @authenticated
      */
     public function logout(Request $request): JsonResponse
@@ -122,6 +128,7 @@ class AuthController extends Controller
 
     /**
      * @group Auth
+     *
      * @authenticated
      */
     public function me(Request $request): JsonResponse
@@ -137,6 +144,7 @@ class AuthController extends Controller
 
     /**
      * @group Auth
+     *
      * @authenticated
      */
     public function updateMe(UpdateProfileRequest $request): JsonResponse
@@ -166,7 +174,7 @@ class AuthController extends Controller
         try {
             $file = $request->file('avatar_path');
 
-            if (!$file || !$file->isValid()) {
+            if (! $file || ! $file->isValid()) {
                 return response()->json([
                     'message' => 'File tidak valid.',
                 ], 400);
@@ -174,7 +182,7 @@ class AuthController extends Controller
 
             $path = $file->store('avatars', 'public');
 
-            if (!$path) {
+            if (! $path) {
                 return response()->json([
                     'message' => 'Gagal menyimpan file ke storage.',
                 ], 400);
@@ -199,14 +207,16 @@ class AuthController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Gagal mengunggah avatar: ' . $e->getMessage(),
+                'message' => 'Gagal mengunggah avatar: '.$e->getMessage(),
             ], 400);
         }
     }
 
     /**
      * @group Auth
+     *
      * @authenticated
+     *
      * @bodyParam current_password string required Password saat ini.
      * @bodyParam password string required Password baru minimal 8 karakter.
      * @bodyParam password_confirmation string required Konfirmasi password baru.
@@ -230,7 +240,9 @@ class AuthController extends Controller
 
     /**
      * @group Auth
+     *
      * @unauthenticated
+     *
      * @bodyParam email string required Email pengguna.
      */
     public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
@@ -246,7 +258,9 @@ class AuthController extends Controller
 
     /**
      * @group Auth
+     *
      * @unauthenticated
+     *
      * @bodyParam email string required Email pengguna.
      * @bodyParam token string required Token reset password.
      * @bodyParam password string required Password baru minimal 8 karakter.
@@ -261,7 +275,7 @@ class AuthController extends Controller
             function (User $user, string $password) {
                 $user->forceFill([
                     'password' => $password,
-                    'remember_token' => \Illuminate\Support\Str::random(60),
+                    'remember_token' => Str::random(60),
                 ])->save();
 
                 event(new PasswordReset($user));
@@ -279,7 +293,9 @@ class AuthController extends Controller
      * Danger Zone: hapus akun sendiri (soft delete + purge data personal).
      *
      * @group Auth
+     *
      * @authenticated
+     *
      * @bodyParam password string required Password akun untuk konfirmasi.
      */
     public function destroy(
@@ -297,7 +313,9 @@ class AuthController extends Controller
      * Daftarkan langganan Web Push milik pengguna.
      *
      * @group Auth
+     *
      * @authenticated
+     *
      * @bodyParam endpoint string required Endpoint push dari browser.
      * @bodyParam keys object required Kunci enkripsi (p256dh, auth).
      */
@@ -328,7 +346,9 @@ class AuthController extends Controller
      * Hentikan langganan Web Push.
      *
      * @group Auth
+     *
      * @authenticated
+     *
      * @bodyParam endpoint string Endpoint yang ingin dihapus. Jika kosong, seluruh langganan pengguna dihapus.
      */
     public function unsubscribePush(Request $request): JsonResponse

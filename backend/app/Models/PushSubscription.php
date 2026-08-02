@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\PushSubscriptionFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -20,7 +21,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 class PushSubscription extends Model
 {
-    /** @use HasFactory<\Database\Factories\PushSubscriptionFactory> */
+    /** @use HasFactory<PushSubscriptionFactory> */
     use HasFactory, HasUlids;
 
     public const UPDATED_AT = null;

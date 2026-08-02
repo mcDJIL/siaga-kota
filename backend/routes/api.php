@@ -1,6 +1,15 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Government\ActivityMapController;
+use App\Http\Controllers\Government\AIPredictionController;
+use App\Http\Controllers\Government\AnnouncementController;
+use App\Http\Controllers\Government\DashboardController;
+use App\Http\Controllers\Government\DepartmentController;
+use App\Http\Controllers\Government\ExportDataController;
+use App\Http\Controllers\Government\FloodReportController;
+use App\Http\Controllers\Government\UserManagementController;
+use App\Http\Controllers\Government\WasteReportController;
 use App\Http\Controllers\Ops\ActivityMapController as OpsActivityMapController;
 use App\Http\Controllers\Ops\DashboardController as OpsDashboardController;
 use App\Http\Controllers\Ops\NotificationController as OpsNotificationController;
@@ -10,7 +19,6 @@ use App\Http\Controllers\Public\FloodPredictionController;
 use App\Http\Controllers\Public\MapController;
 use App\Http\Controllers\Public\ReportController as PublicReportController;
 use Illuminate\Support\Facades\Route;
-
 
 Route::prefix('v1')->group(function (): void {
     Route::prefix('auth')->controller(AuthController::class)->group(function (): void {
@@ -103,7 +111,7 @@ Route::prefix('v1')->group(function (): void {
     Route::middleware(['auth:sanctum', 'role:admin,sanctum', 'throttle:admin'])
         ->prefix('government')
         ->group(function (): void {
-            Route::controller(\App\Http\Controllers\Government\DashboardController::class)
+            Route::controller(DashboardController::class)
                 ->prefix('dashboard')
                 ->group(function (): void {
                     Route::get('/stats', 'getDashboardStats');
@@ -113,7 +121,7 @@ Route::prefix('v1')->group(function (): void {
                     Route::get('/announcements', 'getAnnouncements');
                 });
 
-            Route::controller(\App\Http\Controllers\Government\WasteReportController::class)
+            Route::controller(WasteReportController::class)
                 ->prefix('waste-reports')
                 ->group(function (): void {
                     Route::get('/stats', 'getWasteReportStats');
@@ -122,7 +130,7 @@ Route::prefix('v1')->group(function (): void {
                     Route::get('/recent', 'getRecentWasteReports');
                 });
 
-            Route::controller(\App\Http\Controllers\Government\FloodReportController::class)
+            Route::controller(FloodReportController::class)
                 ->prefix('flood-reports')
                 ->group(function (): void {
                     Route::get('/stats', 'getFloodReportStats');
@@ -133,7 +141,7 @@ Route::prefix('v1')->group(function (): void {
                     Route::patch('/{id}/status', 'updateReportStatus');
                 });
 
-            Route::controller(\App\Http\Controllers\Government\ActivityMapController::class)
+            Route::controller(ActivityMapController::class)
                 ->prefix('activity-map')
                 ->group(function (): void {
                     Route::get('/data', 'getMapData');
@@ -141,13 +149,13 @@ Route::prefix('v1')->group(function (): void {
                     Route::post('/update-district-stats', 'updateDistrictStats');
                 });
 
-            Route::controller(\App\Http\Controllers\Government\AIPredictionController::class)
+            Route::controller(AIPredictionController::class)
                 ->prefix('ai-predictions')
                 ->group(function (): void {
                     Route::get('/', 'index');
                 });
 
-            Route::controller(\App\Http\Controllers\Government\AnnouncementController::class)
+            Route::controller(AnnouncementController::class)
                 ->prefix('announcements')
                 ->group(function (): void {
                     Route::get('/', 'index');
@@ -160,7 +168,7 @@ Route::prefix('v1')->group(function (): void {
                     Route::get('/public/get', 'getPublic');
                 });
 
-            Route::controller(\App\Http\Controllers\Government\UserManagementController::class)
+            Route::controller(UserManagementController::class)
                 ->prefix('users')
                 ->group(function (): void {
                     Route::get('/', 'index');
@@ -172,9 +180,9 @@ Route::prefix('v1')->group(function (): void {
                     Route::delete('/{id}', 'destroy');
                 });
 
-            Route::get('/departments', [\App\Http\Controllers\Government\DepartmentController::class, 'index']);
+            Route::get('/departments', [DepartmentController::class, 'index']);
 
-            Route::controller(\App\Http\Controllers\Government\ExportDataController::class)
+            Route::controller(ExportDataController::class)
                 ->prefix('export-data')
                 ->group(function (): void {
                     Route::get('/', 'index');
@@ -184,7 +192,7 @@ Route::prefix('v1')->group(function (): void {
         });
 
     // Public announcements endpoint
-    Route::controller(\App\Http\Controllers\Government\AnnouncementController::class)
+    Route::controller(AnnouncementController::class)
         ->prefix('announcements')
         ->group(function (): void {
             Route::get('/public/get', 'getPublic');

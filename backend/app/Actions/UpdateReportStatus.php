@@ -3,6 +3,7 @@
 namespace App\Actions;
 
 use App\Enums\ReportStatus;
+use App\Events\ReportStatusChanged;
 use App\Models\Report;
 use App\Models\ReportStatusHistory;
 use App\Models\User;
@@ -37,7 +38,11 @@ class UpdateReportStatus
                 'created_at' => now(),
             ]);
 
-            return $report->fresh()->load(['category', 'user', 'assignedOperator', 'statusHistories.actor']);
+            $report = $report->fresh()->load(['category', 'user', 'assignedOperator', 'statusHistories.actor']);
+
+            ReportStatusChanged::dispatch($report, $oldStatus, $newStatus);
+
+            return $report;
         });
     }
 }

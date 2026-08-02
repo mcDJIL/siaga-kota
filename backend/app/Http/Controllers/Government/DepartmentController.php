@@ -13,6 +13,7 @@ class DepartmentController extends Controller
      * Daftar instansi/dinas untuk dropdown profil petugas & filter analitik.
      *
      * @group Admin - Departments
+     *
      * @authenticated
      */
     public function index(Request $request): JsonResponse

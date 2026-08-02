@@ -25,7 +25,7 @@ class UserResource extends JsonResource
             'village_id' => $this->village_id,
             'employee_id' => $this->employee_id,
             'position' => $this->position,
-            'department' => $this->whenLoaded('department', fn() => [
+            'department' => $this->whenLoaded('department', fn () => [
                 'id' => $this->department->id,
                 'name' => $this->department->name,
                 'slug' => $this->department->slug,

@@ -15,6 +15,7 @@ class ReportController extends Controller
 {
     /**
      * @group Public - Reports
+     *
      * @authenticated
      */
     public function index(Request $request): AnonymousResourceCollection
@@ -22,8 +23,8 @@ class ReportController extends Controller
         $reports = Report::query()
             ->where('user_id', $request->user()->id)
             ->with(['category', 'user'])
-            ->when($request->filled('status'), fn($q) => $q->where('status', $request->status))
-            ->when($request->filled('category'), fn($q) => $q->where('category_id', $request->category))
+            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
+            ->when($request->filled('category'), fn ($q) => $q->where('category_id', $request->category))
             ->when($request->filled('search'), function ($q) use ($request) {
                 $search = $request->search;
                 $q->where(function ($query) use ($search) {
@@ -39,6 +40,7 @@ class ReportController extends Controller
 
     /**
      * @group Public - Reports
+     *
      * @authenticated
      */
     public function store(StoreReportRequest $request, CreateReport $createReport): JsonResponse
@@ -56,6 +58,7 @@ class ReportController extends Controller
 
     /**
      * @group Public - Reports
+     *
      * @authenticated
      */
     public function show(Request $request, string $id): JsonResponse

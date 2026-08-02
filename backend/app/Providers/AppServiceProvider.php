@@ -6,6 +6,7 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Boost\BoostServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -14,8 +15,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        if ($this->app->environment('local') && class_exists(\Laravel\Boost\BoostServiceProvider::class)) {
-            $this->app->register(\Laravel\Boost\BoostServiceProvider::class);
+        if ($this->app->environment('local') && class_exists(BoostServiceProvider::class)) {
+            $this->app->register(BoostServiceProvider::class);
         }
     }
 
