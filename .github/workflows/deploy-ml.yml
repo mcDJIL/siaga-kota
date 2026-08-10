@@ -22,6 +22,7 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}
           password: ${{ secrets.VPS_PASSWORD }}
           port: ${{ secrets.VPS_PORT }}
+          command_timeout: 40m
           script: |
             set -e
 
@@ -33,9 +34,8 @@ jobs:
             git fetch origin
             git reset --hard origin/main
 
-            # Model dilatih di dalam build (best_model.pkl tidak di-commit).
             echo "🐳 Building ML image..."
-            docker compose -f compose.prod.yml build --no-cache
+            docker compose -f compose.prod.yml build
 
             echo "⏹️ Stopping old container..."
             docker compose -f compose.prod.yml down
