@@ -65,6 +65,10 @@ jobs:
             # Restart queue workers
             echo "🔄 Restarting Horizon..."
             docker compose -f compose.prod.yml restart horizon
+
+            # Restart websocket server so it picks up the cached config
+            echo "🔄 Restarting Reverb..."
+            docker compose -f compose.prod.yml restart reverb
             
             echo "✅ Deployment completed!"
             
