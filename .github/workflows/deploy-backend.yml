@@ -22,6 +22,7 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}
           password: ${{ secrets.VPS_PASSWORD }}
           port: ${{ secrets.VPS_PORT }}
+          command_timeout: 40m
           script: |
             set -e
             
@@ -37,7 +38,7 @@ jobs:
             
             # Build new images
             echo "🐳 Building production images..."
-            docker compose -f compose.prod.yml build --no-cache
+            docker compose -f compose.prod.yml build
             
             # Stop containers gracefully
             echo "⏹️ Stopping old containers..."
@@ -64,13 +65,16 @@ jobs:
             
             # Restart queue workers
             echo "🔄 Restarting Horizon..."
-            docker compose -f compose.prod.yml restart horizon
+            docker compose -f compose.prod.yml restart -t 15 horizon
 
             # Restart websocket server so it picks up the cached config
             echo "🔄 Restarting Reverb..."
-            docker compose -f compose.prod.yml restart reverb
+            docker compose -f compose.prod.yml restart -t 15 reverb
             
             echo "✅ Deployment completed!"
+
+            echo "🧹 Pruning dangling images..."
+            docker image prune -f
             
             # Show status
             docker compose -f compose.prod.yml ps
