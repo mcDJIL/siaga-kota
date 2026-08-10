@@ -53,6 +53,7 @@ RUN composer install \
 COPY . .
 
 # Run post-install scripts
+ARG BROADCAST_CONNECTION=null
 RUN composer dump-autoload --optimize
 
 # Set permissions

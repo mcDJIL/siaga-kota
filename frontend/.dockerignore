@@ -1,0 +1,20 @@
+# Direktori besar yang tidak diperlukan saat build.
+node_modules
+dist
+.git
+.github
+
+# Berkas pengembangan.
+*.log
+.vscode
+.idea
+.DS_Store
+
+# CATATAN: .env sengaja TIDAK diabaikan.
+#
+# Vite membaca .env secara native saat `npm run build` dan meng-inline seluruh
+# variabel VITE_* ke dalam bundle. Dengan menyertakannya di build context,
+# Dockerfile tidak perlu mendaftarkan variabel satu per satu.
+#
+# Berkas ini hanya ada di stage build. Stage runtime (nginx) hanya menyalin
+# folder dist/, sehingga .env tidak pernah masuk ke image final.

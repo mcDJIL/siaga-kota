@@ -1,0 +1,25 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+      # Tanpa build args. Vite membaca .env dari build context secara langsung,
+      # sehingga variabel VITE_* baru tidak perlu didaftarkan di sini.
+    image: siagakota-frontend:latest
+    container_name: siagakota-frontend
+    restart: unless-stopped
+    ports:
+      # Hanya localhost; diakses publik lewat Cloudflare tunnel.
+      - "127.0.0.1:${FRONTEND_PORT:-25173}:80"
+    networks:
+      - siagakota
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  siagakota:
+    external: true
+    name: backend_siagakota
