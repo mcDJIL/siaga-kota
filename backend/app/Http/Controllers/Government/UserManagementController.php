@@ -34,14 +34,14 @@ class UserManagementController extends Controller
             $search = $validated['search'];
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('employee_id', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('employee_id', 'like', "%{$search}%");
             });
         }
 
         // Filter by role
         if ($validated['role'] ?? null) {
-            $query->whereHas('roles', fn($q) => $q->where('name', $validated['role']));
+            $query->whereHas('roles', fn ($q) => $q->where('name', $validated['role']));
         }
 
         // Filter by status (active = true/false)
@@ -63,7 +63,7 @@ class UserManagementController extends Controller
         $users = $query->paginate($validated['per_page'] ?? 10);
 
         $formattedUsers = $users->items();
-        $formattedUsers = array_map(fn($user) => $this->formatUser($user), $formattedUsers);
+        $formattedUsers = array_map(fn ($user) => $this->formatUser($user), $formattedUsers);
 
         return response()->json([
             'data' => [
@@ -106,7 +106,7 @@ class UserManagementController extends Controller
             'employee_id.unique' => 'NIP/ID Karyawan sudah terdaftar.',
         ]);
 
-        if (empty($validated['department_id']) && !empty($validated['institution'])) {
+        if (empty($validated['department_id']) && ! empty($validated['institution'])) {
             $validated['department_id'] = Department::query()
                 ->where('name', $validated['institution'])
                 ->orWhere('slug', Str::slug($validated['institution']))
@@ -114,16 +114,16 @@ class UserManagementController extends Controller
         }
 
         if ($request->hasFile('avatar')) {
-            $validated['avatar_path'] = 'storage/' . $request->file('avatar')->store('avatars', 'public');
+            $validated['avatar_path'] = 'storage/'.$request->file('avatar')->store('avatars', 'public');
         }
 
         $validated['password'] = Hash::make($validated['password']);
-        $validated['active'] = !in_array($validated['status'] ?? 'Aktif', ['Nonaktif', 'nonaktif'], true);
+        $validated['active'] = ! in_array($validated['status'] ?? 'Aktif', ['Nonaktif', 'nonaktif'], true);
         $validated['role'] = 'petugas';
         unset($validated['institution'], $validated['status'], $validated['avatar']);
 
         $user = User::create($validated);
-        
+
         // Assign petugas role by default
         $user->assignRole('petugas');
 
@@ -139,9 +139,9 @@ class UserManagementController extends Controller
 
         $validated = $request->validate([
             'name' => 'nullable|string|max:255',
-            'email' => 'nullable|email|unique:users,email,' . $user->id,
+            'email' => 'nullable|email|unique:users,email,'.$user->id,
             'phone' => 'nullable|string|max:20',
-            'employee_id' => 'nullable|string|unique:users,employee_id,' . $user->id,
+            'employee_id' => 'nullable|string|unique:users,employee_id,'.$user->id,
             'position' => 'nullable|string|max:255',
             'department_id' => 'nullable|exists:departments,id',
             'password' => 'nullable|string|min:8',
@@ -166,12 +166,12 @@ class UserManagementController extends Controller
     {
         $user = User::findOrFail($id);
 
-        $newStatus = !$user->active;
+        $newStatus = ! $user->active;
         $user->update(['active' => $newStatus]);
 
         return response()->json([
             'data' => $this->formatUser($user),
-            'message' => "Pengguna berhasil di" . ($newStatus ? 'aktifkan' : 'nonaktifkan') . '.',
+            'message' => 'Pengguna berhasil di'.($newStatus ? 'aktifkan' : 'nonaktifkan').'.',
         ]);
     }
 
@@ -201,7 +201,7 @@ class UserManagementController extends Controller
         $roleBreakdown = [];
         $roles = ['admin', 'petugas', 'warga'];
         foreach ($roles as $role) {
-            $count = User::whereHas('roles', fn($q) => $q->where('name', $role))->count();
+            $count = User::whereHas('roles', fn ($q) => $q->where('name', $role))->count();
             $roleBreakdown[] = [
                 'role' => $role,
                 'count' => $count,

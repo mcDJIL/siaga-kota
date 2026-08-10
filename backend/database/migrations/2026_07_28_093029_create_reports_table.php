@@ -68,17 +68,17 @@ return new class extends Migration
         });
 
         // Tambahkan kolom geometry Point setelah address dengan raw SQL
-        DB::statement("
+        DB::statement('
             ALTER TABLE reports 
             ADD COLUMN location geometry(Point, 4326) NOT NULL
-        ");
+        ');
 
         // Buat spatial index untuk kolom location
-        DB::statement("
+        DB::statement('
             CREATE INDEX reports_location_idx 
             ON reports 
             USING GIST (location)
-        ");
+        ');
     }
 
     /**

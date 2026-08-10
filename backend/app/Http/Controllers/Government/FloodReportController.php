@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers\Government;
 
+use App\Actions\UpdateReportStatus;
+use App\Enums\ReportStatus;
 use App\Http\Controllers\Controller;
+use App\Models\District;
 use App\Models\Report;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class FloodReportController extends Controller
 {
@@ -21,11 +26,11 @@ class FloodReportController extends Controller
         $lastMonthEnd = Carbon::now()->subMonth()->endOfMonth();
 
         // Total reports this month
-        $totalReports = Report::whereHas('category', fn($q) => $q->where('slug', 'banjir'))
+        $totalReports = Report::whereHas('category', fn ($q) => $q->where('slug', 'banjir'))
             ->whereBetween('created_at', [$currentMonthStart, $currentMonthEnd])
             ->count();
 
-        $totalReportsLastMonth = Report::whereHas('category', fn($q) => $q->where('slug', 'banjir'))
+        $totalReportsLastMonth = Report::whereHas('category', fn ($q) => $q->where('slug', 'banjir'))
             ->whereBetween('created_at', [$lastMonthStart, $lastMonthEnd])
             ->count();
 
@@ -34,12 +39,12 @@ class FloodReportController extends Controller
             : 0;
 
         // Completed reports this month
-        $completedReports = Report::whereHas('category', fn($q) => $q->where('slug', 'banjir'))
+        $completedReports = Report::whereHas('category', fn ($q) => $q->where('slug', 'banjir'))
             ->where('status', 'selesai')
             ->whereBetween('created_at', [$currentMonthStart, $currentMonthEnd])
             ->count();
 
-        $completedReportsLastMonth = Report::whereHas('category', fn($q) => $q->where('slug', 'banjir'))
+        $completedReportsLastMonth = Report::whereHas('category', fn ($q) => $q->where('slug', 'banjir'))
             ->where('status', 'selesai')
             ->whereBetween('created_at', [$lastMonthStart, $lastMonthEnd])
             ->count();
@@ -48,19 +53,22 @@ class FloodReportController extends Controller
             ? round((($completedReports - $completedReportsLastMonth) / $completedReportsLastMonth) * 100)
             : 0;
 
-        // Calculate average response time (minutes from created to selesai status)
-        $avgResponseTime = Report::whereHas('category', fn($q) => $q->where('slug', 'banjir'))
-            ->where('status', 'selesai')
+        // Waktu respon dihitung dari created_at ke resolved_at. Memakai updated_at
+        // tidak akurat karena kolom itu berubah pada setiap penyuntingan laporan.
+        $avgResponseTime = Report::whereHas('category', fn ($q) => $q->where('slug', 'banjir'))
+            ->where('status', ReportStatus::Selesai->value)
+            ->whereNotNull('resolved_at')
             ->whereBetween('created_at', [$currentMonthStart, $currentMonthEnd])
-            ->selectRaw('AVG(EXTRACT(EPOCH FROM (updated_at - created_at))/60) as avg_minutes')
+            ->selectRaw('AVG(EXTRACT(EPOCH FROM (resolved_at - created_at))/60) as avg_minutes')
             ->first()?->avg_minutes;
 
         $avgResponseTime = round($avgResponseTime ?? 0);
 
-        $avgResponseTimeLastMonth = Report::whereHas('category', fn($q) => $q->where('slug', 'banjir'))
-            ->where('status', 'selesai')
+        $avgResponseTimeLastMonth = Report::whereHas('category', fn ($q) => $q->where('slug', 'banjir'))
+            ->where('status', ReportStatus::Selesai->value)
+            ->whereNotNull('resolved_at')
             ->whereBetween('created_at', [$lastMonthStart, $lastMonthEnd])
-            ->selectRaw('AVG(EXTRACT(EPOCH FROM (updated_at - created_at))/60) as avg_minutes')
+            ->selectRaw('AVG(EXTRACT(EPOCH FROM (resolved_at - created_at))/60) as avg_minutes')
             ->first()?->avg_minutes;
 
         $avgResponseTimeLastMonth = round($avgResponseTimeLastMonth ?? 0);
@@ -69,13 +77,13 @@ class FloodReportController extends Controller
             : 0;
 
         // Prevented incidents = reports with high water level that were handled quickly
-        $preventedIncidents = Report::whereHas('category', fn($q) => $q->where('slug', 'banjir'))
+        $preventedIncidents = Report::whereHas('category', fn ($q) => $q->where('slug', 'banjir'))
             ->where('water_level_cm', '>', 70)
             ->where('status', 'selesai')
             ->whereBetween('created_at', [$currentMonthStart, $currentMonthEnd])
             ->count();
 
-        $preventedIncidentsLastMonth = Report::whereHas('category', fn($q) => $q->where('slug', 'banjir'))
+        $preventedIncidentsLastMonth = Report::whereHas('category', fn ($q) => $q->where('slug', 'banjir'))
             ->where('water_level_cm', '>', 70)
             ->where('status', 'selesai')
             ->whereBetween('created_at', [$lastMonthStart, $lastMonthEnd])
@@ -98,8 +106,8 @@ class FloodReportController extends Controller
                         'iconBg' => 'bg-navy/10',
                         'iconColor' => 'text-navy',
                         'trend' => [
-                            'value' => ($totalTrend >= 0 ? '+' : '') . $totalTrend . '%',
-                            'className' => $totalTrend >= 0 ? 'bg-[#FFDAD6]/50 text-[#BA1A1A]' : 'bg-brand-green-light/50 text-brand-green'
+                            'value' => ($totalTrend >= 0 ? '+' : '').$totalTrend.'%',
+                            'className' => $totalTrend >= 0 ? 'bg-[#FFDAD6]/50 text-[#BA1A1A]' : 'bg-brand-green-light/50 text-brand-green',
                         ],
                     ],
                     [
@@ -111,8 +119,8 @@ class FloodReportController extends Controller
                         'iconBg' => 'bg-brand-green-light/30',
                         'iconColor' => 'text-brand-green',
                         'trend' => [
-                            'value' => ($completedTrend >= 0 ? '+' : '') . $completedTrend . '%',
-                            'className' => 'bg-brand-green-light/50 text-brand-green'
+                            'value' => ($completedTrend >= 0 ? '+' : '').$completedTrend.'%',
+                            'className' => 'bg-brand-green-light/50 text-brand-green',
                         ],
                         'showProgress' => true,
                     ],
@@ -125,8 +133,8 @@ class FloodReportController extends Controller
                         'iconBg' => 'bg-badge-gold/20',
                         'iconColor' => 'text-[#715C00]',
                         'trend' => [
-                            'value' => ($responseTrend <= 0 ? '' : '+') . $responseTrend . 'm',
-                            'className' => $responseTrend <= 0 ? 'bg-brand-green-light/50 text-brand-green' : 'bg-[#FFDAD6]/50 text-[#BA1A1A]'
+                            'value' => ($responseTrend <= 0 ? '' : '+').$responseTrend.'m',
+                            'className' => $responseTrend <= 0 ? 'bg-brand-green-light/50 text-brand-green' : 'bg-[#FFDAD6]/50 text-[#BA1A1A]',
                         ],
                     ],
                     [
@@ -137,8 +145,8 @@ class FloodReportController extends Controller
                         'iconBg' => 'bg-navy/10',
                         'iconColor' => 'text-navy',
                         'trend' => [
-                            'value' => ($preventedTrend >= 0 ? '+' : '') . $preventedTrend . '%',
-                            'className' => 'bg-brand-green-light/50 text-brand-green'
+                            'value' => ($preventedTrend >= 0 ? '+' : '').$preventedTrend.'%',
+                            'className' => 'bg-brand-green-light/50 text-brand-green',
                         ],
                         'footnote' => 'Laporan tinggi yang terselesaikan',
                     ],
@@ -149,15 +157,22 @@ class FloodReportController extends Controller
 
     public function getDistrictFloodDistribution(): JsonResponse
     {
-        $districts = Report::selectRaw('address as district, COUNT(*) as reports')
-            ->whereHas('category', fn($q) => $q->where('slug', 'banjir'))
-            ->whereNotNull('address')
-            ->groupBy('address')
-            ->orderByDesc('reports')
-            ->limit(7)
-            ->get()
-            ->map(fn($d) => ['district' => $d->district, 'reports' => (int)$d->reports])
-            ->toArray();
+        // Tabel reports belum punya kolom district_id, sehingga kecamatan
+        // dicocokkan dari alamat laporan terhadap daftar kecamatan terdaftar.
+        $districts = District::query()
+            ->orderBy('name')
+            ->pluck('name')
+            ->map(fn (string $name) => [
+                'district' => $name,
+                'reports' => Report::query()
+                    ->whereHas('category', fn ($q) => $q->where('slug', 'banjir'))
+                    ->where('address', 'ilike', "%{$name}%")
+                    ->count(),
+            ])
+            ->sortByDesc('reports')
+            ->take(7)
+            ->values()
+            ->all();
 
         return response()->json([
             'data' => [
@@ -170,7 +185,7 @@ class FloodReportController extends Controller
     {
         $district = $request->query('district', null);
 
-        $query = Report::whereHas('category', fn($q) => $q->where('slug', 'banjir'));
+        $query = Report::whereHas('category', fn ($q) => $q->where('slug', 'banjir'));
 
         if ($district && $district !== 'Semua District') {
             $query->where('address', 'like', "%{$district}%");
@@ -201,41 +216,43 @@ class FloodReportController extends Controller
         $status = $request->query('status', null);
         $perPage = $request->query('per_page', 10);
 
-        $query = Report::selectRaw("*, ST_AsText(location) as location_text")
-            ->whereHas('category', fn($q) => $q->where('slug', 'banjir'))
-            ->with(['category', 'user'])
+        $query = Report::selectRaw('*, ST_AsText(location) as location_text')
+            ->whereHas('category', fn ($q) => $q->where('slug', 'banjir'))
+            ->with(['category', 'user', 'assignedOperator.department'])
+            ->withCount('attachments')
             ->latest('created_at');
 
         if ($district && $district !== 'Semua District') {
-            $query->where('address', 'like', "%{$district}%");
+            $query->where('address', 'ilike', "%{$district}%");
         }
 
         if ($status) {
             $query->where('status', $status);
         }
 
-        $reports = $query->limit($perPage)->get()->map(function ($report) {
-            $locationText = $report->address ?? $this->parseGeometryPoint($report->location_text);
+        $reports = $query->limit($perPage)->get()->map(function (Report $report) {
+            $locationText = $report->address ?: $this->parseGeometryPoint($report->location_text ?? '');
+
             return [
-                'id' => '#FLD-' . substr($report->id, -4),
+                // Kode laporan human-friendly sesuai PLAN §5.2, bukan potongan ULID.
+                'id' => $report->code,
                 'location' => $locationText,
-                'waterLevel' => (int)($report->water_level_cm ?? 0),
+                'waterLevel' => (int) ($report->water_level_cm ?? 0),
                 'severity' => $this->determineSeverity($report->water_level_cm ?? 0),
-                'status' => $report->status ?? 'menunggu',
-                'time' => $report->created_at->format('d M, H:i'),
-                'reporter' => $report->user?->name ?? 'Unknown',
-                'description' => substr($report->description ?? '', 0, 100),
-                'photos' => $report->photos_count ?? 0,
-                'assignedDepartment' => 'Dinas PU (Tata Air)',
-                'aiPrediction' => 'Prediksi dari AI',
+                'status' => $report->status->value,
+                'time' => $report->created_at?->format('d M, H:i'),
+                'reporter' => $report->user?->name ?? 'Tidak diketahui',
+                'description' => Str::limit($report->description ?? '', 100),
+                'photos' => $report->attachments_count,
+                'assignedDepartment' => $report->assignedOperator?->department?->name ?? 'Belum ditugaskan',
             ];
         });
 
         return response()->json([
             'data' => [
                 'reports' => $reports,
-                'total' => Report::whereHas('category', fn($q) => $q->where('slug', 'banjir'))->count(),
-                'completed' => Report::whereHas('category', fn($q) => $q->where('slug', 'banjir'))
+                'total' => Report::whereHas('category', fn ($q) => $q->where('slug', 'banjir'))->count(),
+                'completed' => Report::whereHas('category', fn ($q) => $q->where('slug', 'banjir'))
                     ->where('status', 'selesai')
                     ->count(),
             ],
@@ -244,75 +261,95 @@ class FloodReportController extends Controller
 
     private function determineSeverity(int $waterLevel): string
     {
-        if ($waterLevel > 70) return 'Tinggi';
-        if ($waterLevel > 30) return 'Sedang';
+        if ($waterLevel > 70) {
+            return 'Tinggi';
+        }
+        if ($waterLevel > 30) {
+            return 'Sedang';
+        }
+
         return 'Rendah';
     }
 
-    public function verifyReport(string $id): JsonResponse
+    /**
+     * Verifikasi laporan banjir: menunggu -> diverifikasi.
+     *
+     * @group Admin - Flood Reports
+     *
+     * @authenticated
+     */
+    public function verifyReport(Request $request, UpdateReportStatus $updateStatus, string $id): JsonResponse
     {
-        try {
-            $report = Report::whereHas('category', fn($q) => $q->where('slug', 'banjir'))
-                ->findOrFail($id);
+        $report = Report::query()
+            ->whereHas('category', fn ($q) => $q->where('slug', 'banjir'))
+            ->findOrFail($id);
 
-            if ($report->status !== 'menunggu') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Laporan tidak dalam status menunggu verifikasi',
-                ], 400);
-            }
-
-            $report->update([
-                'status' => 'terverifikasi',
-                'verified_at' => Carbon::now(),
-                'verified_by' => auth()->id(),
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Laporan berhasil diverifikasi',
-                'data' => [
-                    'id' => $report->id,
-                    'status' => $report->status,
-                    'verified_at' => $report->verified_at?->format('d M, H:i'),
-                ],
-            ]);
-        } catch (\Exception $e) {
+        if ($report->status !== ReportStatus::Menunggu) {
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal memverifikasi laporan: ' . $e->getMessage(),
-            ], 500);
+                'message' => 'Laporan tidak dalam status menunggu verifikasi.',
+            ], 422);
         }
+
+        $report = $updateStatus->execute(
+            $report,
+            ReportStatus::Diverifikasi->value,
+            $request->user(),
+            'Laporan diverifikasi oleh admin.',
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Laporan berhasil diverifikasi.',
+            'data' => [
+                'id' => $report->id,
+                'status' => $report->status->value,
+                'verified_at' => $report->accepted_at?->format('d M, H:i'),
+            ],
+        ]);
     }
 
-    public function updateReportStatus(Request $request, string $id): JsonResponse
-    {
-        try {
-            $request->validate([
-                'status' => 'required|in:menunggu,terverifikasi,diproses,selesai',
-            ]);
+    /**
+     * Ubah status laporan banjir beserta catatan penanganannya.
+     *
+     * @group Admin - Flood Reports
+     *
+     * @authenticated
+     */
+    public function updateReportStatus(
+        Request $request,
+        UpdateReportStatus $updateStatus,
+        string $id
+    ): JsonResponse {
+        $validated = $request->validate([
+            'status' => ['required', Rule::enum(ReportStatus::class)],
+            'note' => ['nullable', 'string', 'max:1000'],
+        ], [
+            'status.required' => 'Status wajib dipilih.',
+        ]);
 
-            $report = Report::whereHas('category', fn($q) => $q->where('slug', 'banjir'))
-                ->findOrFail($id);
+        $report = Report::query()
+            ->whereHas('category', fn ($q) => $q->where('slug', 'banjir'))
+            ->findOrFail($id);
 
-            $oldStatus = $report->status;
-            $report->update(['status' => $request->status]);
+        $oldStatus = $report->status->value;
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Status laporan berhasil diubah dari ' . $oldStatus . ' menjadi ' . $request->status,
-                'data' => [
-                    'id' => $report->id,
-                    'status' => $report->status,
-                    'updated_at' => $report->updated_at?->format('d M, H:i'),
-                ],
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal mengubah status laporan: ' . $e->getMessage(),
-            ], 500);
-        }
+        $report = $updateStatus->execute(
+            $report,
+            $validated['status'],
+            $request->user(),
+            $validated['note'] ?? null,
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => "Status laporan berhasil diubah dari {$oldStatus} menjadi {$report->status->value}.",
+            'data' => [
+                'id' => $report->id,
+                'status' => $report->status->value,
+                'updated_at' => $report->updated_at?->format('d M, H:i'),
+            ],
+        ]);
     }
 
     private function parseGeometryPoint(string $pointText): string
@@ -320,8 +357,10 @@ class FloodReportController extends Controller
         if (preg_match('/POINT\(([\d.-]+)\s+([\d.-]+)\)/', $pointText, $matches)) {
             $longitude = $matches[1];
             $latitude = $matches[2];
+
             return "Koordinat: {$latitude}, {$longitude}";
         }
+
         return 'Lokasi tidak tersedia';
     }
 }

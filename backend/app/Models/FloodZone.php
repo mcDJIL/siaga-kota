@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use Database\Factories\FloodZoneFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\Expression;
 
 #[Fillable([
     'name',
@@ -15,7 +17,7 @@ use Illuminate\Database\Eloquent\Model;
 ])]
 class FloodZone extends Model
 {
-    /** @use HasFactory<\Database\Factories\FloodZoneFactory> */
+    /** @use HasFactory<FloodZoneFactory> */
     use HasFactory, HasUlids;
 
     protected function casts(): array
@@ -33,14 +35,16 @@ class FloodZone extends Model
     {
         $zone = $this->attributes['zone'] ?? null;
 
-        if (! $zone || $zone instanceof \Illuminate\Database\Query\Expression) {
+        if (! $zone || $zone instanceof Expression) {
             return null;
         }
 
         if (preg_match('/POLYGON\(\(([^)]+)\)\)/', $zone, $matches)) {
             $coords = explode(',', $matches[1]);
+
             return array_map(function ($coord) {
                 [$lng, $lat] = explode(' ', trim($coord));
+
                 return [(float) $lng, (float) $lat];
             }, $coords);
         }

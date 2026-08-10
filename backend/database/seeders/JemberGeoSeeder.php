@@ -6,7 +6,6 @@ use App\Models\EvacuationRoute;
 use App\Models\FloodZone;
 use App\Models\Tps;
 use App\Models\WasteBank;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -112,10 +111,10 @@ class JemberGeoSeeder extends Seeder
         ];
 
         foreach ($routes as $route) {
-            $lineString = 'LINESTRING(' . implode(',', array_map(
-                fn($coord) => "{$coord[0]} {$coord[1]}",
+            $lineString = 'LINESTRING('.implode(',', array_map(
+                fn ($coord) => "{$coord[0]} {$coord[1]}",
                 $route['coordinates']
-            )) . ')';
+            )).')';
 
             EvacuationRoute::query()->create([
                 'name' => $route['name'],
@@ -151,10 +150,10 @@ class JemberGeoSeeder extends Seeder
         ];
 
         foreach ($zones as $zone) {
-            $polygon = 'POLYGON((' . implode(',', array_map(
-                fn($coord) => "{$coord[0]} {$coord[1]}",
+            $polygon = 'POLYGON(('.implode(',', array_map(
+                fn ($coord) => "{$coord[0]} {$coord[1]}",
                 $zone['coordinates']
-            )) . '))';
+            )).'))';
 
             FloodZone::query()->create([
                 'name' => $zone['name'],

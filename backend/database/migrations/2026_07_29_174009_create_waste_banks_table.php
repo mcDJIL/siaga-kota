@@ -22,16 +22,16 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        DB::statement("
+        DB::statement('
             ALTER TABLE waste_banks 
             ADD COLUMN location geometry(Point, 4326) NOT NULL
-        ");
+        ');
 
-        DB::statement("
+        DB::statement('
             CREATE INDEX waste_banks_location_idx 
             ON waste_banks 
             USING GIST (location)
-        ");
+        ');
     }
 
     /**

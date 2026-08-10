@@ -38,15 +38,14 @@ class ReportResource extends JsonResource
                 'id' => $this->user->id,
                 'name' => $this->user->name,
             ],
-            'assigned_operator' => $this->whenLoaded('assignedOperator', fn() => [
+            'assigned_operator' => $this->whenLoaded('assignedOperator', fn () => [
                 'id' => $this->assignedOperator->id,
                 'name' => $this->assignedOperator->name,
                 'employee_id' => $this->assignedOperator->employee_id,
             ]),
             'status_histories' => $this->whenLoaded(
                 'statusHistories',
-                fn() =>
-                $this->statusHistories->map(fn($history) => [
+                fn () => $this->statusHistories->map(fn ($history) => [
                     'from_status' => $history->from_status?->value,
                     'to_status' => $history->to_status->value,
                     'note' => $history->note,
@@ -59,8 +58,7 @@ class ReportResource extends JsonResource
             ),
             'attachments' => $this->whenLoaded(
                 'attachments',
-                fn() =>
-                $this->attachments->map(fn($attachment) => [
+                fn () => $this->attachments->map(fn ($attachment) => [
                     'id' => $attachment->id,
                     'type' => $attachment->type->value,
                     'url' => url("storage/{$attachment->path}"),

@@ -20,16 +20,16 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        DB::statement("
+        DB::statement('
             ALTER TABLE flood_zones 
             ADD COLUMN zone geometry(Polygon, 4326) NOT NULL
-        ");
+        ');
 
-        DB::statement("
+        DB::statement('
             CREATE INDEX flood_zones_zone_idx 
             ON flood_zones 
             USING GIST (zone)
-        ");
+        ');
     }
 
     /**

@@ -6,6 +6,7 @@ use App\Enums\ReportStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ReportResource;
 use App\Models\Report;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,6 +17,7 @@ class DashboardController extends Controller
      * Ringkasan wilayah kerja petugas sesuai PLAN §6.3.
      *
      * @group Ops - Dashboard
+     *
      * @authenticated
      */
     public function index(Request $request): JsonResponse
@@ -107,9 +109,9 @@ class DashboardController extends Controller
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Collection<int, Report>
+     * @return Collection<int, Report>
      */
-    private function recentReports(): \Illuminate\Database\Eloquent\Collection
+    private function recentReports(): Collection
     {
         return Report::query()
             ->with(['category', 'user', 'assignedOperator'])

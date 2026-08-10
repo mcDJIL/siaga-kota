@@ -15,7 +15,7 @@ class GenerateReportCode
     public function execute(ReportCategory $category): string
     {
         $prefix = $this->getPrefixForCategory($category->slug);
-        
+
         // Ambil nomor terakhir untuk prefix ini di tahun berjalan
         $year = now()->year;
         $lastCode = Report::query()

@@ -32,6 +32,7 @@ class ActivityMapController extends Controller
      * Tugas aktif untuk ditampilkan di Peta Aktivitas.
      *
      * @group Ops - Activity Map
+     *
      * @authenticated
      */
     public function getActiveTasks(Request $request): AnonymousResourceCollection
@@ -62,6 +63,7 @@ class ActivityMapController extends Controller
      * Daftar petugas beserta beban tugas aktifnya.
      *
      * @group Ops - Activity Map
+     *
      * @authenticated
      */
     public function getOfficers(Request $request): AnonymousResourceCollection
@@ -82,6 +84,7 @@ class ActivityMapController extends Controller
 
     /**
      * @group Ops - Activity Map
+     *
      * @authenticated
      */
     public function getOfficer(string $id): JsonResponse
@@ -108,6 +111,7 @@ class ActivityMapController extends Controller
      * diberikan sebelum petugas benar-benar menindaklanjuti.
      *
      * @group Ops - Activity Map
+     *
      * @authenticated
      */
     public function assignOfficer(
@@ -143,6 +147,7 @@ class ActivityMapController extends Controller
      * Statistik ringkas Peta Aktivitas.
      *
      * @group Ops - Activity Map
+     *
      * @authenticated
      */
     public function getStatistics(Request $request): JsonResponse

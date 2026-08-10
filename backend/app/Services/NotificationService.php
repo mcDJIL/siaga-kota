@@ -54,7 +54,7 @@ class NotificationService
     /**
      * Notifikasi ke pelapor saat status laporannya berubah.
      */
-    public static function createStatusUpdateNotification(Report $report, string $oldStatus, string $newStatus): void
+    public static function createStatusUpdateNotification(Report $report, ?string $oldStatus, string $newStatus): void
     {
         if (! $report->user_id) {
             return;

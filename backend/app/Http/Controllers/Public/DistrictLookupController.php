@@ -25,7 +25,7 @@ class DistrictLookupController extends Controller
             'data' => District::query()
                 ->orderBy('name')
                 ->get()
-                ->map(fn(District $district) => $this->formatDistrict($district)),
+                ->map(fn (District $district) => $this->formatDistrict($district)),
         ]);
     }
 

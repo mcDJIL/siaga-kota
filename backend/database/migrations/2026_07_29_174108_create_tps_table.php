@@ -21,16 +21,16 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        DB::statement("
+        DB::statement('
             ALTER TABLE tps 
             ADD COLUMN location geometry(Point, 4326) NOT NULL
-        ");
+        ');
 
-        DB::statement("
+        DB::statement('
             CREATE INDEX tps_location_idx 
             ON tps 
             USING GIST (location)
-        ");
+        ');
     }
 
     /**

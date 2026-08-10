@@ -7,6 +7,7 @@ use App\Actions\UpdateReportStatus;
 use App\Enums\ReportAttachmentType;
 use App\Enums\ReportPriority;
 use App\Enums\ReportStatus;
+use App\Events\ReportMarkedEmergency;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreHandlingRequest;
 use App\Http\Requests\UpdateReportStatusRequest;
@@ -27,6 +28,7 @@ class ReportController extends Controller
 {
     /**
      * @group Ops - Reports
+     *
      * @authenticated
      */
     public function index(Request $request): AnonymousResourceCollection
@@ -47,6 +49,7 @@ class ReportController extends Controller
      * Laporan kategori sampah untuk halaman "Laporan Sampah" petugas.
      *
      * @group Ops - Reports
+     *
      * @authenticated
      */
     public function wasteReports(Request $request): AnonymousResourceCollection
@@ -60,6 +63,7 @@ class ReportController extends Controller
      * Laporan kategori banjir untuk halaman "Laporan Insiden Banjir" petugas.
      *
      * @group Ops - Reports
+     *
      * @authenticated
      */
     public function floodReports(Request $request): AnonymousResourceCollection
@@ -71,6 +75,7 @@ class ReportController extends Controller
 
     /**
      * @group Ops - Reports
+     *
      * @authenticated
      */
     public function show(string $id): JsonResponse
@@ -86,6 +91,7 @@ class ReportController extends Controller
 
     /**
      * @group Ops - Reports
+     *
      * @authenticated
      */
     public function updateStatus(
@@ -112,6 +118,7 @@ class ReportController extends Controller
 
     /**
      * @group Ops - Reports
+     *
      * @authenticated
      */
     public function uploadHandlingPhotos(
@@ -143,6 +150,7 @@ class ReportController extends Controller
 
     /**
      * @group Ops - Reports
+     *
      * @authenticated
      */
     public function markEmergency(Request $request, string $id): JsonResponse
@@ -151,17 +159,22 @@ class ReportController extends Controller
 
         $report->update([
             'is_emergency' => true,
-            'priority' => 'mendesak',
+            'priority' => ReportPriority::Mendesak->value,
         ]);
 
+        $report = $report->fresh()->load(['category', 'user', 'assignedOperator']);
+
+        ReportMarkedEmergency::dispatch($report);
+
         return response()->json([
-            'data' => new ReportResource($report->fresh()),
+            'data' => new ReportResource($report),
             'message' => 'Laporan berhasil ditandai sebagai darurat.',
         ]);
     }
 
     /**
      * @group Ops - Reports
+     *
      * @authenticated
      */
     public function assign(Request $request, AssignReport $assignReport, string $id): JsonResponse
@@ -185,6 +198,7 @@ class ReportController extends Controller
      * Aksi "Tandai Darurat" — toggle status darurat laporan.
      *
      * @group Ops - Reports
+     *
      * @authenticated
      */
     public function toggleEmergency(Request $request, string $id): JsonResponse
@@ -202,6 +216,10 @@ class ReportController extends Controller
 
         $report = $report->fresh()->load(['category', 'user', 'assignedOperator']);
 
+        if ($isEmergency) {
+            ReportMarkedEmergency::dispatch($report);
+        }
+
         return response()->json([
             'data' => new ReportResource($report),
             'message' => $isEmergency
@@ -214,6 +232,7 @@ class ReportController extends Controller
      * Simpan catatan penanganan + foto bukti, lalu tutup laporan sebagai selesai.
      *
      * @group Ops - Reports
+     *
      * @authenticated
      */
     public function storeHandling(
@@ -263,6 +282,7 @@ class ReportController extends Controller
      * Cetak/Unduh Laporan dalam format PDF sesuai PLAN §6.3.
      *
      * @group Ops - Reports
+     *
      * @authenticated
      */
     public function export(string $id): Response
@@ -287,6 +307,7 @@ class ReportController extends Controller
 
     /**
      * @group Ops - Reports
+     *
      * @authenticated
      */
     public function operators(Request $request): JsonResponse
