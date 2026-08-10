@@ -45,8 +45,9 @@ jobs:
 
             echo "⏳ Waiting for ML service to be healthy..."
             for i in $(seq 1 30); do
-              if curl -fsS http://127.0.0.1:8001/health > /dev/null 2>&1; then
-                echo "✅ ML service healthy on 127.0.0.1:8001"
+              if docker compose -f compose.prod.yml exec -T ml \
+                python -c "import urllib.request; urllib.request.urlopen('http://localhost:8001/health').read()" > /dev/null 2>&1; then
+                echo "✅ ML service healthy (internal :8001)"
                 break
               fi
               if [ "$i" -eq 30 ]; then
