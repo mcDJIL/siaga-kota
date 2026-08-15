@@ -8,10 +8,10 @@ export function FloodRiskPolygon({ zone }) {
     <Polygon
       positions={zone.positions}
       pathOptions={{
-        color: '#BA1A1A',
+        color: zone.color || '#BA1A1A',
         weight: 2,
         opacity: 0.7,
-        fillColor: '#BA1A1A',
+        fillColor: zone.color || '#BA1A1A',
         fillOpacity: isHovered ? 0.45 : 0.2,
       }}
       eventHandlers={{

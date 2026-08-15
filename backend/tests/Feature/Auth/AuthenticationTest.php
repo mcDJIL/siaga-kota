@@ -6,7 +6,9 @@ use App\Enums\UserRole;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class AuthenticationTest extends TestCase
@@ -153,6 +155,32 @@ class AuthenticationTest extends TestCase
         $response
             ->assertOk()
             ->assertJsonPath('data.user.id', $user->id);
+    }
+
+    public function test_authenticated_user_can_upload_avatar(): void
+    {
+        Storage::fake('public');
+        $this->seed(RoleSeeder::class);
+
+        $user = User::factory()->create([
+            'role' => UserRole::Warga->value,
+            'active' => true,
+        ]);
+        $user->assignRole(UserRole::Warga->value);
+
+        $response = $this
+            ->actingAs($user, 'sanctum')
+            ->post('/api/v1/auth/me/avatar', [
+                'avatar_path' => UploadedFile::fake()->image('avatar'),
+            ]);
+
+        $response
+            ->assertOk()
+            ->assertJsonPath('data.user.id', $user->id);
+
+        $avatarPath = $user->fresh()->avatar_path;
+        $this->assertNotNull($avatarPath);
+        Storage::disk('public')->assertExists($avatarPath);
     }
 
     public function test_authenticated_user_can_update_password(): void

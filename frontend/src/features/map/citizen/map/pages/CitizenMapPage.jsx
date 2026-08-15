@@ -14,9 +14,48 @@ import { useMarkerSelection } from '../../../shared/hooks/useMarkerSelection'
 import { buildSearchIndex, filterMarkersByTab } from '../../../shared/utils/markerHelpers'
 import { focusMapOnPosition } from '../../../shared/utils/mapHelpers'
 import { fetchMapPoints } from '../../../../../services/report.service'
+import { getMapFloodPredictions } from '../../../../../services/ai-prediction.service'
 import { tpsMarkers } from '../data/tpsMarkers'
 import { riskZones } from '../data/riskZones'
 import { evacuationRoutes } from '../data/evacuationRoutes'
+
+const PREDICTION_COLORS = {
+  high: '#BA1A1A',
+  medium: '#C9A82C',
+  low: '#006D40',
+}
+
+function buildPredictionPolygon(center, radius) {
+  return Array.from({ length: 24 }, (_, index) => {
+    const angle = (index / 24) * Math.PI * 2
+    return [
+      center[0] + Math.sin(angle) * radius,
+      center[1] + Math.cos(angle) * radius * 1.15,
+    ]
+  })
+}
+
+function mapPredictionZone(prediction) {
+  const [latitude, longitude] = prediction.center ?? []
+  const riskLevel = String(prediction.riskLevel ?? 'low').toLowerCase()
+
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+    return null
+  }
+
+  const radius = riskLevel === 'high' ? 0.015 : riskLevel === 'medium' ? 0.012 : 0.009
+  const riskLabel = riskLevel === 'high' ? 'Tinggi' : riskLevel === 'medium' ? 'Sedang' : 'Rendah'
+  const riskScore = Math.round(Number(prediction.riskScore) || 0)
+
+  return {
+    id: `ai-${prediction.id}`,
+    positions: buildPredictionPolygon([latitude, longitude], radius),
+    title: prediction.district || 'Prediksi Banjir AI',
+    level: `${riskLabel} (${riskScore}%)`,
+    description: prediction.recommendedAction || 'Prediksi risiko banjir dari sistem AI.',
+    color: PREDICTION_COLORS[riskLevel] || PREDICTION_COLORS.low,
+  }
+}
 
 function mapReportFeature(feature) {
   const [longitude, latitude] = feature.geometry?.coordinates ?? []
@@ -51,6 +90,7 @@ export function CitizenMapPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [apiWasteMarkers, setApiWasteMarkers] = useState([])
   const [apiFloodMarkers, setApiFloodMarkers] = useState([])
+  const [aiPredictions, setAiPredictions] = useState([])
 
   const { activeTab, setActiveTab, advancedFilters, setAdvancedFilter } = useMapFilters()
   const { layers, toggleLayer } = useMapLayers()
@@ -62,17 +102,25 @@ export function CitizenMapPage() {
 
     async function loadReports() {
       try {
-        const features = await fetchMapPoints()
+        const [features, predictionResponse] = await Promise.all([
+          fetchMapPoints(),
+          getMapFloodPredictions().catch((error) => {
+            console.error('Error fetching AI flood predictions:', error)
+            return null
+          }),
+        ])
         const reports = features
           .filter((feature) => feature.properties?.layer === 'report')
           .map(mapReportFeature)
           .filter(Boolean)
+        const predictions = (predictionResponse?.data?.predictions ?? []).map(mapPredictionZone).filter(Boolean)
         const wasteData = reports.filter((report) => report.category === 'Sampah')
         const floodData = reports.filter((report) => report.category === 'Banjir')
 
         if (mounted) {
           setApiWasteMarkers(wasteData)
           setApiFloodMarkers(floodData)
+          setAiPredictions(predictions)
           setIsLoading(false)
         }
       } catch (err) {
@@ -95,6 +143,7 @@ export function CitizenMapPage() {
 
   const filteredWasteMarkers = useMemo(() => filterMarkersByTab(apiWasteMarkers, activeTab), [apiWasteMarkers, activeTab])
   const filteredFloodMarkers = useMemo(() => filterMarkersByTab(apiFloodMarkers, activeTab), [apiFloodMarkers, activeTab])
+  const predictionZones = aiPredictions.length > 0 ? aiPredictions : riskZones
 
   function handleSelectSearchResult(result) {
     selectObject(result)
@@ -123,7 +172,7 @@ export function CitizenMapPage() {
             wasteMarkers={filteredWasteMarkers}
             floodMarkers={filteredFloodMarkers}
             tpsMarkers={tpsMarkers}
-            riskZones={riskZones}
+            riskZones={predictionZones}
             evacuationRoutes={evacuationRoutes}
             layers={layers}
             selectedObject={selectedObject}

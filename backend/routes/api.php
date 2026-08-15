@@ -46,6 +46,7 @@ Route::prefix('v1')->group(function (): void {
         ->group(function (): void {
             Route::get('/points', 'points');
             Route::get('/heatmap', 'heatmap');
+            Route::get('/flood-predictions', [AIPredictionController::class, 'index']);
         });
 
     // warga only

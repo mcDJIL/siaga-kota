@@ -39,6 +39,7 @@ export function CitizenReportTable() {
 
           return {
             id: r.code ?? r.id,
+            reportId: r.id,
             title: r.title,
             category: r.category?.slug ?? r.category?.name ?? 'sampah',
             date: formattedDate,
@@ -75,7 +76,7 @@ export function CitizenReportTable() {
 
       <ReportTable
         reports={reports}
-        onRowClick={(report) => navigate(`/citizen/reports/${report.id}`)}
+        onRowClick={(report) => navigate(`/citizen/reports/${report.reportId}`)}
       />
     </section>
   )

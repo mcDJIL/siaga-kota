@@ -85,6 +85,7 @@ export function useOfficerDashboardData() {
   // Get recent reports (last 5)
   const recentReports = reports.slice(0, 5).map(report => ({
     id: report.code,
+    reportId: report.id,
     category: report.category?.slug || report.waste_type || 'sampah',
     title: report.title,
     location: report.location?.address || report.address || '-',
