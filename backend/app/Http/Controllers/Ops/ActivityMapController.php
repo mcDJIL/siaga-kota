@@ -136,6 +136,17 @@ class ActivityMapController extends Controller
             ]);
         }
 
+        $hasActiveTask = $officer->assignedReports()
+            ->where('id', '!=', $report->id)
+            ->whereIn('status', self::ACTIVE_STATUSES)
+            ->exists();
+
+        if ($hasActiveTask) {
+            throw ValidationException::withMessages([
+                'officer_id' => 'Petugas sedang bertugas pada laporan lain.',
+            ]);
+        }
+
         $report = $assignReport->execute($report, $officer);
 
         if ($report->status !== ReportStatus::Ditugaskan) {
