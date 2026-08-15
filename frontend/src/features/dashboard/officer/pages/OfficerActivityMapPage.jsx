@@ -71,7 +71,8 @@ export function OfficerActivityMapPage() {
   const handleViewDetail = (task) => {
     const categorySlug = task.category?.slug || task.category
     const category = CATEGORY_ROUTES[categorySlug]
-    navigate(`/officer/reports/${category}/${task.id}`)
+    const reportId = typeof task.id === 'object' ? task.id?.id : task.id
+    navigate(`/officer/reports/${category}/${reportId}`)
   }
 
   const handleAssignOfficer = async (officerId) => {
