@@ -21,6 +21,7 @@ class NotificationService
     private const STATUS_LABELS = [
         'menunggu' => 'Menunggu Verifikasi',
         'diverifikasi' => 'Terverifikasi',
+        'ditugaskan' => 'Ditugaskan',
         'diproses' => 'Sedang Diproses',
         'selesai' => 'Selesai',
         'ditolak' => 'Ditolak',

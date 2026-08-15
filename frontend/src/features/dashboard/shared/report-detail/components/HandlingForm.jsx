@@ -7,7 +7,15 @@ import { Button } from '../../../../../components/ui/Button'
 import { EvidenceDropzone } from './EvidenceDropzone'
 import { handlingSchema } from '../validation/handlingSchema'
 
-export function HandlingForm({ onSave, onCancel, isLoading = false, isDisabled = false, resolutionNote = null, reportStatus = null }) {
+export function HandlingForm({
+  onSave,
+  onCancel,
+  isLoading = false,
+  isDisabled = false,
+  resolutionNote = null,
+  reportStatus = null,
+  alwaysVisible = false,
+}) {
   const {
     register,
     control,
@@ -51,7 +59,7 @@ export function HandlingForm({ onSave, onCancel, isLoading = false, isDisabled =
 
   const isFormDisabled = isDisabled || isSubmitting || isLoading
   const isProcessing = reportStatus === 'diproses'
-  const isNotVisible = !isProcessing && !resolutionNote
+  const isNotVisible = !alwaysVisible && !isProcessing && !resolutionNote
 
   if (isNotVisible) {
     return null

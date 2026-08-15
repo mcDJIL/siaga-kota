@@ -11,8 +11,7 @@ class AssignReport
     /**
      * Tugaskan laporan ke petugas.
      *
-     * Sesuai PLAN Resolved Decision #5, penugasan hanya mengisi `assigned_to`
-     * tanpa mengubah status laporan.
+     * Perubahan status ditangani oleh controller agar tercatat dalam histori.
      */
     public function execute(Report $report, User $operator): Report
     {

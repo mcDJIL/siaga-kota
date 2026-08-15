@@ -178,7 +178,12 @@ class ReportController extends Controller
      *
      * @authenticated
      */
-    public function assign(Request $request, AssignReport $assignReport, string $id): JsonResponse
+    public function assign(
+        Request $request,
+        AssignReport $assignReport,
+        UpdateReportStatus $updateStatus,
+        string $id
+    ): JsonResponse
     {
         $request->validate([
             'operator_id' => ['required', 'string', 'exists:users,id'],
@@ -188,6 +193,15 @@ class ReportController extends Controller
         $operator = User::query()->findOrFail($request->operator_id);
 
         $report = $assignReport->execute($report, $operator);
+
+        if ($report->status !== ReportStatus::Ditugaskan) {
+            $report = $updateStatus->execute(
+                $report,
+                ReportStatus::Ditugaskan->value,
+                $request->user(),
+                'Petugas ditugaskan melalui manajemen laporan.',
+            );
+        }
 
         return response()->json([
             'data' => new ReportResource($report),

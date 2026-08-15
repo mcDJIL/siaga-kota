@@ -15,6 +15,7 @@ class OfficerResource extends JsonResource
      */
     private const ACTIVE_STATUSES = [
         ReportStatus::Diverifikasi->value,
+        ReportStatus::Ditugaskan->value,
         ReportStatus::Diproses->value,
     ];
 

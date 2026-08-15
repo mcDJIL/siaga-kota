@@ -178,6 +178,7 @@ export function OfficerFloodReportDetailPage() {
             isDisabled={!!apiReport?.resolution_note}
             resolutionNote={apiReport?.resolution_note}
             reportStatus={apiReport?.status}
+            alwaysVisible
           />
         </div>
       </div>
