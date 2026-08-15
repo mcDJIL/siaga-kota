@@ -126,6 +126,7 @@ Route::prefix('v1')->group(function (): void {
                     Route::get('/stats', 'getDashboardStats');
                     Route::get('/trends', 'getMonthlyTrend');
                     Route::get('/reports', 'getRecentReports');
+                    Route::get('/reports/{id}', 'getReportDetail');
                     Route::get('/departments', 'getDepartmentPerformance');
                     Route::get('/announcements', 'getAnnouncements');
                 });
@@ -137,6 +138,7 @@ Route::prefix('v1')->group(function (): void {
                     Route::get('/categories', 'getWasteCategoryDistribution');
                     Route::get('/districts', 'getDistrictReportStats');
                     Route::get('/recent', 'getRecentWasteReports');
+                    Route::patch('/{id}/verify', 'verifyReport');
                 });
 
             Route::controller(FloodReportController::class)

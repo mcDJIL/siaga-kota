@@ -1,15 +1,17 @@
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
-import { ArrowUpDown, ChevronLeft, ChevronRight, Search } from 'lucide-react'
+import { ArrowUpDown, ChevronLeft, ChevronRight, Loader2, Search } from 'lucide-react'
 import { cn } from '../../../../../lib/cn'
 import { Button } from '../../../../../components/ui/Button'
 import { WasteReportDetailModal } from './WasteReportDetailModal'
+import { verifyWasteReport } from '../../../../../services/waste-report.service'
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20]
 
 const STATUS_STYLES = {
   menunggu: { label: 'Menunggu', className: 'bg-badge-gold/20 text-[#715C00]' },
+  diverifikasi: { label: 'Diverifikasi', className: 'bg-navy/10 text-navy' },
   selesai: { label: 'Selesai', className: 'bg-accent-green/10 text-accent-green' },
   kritis: { label: 'Kritis', className: 'bg-[#BA1A1A]/10 text-[#BA1A1A]' },
 }
@@ -22,13 +24,14 @@ const COLUMNS = [
   { key: 'date', label: 'Tanggal' },
 ]
 
-export function WasteReportTable({ reports = [], districtFilter = 'Semua Kecamatan' }) {
+export function WasteReportTable({ reports = [], districtFilter = 'Semua Kecamatan', onReportVerified = () => {} }) {
   const [searchInput, setSearchInput] = useState('')
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState({ key: null, direction: 'asc' })
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(5)
   const [selectedReport, setSelectedReport] = useState(null)
+  const [verifyingReportId, setVerifyingReportId] = useState(null)
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -73,8 +76,28 @@ export function WasteReportTable({ reports = [], districtFilter = 'Semua Kecamat
     toast.success('Detail laporan berhasil dimuat.')
   }
 
-  function handleVerify() {
-    toast.success('Laporan siap diverifikasi.')
+  async function handleVerify(report) {
+    if (verifyingReportId) {
+      return
+    }
+
+    if (!report?.ulid) {
+      toast.error('ULID laporan tidak tersedia. Muat ulang data laporan terlebih dahulu.')
+      return
+    }
+
+    setVerifyingReportId(report.ulid)
+
+    try {
+      const response = await verifyWasteReport(report.ulid)
+      const status = response?.data?.status || 'diverifikasi'
+      onReportVerified(report.ulid, status)
+      toast.success(response?.message || 'Laporan sampah berhasil diverifikasi.')
+    } catch (error) {
+      toast.error(error.message || 'Gagal memverifikasi laporan sampah.')
+    } finally {
+      setVerifyingReportId(null)
+    }
   }
 
   return (
@@ -150,8 +173,15 @@ export function WasteReportTable({ reports = [], districtFilter = 'Semua Kecamat
                     <td className="px-6 py-4 text-sm text-text-muted">{report.date}</td>
                     <td className="px-6 py-4 text-right">
                       {report.status === 'menunggu' ? (
-                        <Button variant="navy" size="sm" className="rounded-md px-4 py-1.5 text-xs" onClick={() => handleVerify(report)}>
-                          Verifikasi
+                        <Button
+                          variant="navy"
+                          size="sm"
+                          className="rounded-md px-4 py-1.5 text-xs"
+                          onClick={() => handleVerify(report)}
+                          disabled={verifyingReportId === report.ulid}
+                        >
+                          {verifyingReportId === report.ulid && <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />}
+                          {verifyingReportId === report.ulid ? 'Memverifikasi...' : 'Verifikasi'}
                         </Button>
                       ) : (
                         <Button

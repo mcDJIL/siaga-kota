@@ -26,7 +26,7 @@ function useFilteredReports(reports, query, sort, appliedFilters) {
       const statusLabel = STATUS_STYLES[report.status]?.label || 'Unknown'
       const matchesQuery =
         !normalized ||
-        [report.id, report.location, String(report.waterLevel), statusLabel].join(' ').toLowerCase().includes(normalized)
+        [report.code, report.id, report.location, String(report.waterLevel), statusLabel].join(' ').toLowerCase().includes(normalized)
       const matchesStatus = appliedFilters.status === 'Semua Status' || statusLabel === appliedFilters.status
       const matchesSeverity = appliedFilters.severity === 'Semua Keparahan' || report.severity === appliedFilters.severity
       const matchesWater = matchesWaterLevel(report.waterLevel, appliedFilters.waterLevel)
@@ -54,6 +54,7 @@ export function FloodReportTable({ filters = {} }) {
   const [pageSize, setPageSize] = useState(5)
   const [selectedReport, setSelectedReport] = useState(null)
   const [reportPendingVerify, setReportPendingVerify] = useState(null)
+  const [verifyingReportId, setVerifyingReportId] = useState(null)
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [draftFilters, setDraftFilters] = useState(DEFAULT_FLOOD_FILTERS)
   const [appliedFilters, setAppliedFilters] = useState(DEFAULT_FLOOD_FILTERS)
@@ -88,18 +89,34 @@ export function FloodReportTable({ filters = {} }) {
   }
 
   async function handleConfirmVerify() {
+    const reportId = reportPendingVerify?.id
+
+    if (!reportId || verifyingReportId) {
+      if (!reportId) {
+        toast.error('ID laporan tidak tersedia. Muat ulang data laporan terlebih dahulu.')
+      }
+      return
+    }
+
+    setVerifyingReportId(reportId)
+
     try {
-      const result = await verifyFloodReport(reportPendingVerify.id)
+      const result = await verifyFloodReport(reportId)
       if (result.success) {
-        setReports((prev) => prev.map((item) => (item.id === reportPendingVerify.id ? { ...item, status: 'terverifikasi' } : item)))
+        const status = result.data?.status || 'diverifikasi'
+        setReports((prev) =>
+          prev.map((item) => (item.id === reportId ? { ...item, status } : item))
+        )
         setReportPendingVerify(null)
-        toast.success('Laporan berhasil diverifikasi.')
+        toast.success(result.message || 'Laporan berhasil diverifikasi.')
       } else {
         toast.error(result.message || 'Gagal memverifikasi laporan')
       }
     } catch (error) {
       console.error('Error verifying report:', error)
       toast.error(error.message || 'Gagal memverifikasi laporan')
+    } finally {
+      setVerifyingReportId(null)
     }
   }
 
@@ -181,6 +198,7 @@ export function FloodReportTable({ filters = {} }) {
             onSort={handleSort}
             onVerify={setReportPendingVerify}
             onOpenDetail={handleOpenDetail}
+            verifyingReportId={verifyingReportId}
           />
         </div>
 
@@ -243,7 +261,16 @@ export function FloodReportTable({ filters = {} }) {
         onReset={handleResetFilters}
       />
 
-      <VerifyConfirmationModal report={reportPendingVerify} onClose={() => setReportPendingVerify(null)} onConfirm={handleConfirmVerify} />
+      <VerifyConfirmationModal
+        report={reportPendingVerify}
+        onClose={() => {
+          if (!verifyingReportId) {
+            setReportPendingVerify(null)
+          }
+        }}
+        onConfirm={handleConfirmVerify}
+        isLoading={Boolean(verifyingReportId)}
+      />
 
       <FloodReportDetailModal report={selectedReport} isOpen={Boolean(selectedReport)} onClose={() => setSelectedReport(null)} />
     </>

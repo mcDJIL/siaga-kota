@@ -66,6 +66,14 @@ export function GovernmentWasteReportPage() {
     setDistrict(newDistrict)
   }
 
+  const handleReportVerified = (reportId, status) => {
+    setRecentReports((currentReports) =>
+      currentReports.map((report) =>
+        report.ulid === reportId ? { ...report, status } : report
+      )
+    )
+  }
+
   return (
     <div className="flex flex-col gap-4 p-4 sm:p-8">
       <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-start">
@@ -115,7 +123,11 @@ export function GovernmentWasteReportPage() {
       {isLoading ? (
         <TableSkeleton />
       ) : (
-        <WasteReportTable reports={recentReports} districtFilter={district} />
+        <WasteReportTable
+          reports={recentReports}
+          districtFilter={district}
+          onReportVerified={handleReportVerified}
+        />
       )}
     </div>
   )

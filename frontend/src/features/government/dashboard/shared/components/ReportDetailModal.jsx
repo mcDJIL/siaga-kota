@@ -6,6 +6,9 @@ import { TimelineStep } from '../../../../dashboard/shared/report-detail/compone
 export function ReportDetailModal({ report, isOpen, onClose }) {
   if (!report) return null
 
+  const statusTimeline = Array.isArray(report.statusTimeline) ? report.statusTimeline : []
+  const photoCount = Math.max(0, Number(report.photos) || 0)
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={`${report.id} · ${report.typeLabel}`} className="max-w-lg">
       <div className="flex flex-col gap-6">
@@ -39,7 +42,7 @@ export function ReportDetailModal({ report, isOpen, onClose }) {
         <div>
           <h3 className="mb-3 text-sm font-bold text-text-body">Status Timeline</h3>
           <ul className="flex flex-col gap-4">
-            {report.statusTimeline.map((step) => (
+            {statusTimeline.map((step) => (
               <TimelineStep key={step.title} step={step} />
             ))}
           </ul>
@@ -48,7 +51,7 @@ export function ReportDetailModal({ report, isOpen, onClose }) {
         <div>
           <h3 className="mb-3 text-sm font-bold text-text-body">Foto Kejadian</h3>
           <div className="grid grid-cols-3 gap-3">
-            {Array.from({ length: report.photos }, (_, index) => (
+            {Array.from({ length: photoCount }, (_, index) => (
               <div
                 key={index}
                 className="flex aspect-square items-center justify-center rounded-lg bg-bg-blue-light"

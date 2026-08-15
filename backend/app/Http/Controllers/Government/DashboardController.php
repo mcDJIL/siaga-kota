@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Government;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ReportResource;
 use App\Models\Announcement;
 use App\Models\Department;
 use App\Models\Report;
@@ -114,6 +115,18 @@ class DashboardController extends Controller
         ]);
     }
 
+    public function getReportDetail(string $id): JsonResponse
+    {
+        $report = Report::query()
+            ->withLocationText()
+            ->with(['category', 'user', 'assignedOperator', 'statusHistories.actor', 'attachments.uploader'])
+            ->findOrFail($id);
+
+        return response()->json([
+            'data' => new ReportResource($report),
+        ]);
+    }
+
     public function getRecentReports(): JsonResponse
     {
         $reports = Report::selectRaw('*, ST_AsText(location) as location_text')
@@ -124,6 +137,7 @@ class DashboardController extends Controller
             ->map(function ($report) {
                 return [
                     'id' => '#RPT-'.substr($report->id, -4),
+                    'ulid' => $report->id,
                     'type' => $report->category?->slug ?? 'unknown',
                     'typeLabel' => $report->category?->name ?? 'Unknown',
                     'location' => $report->address ?? $this->parseGeometryPoint($report->location_text),

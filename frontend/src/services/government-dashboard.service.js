@@ -49,6 +49,15 @@ export async function getRecentReports() {
   }
 }
 
+export async function getGovernmentReportDetail(reportId) {
+  try {
+    const { data } = await axios.get(`${API_BASE_URL}/api/v1/government/dashboard/reports/${reportId}`, getAuthConfig())
+    return data
+  } catch (error) {
+    throw new Error(error.response?.data?.message ?? error.message ?? 'Gagal mengambil detail laporan')
+  }
+}
+
 export async function getDepartmentPerformance() {
   try {
     const { data } = await axios.get(`${API_BASE_URL}/api/v1/government/dashboard/departments`, getAuthConfig())
