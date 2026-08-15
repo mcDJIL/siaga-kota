@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
 class ReportResource extends JsonResource
 {
@@ -32,8 +33,8 @@ class ReportResource extends JsonResource
             'waste_type' => $this->waste_type?->value,
             'water_level_cm' => $this->water_level_cm,
             'is_emergency' => $this->is_emergency,
-            'location' => $this->parseLocationForResponse($this->location),
-            'photo_url' => $this->photo_path ? url("storage/{$this->photo_path}") : null,
+            'location' => $this->parseLocationForResponse($this->location_wkt ?? $this->location),
+            'photo_url' => $this->photo_path ? Storage::disk('public')->url($this->photo_path) : null,
             'reporter' => [
                 'id' => $this->user->id,
                 'name' => $this->user->name,
@@ -61,7 +62,7 @@ class ReportResource extends JsonResource
                 fn () => $this->attachments->map(fn ($attachment) => [
                     'id' => $attachment->id,
                     'type' => $attachment->type->value,
-                    'url' => url("storage/{$attachment->path}"),
+                    'url' => $attachment->path ? Storage::disk('public')->url($attachment->path) : null,
                     'uploaded_by' => $attachment->uploader ? [
                         'id' => $attachment->uploader->id,
                         'name' => $attachment->uploader->name,

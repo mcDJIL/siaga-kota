@@ -16,8 +16,8 @@ import { useFloodMarkers } from '../../../shared/hooks/useFloodMarkers'
 import { MapControlButton } from '../../../../dashboard/shared/map/MapControlButton'
 import { fetchReports } from '../../../../../services/report.service'
 
-const DEFAULT_POSITION = { lat: -6.2088, lng: 106.8229 }
-const DEFAULT_ADDRESS = 'Jl. Jendral Sudirman No. 12, Jakarta Selatan'
+const DEFAULT_POSITION = { lat: -8.1724, lng: 113.7006 }
+const DEFAULT_ADDRESS = 'Jember, Jawa Timur'
 
 function GpsIcon(props) {
   return (

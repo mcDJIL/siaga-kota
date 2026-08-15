@@ -7,4 +7,4 @@ export const WASTE_CATEGORIES = [
   { value: 'lainnya', label: 'Lainnya' },
 ]
 
-export const CATEGORY_ID = '01kyq8sh5hxadrwsawvedeq5h4'
+export const CATEGORY_ID = '01kywhgx69540gw76j5rdmgb57'

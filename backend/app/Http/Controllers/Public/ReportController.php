@@ -21,6 +21,7 @@ class ReportController extends Controller
     public function index(Request $request): AnonymousResourceCollection
     {
         $reports = Report::query()
+            ->withLocationText()
             ->where('user_id', $request->user()->id)
             ->with(['category', 'user'])
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
@@ -64,6 +65,7 @@ class ReportController extends Controller
     public function show(Request $request, string $id): JsonResponse
     {
         $report = Report::query()
+            ->withLocationText()
             ->where('id', $id)
             ->where('user_id', $request->user()->id)
             ->with(['category', 'user', 'assignedOperator', 'statusHistories.actor', 'attachments.uploader'])

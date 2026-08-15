@@ -66,5 +66,5 @@ export const evacuationRoutes = [
   },
 ]
 
-export const mapCenter = [-8.1735, 113.6935]
+export const mapCenter = [-8.1724, 113.7008]
 export const mapZoom = 15

@@ -21,9 +21,9 @@ export function CitizenWasteReportPage() {
       title: '',
       wasteType: '',
       description: '',
-      address: '',
-      latitude: -6.1944,
-      longitude: 106.8229,
+      address: 'Jember, Jawa Timur',
+      latitude: -8.1724,
+      longitude: 113.7006,
       images: [],
     },
   })

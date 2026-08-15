@@ -9,12 +9,15 @@ use App\Events\ReportCreated;
 use App\Events\ReportMarkedEmergency;
 use App\Events\ReportStatusChanged;
 use App\Models\Report;
+use App\Models\ReportAttachment;
 use App\Models\ReportCategory;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class ReportBroadcastTest extends TestCase
@@ -119,9 +122,48 @@ class ReportBroadcastTest extends TestCase
                 'latitude' => -8.1706,
                 'longitude' => 113.7004,
             ])
-            ->assertCreated();
+            ->assertCreated()
+            ->assertJsonPath('data.location.latitude', -8.1706)
+            ->assertJsonPath('data.location.longitude', 113.7004);
 
         Event::assertDispatched(ReportCreated::class);
+    }
+
+    public function test_creating_report_stores_additional_photo_attachment(): void
+    {
+        Storage::fake('public');
+        $this->seed(RoleSeeder::class);
+
+        $citizen = User::factory()->create([
+            'role' => UserRole::Warga->value,
+            'active' => true,
+        ]);
+        $citizen->assignRole(UserRole::Warga->value);
+        $category = ReportCategory::factory()->create(['slug' => 'sampah']);
+
+        $response = $this->actingAs($citizen, 'sanctum')
+            ->post('/api/v1/public/reports', [
+                'category_id' => $category->id,
+                'title' => 'Sampah menumpuk di pinggir jalan',
+                'description' => 'Sudah tiga hari belum diangkut petugas.',
+                'address' => 'Jl. Sumbersari No. 10',
+                'latitude' => -8.1706,
+                'longitude' => 113.7004,
+                'photos' => [
+                    UploadedFile::fake()->image('primary.jpg'),
+                    UploadedFile::fake()->image('additional.jpg'),
+                ],
+            ])
+            ->assertCreated();
+
+        $report = Report::query()->firstOrFail();
+        $this->assertSame(Storage::disk('public')->url($report->photo_path), $response->json('data.photo_url'));
+
+        $attachment = ReportAttachment::query()->firstOrFail();
+
+        $this->assertSame('reporter', $attachment->type->value);
+        $this->assertNotNull($attachment->path);
+        Storage::disk('public')->assertExists($attachment->path);
     }
 
     public function test_updating_status_dispatches_status_changed_event(): void

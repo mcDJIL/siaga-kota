@@ -1,4 +1,4 @@
-export const CITIZEN_MAP_CENTER = [-8.1735, 113.6935]
+export const CITIZEN_MAP_CENTER = [-8.1724, 113.7008]
 export const CITIZEN_MAP_ZOOM = 15
 export const CITIZEN_MAP_FOCUS_ZOOM = 17
 
