@@ -45,11 +45,11 @@ class User extends Authenticatable
         return Attribute::make(
             get: function (): string {
                 if (! $this->avatar_path) {
-                    return url('/default-avatar.png');
+                    return secure_url('/default-avatar.png');
                 }
 
                 // Path tersimpan relatif terhadap disk public, mis. "avatars/xyz.jpg".
-                return url("storage/{$this->avatar_path}");
+                return secure_url("storage/{$this->avatar_path}");
             },
         );
     }
