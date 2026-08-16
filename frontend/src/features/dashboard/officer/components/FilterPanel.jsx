@@ -12,6 +12,7 @@ const REGION_OPTIONS = [
 const STATUS_OPTIONS = [
   { value: 'semua', label: 'Semua Status' },
   { value: 'diverifikasi', label: 'Sudah Terverifikasi' },
+  { value: 'ditugaskan', label: 'Ditugaskan' },
   { value: 'diproses', label: 'Sedang Diproses' },
   { value: 'selesai', label: 'Selesai' },
   { value: 'ditolak', label: 'Ditolak' },

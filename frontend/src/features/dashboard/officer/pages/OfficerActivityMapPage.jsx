@@ -97,10 +97,9 @@ export function OfficerActivityMapPage() {
       setDispatchedOfficerByTask((current) => ({ ...current, [dispatchTask.id]: officerId }))
       refetchTasks()
       refetchOfficers()
+      setDispatchTask(null)
     } catch (err) {
       toast.error(err.message || 'Gagal menugaskan petugas')
-    } finally {
-      setDispatchTask(null)
     }
   }
 

@@ -50,6 +50,7 @@ class DashboardController extends Controller
             'total' => (int) $counts->sum(),
             'menunggu' => $get(ReportStatus::Menunggu),
             'diverifikasi' => $get(ReportStatus::Diverifikasi),
+            'ditugaskan' => $get(ReportStatus::Ditugaskan),
             'diproses' => $get(ReportStatus::Diproses),
             'selesai' => $get(ReportStatus::Selesai),
             'ditolak' => $get(ReportStatus::Ditolak),

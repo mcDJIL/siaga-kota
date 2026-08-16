@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Ops;
 
 use App\Actions\AssignReport;
+use App\Actions\UpdateReportStatus;
 use App\Enums\ReportStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\OfficerResource;
@@ -25,6 +26,7 @@ class ActivityMapController extends Controller
     private const ACTIVE_STATUSES = [
         ReportStatus::Menunggu->value,
         ReportStatus::Diverifikasi->value,
+        ReportStatus::Ditugaskan->value,
         ReportStatus::Diproses->value,
     ];
 
@@ -105,10 +107,8 @@ class ActivityMapController extends Controller
     /**
      * Aksi "Kirim Petugas" — tugaskan laporan ke petugas.
      *
-     * Sesuai PLAN Resolved Decision #5, penugasan hanya mengisi `assigned_to`
-     * dan TIDAK memaksa status menjadi `diproses`. Perubahan status dilakukan
-     * terpisah lewat PATCH /ops/reports/{id}/status agar Impact Points tidak
-     * diberikan sebelum petugas benar-benar menindaklanjuti.
+     * Penugasan mengisi `assigned_to` dan mengubah status laporan menjadi
+     * `ditugaskan`. Status `diproses` tetap dipakai saat petugas mulai menangani.
      *
      * @group Ops - Activity Map
      *
@@ -117,6 +117,7 @@ class ActivityMapController extends Controller
     public function assignOfficer(
         Request $request,
         AssignReport $assignReport,
+        UpdateReportStatus $updateStatus,
         string $reportId
     ): JsonResponse {
         $validated = $request->validate([
@@ -135,7 +136,27 @@ class ActivityMapController extends Controller
             ]);
         }
 
+        $hasActiveTask = $officer->assignedReports()
+            ->where('id', '!=', $report->id)
+            ->whereIn('status', self::ACTIVE_STATUSES)
+            ->exists();
+
+        if ($hasActiveTask) {
+            throw ValidationException::withMessages([
+                'officer_id' => 'Petugas sedang bertugas pada laporan lain.',
+            ]);
+        }
+
         $report = $assignReport->execute($report, $officer);
+
+        if ($report->status !== ReportStatus::Ditugaskan) {
+            $report = $updateStatus->execute(
+                $report,
+                ReportStatus::Ditugaskan->value,
+                $request->user(),
+                'Petugas ditugaskan melalui peta aktivitas.',
+            );
+        }
 
         return response()->json([
             'data' => new ReportResource($report->load(['category', 'user', 'assignedOperator'])),

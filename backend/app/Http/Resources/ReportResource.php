@@ -111,6 +111,7 @@ class ReportResource extends JsonResource
         return match ($this->status->value) {
             'menunggu' => 'Menunggu',
             'diverifikasi' => 'Terverifikasi',
+            'ditugaskan' => 'Ditugaskan',
             'diproses' => 'Sedang Diproses',
             'selesai' => 'Selesai',
             'ditolak' => 'Ditolak',
