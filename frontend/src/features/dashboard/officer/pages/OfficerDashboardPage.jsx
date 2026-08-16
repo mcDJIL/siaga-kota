@@ -20,8 +20,6 @@ export function OfficerDashboardPage() {
             <WeeklyPerformanceChart />
           </div>
         </div>
-
-        <FloatingActionButton onClick={() => {}} />
       </div>
     </DashboardProvider>
   )

@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
-import { Trash2, Waves } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Trash2, Waves, Eye } from 'lucide-react'
 import { Button } from '../../../../../components/ui/Button'
 import { PriorityBadge } from './PriorityBadge'
 import { ReportStatusBadge } from './ReportStatusBadge'
@@ -12,6 +13,7 @@ const CATEGORY_LABELS = { sampah: 'Sampah', banjir: 'Banjir' }
 const COLUMNS = ['ID', 'Kategori', 'Judul', 'Lokasi', 'Prioritas', 'Status', 'Tanggal', 'Aksi']
 
 export function RecentReportsTable() {
+  const navigate = useNavigate()
   const { recentReports, loading } = useDashboardContext()
 
   if (loading) {
@@ -78,8 +80,19 @@ export function RecentReportsTable() {
                     </td>
                     <td className="px-6 py-4 text-sm font-medium text-text-body">{report.date}</td>
                     <td className="px-6 py-4 text-right">
-                      <Button variant="navy" size="sm" className="rounded-md px-4 py-1.5 text-xs">
-                        Proses
+                      <Button
+                        type="button"
+                        variant="navy"
+                        size="sm"
+                        className="inline-flex items-center gap-1.5 rounded-md px-4 py-1.5 text-xs"
+                        onClick={() => {
+                          const reportId = typeof report.reportId === 'object' ? report.reportId?.id : report.reportId
+                          const reportType = report.category === 'banjir' ? 'flood' : 'waste'
+                          navigate(`/officer/reports/${reportType}/${reportId}`)
+                        }}
+                      >
+                        <Eye className="h-3.5 w-3.5" aria-hidden="true" />
+                        Lihat Detail
                       </Button>
                     </td>
                   </tr>

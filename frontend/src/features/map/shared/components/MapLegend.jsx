@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Info, ChevronDown } from 'lucide-react'
 
 const LEGEND_ITEMS = [
-  { key: 'riskZones', label: 'Flood Risk Zones', color: '#BA1A1A' },
+  { key: 'riskZones', label: 'AI Flood Prediction', color: '#BA1A1A' },
   { key: 'tps', label: 'TPS / Waste Bank', color: '#74777F' },
   { key: 'evacuation', label: 'Evacuation Route', color: '#00522F' },
 ]

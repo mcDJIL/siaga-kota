@@ -19,6 +19,17 @@ import { ACTIVITY_MAP_CENTER, ACTIVITY_MAP_ZOOM, MAP_LAYERS, MAP_LEGEND_ITEMS } 
 
 const CATEGORY_ROUTES = { sampah: 'waste', banjir: 'flood' }
 
+function getTaskPosition(task) {
+  const latitude = Number(task.latitude ?? task.location?.latitude)
+  const longitude = Number(task.longitude ?? task.location?.longitude)
+
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude) || (latitude === 0 && longitude === 0)) {
+    return null
+  }
+
+  return [latitude, longitude]
+}
+
 export function OfficerActivityMapPage() {
   const navigate = useNavigate()
 
@@ -63,8 +74,10 @@ export function OfficerActivityMapPage() {
   const handleSelectTask = (taskId) => {
     const task = allTasks.find((item) => item.id === taskId)
     setSelectedTaskId(taskId)
-    if (task && task.latitude && task.longitude) {
-      setFocusPosition([task.latitude, task.longitude])
+
+    const position = task ? getTaskPosition(task) : null
+    if (position) {
+      setFocusPosition(position)
     }
   }
 
@@ -99,7 +112,7 @@ export function OfficerActivityMapPage() {
   // Map task position
   const mapTasksWithPosition = visibleTasks.map((task) => ({
     ...task,
-    position: [task.latitude || 0, task.longitude || 0],
+    position: getTaskPosition(task) || [0, 0],
   }))
 
   // Show skeleton when either tasks or officers are loading (initial load)

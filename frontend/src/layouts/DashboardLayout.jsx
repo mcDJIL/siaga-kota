@@ -1,6 +1,23 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { DashboardSidebar } from '../features/dashboard/officer/components/layout/DashboardSidebar'
 import { DashboardTopbar } from '../features/dashboard/officer/components/layout/DashboardTopbar'
+import { OFFICER_PROFILE } from '../features/dashboard/officer/data/dashboardData'
+import { me } from '../services/auth.service'
+
+function mapDashboardProfile(user, fallbackProfile) {
+  const role = String(user?.role || '').toLowerCase()
+  const defaultRole = /warga|citizen/.test(role)
+    ? 'Warga'
+    : /admin|government|gov/.test(role)
+      ? 'Admin'
+      : 'Petugas'
+
+  return {
+    name: user?.name || fallbackProfile?.name || OFFICER_PROFILE.name,
+    role: user?.position || defaultRole || fallbackProfile?.role,
+    avatar: user?.avatar_url || fallbackProfile?.avatar || OFFICER_PROFILE.avatar,
+  }
+}
 
 export function DashboardLayout({
   children,
@@ -12,6 +29,27 @@ export function DashboardLayout({
   profileHref,
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [loadedProfile, setLoadedProfile] = useState(profile || OFFICER_PROFILE)
+
+  useEffect(() => {
+    let mounted = true
+
+    me()
+      .then((response) => {
+        const user = response?.data?.user || response?.data
+        if (mounted && user) {
+          localStorage.setItem('user', JSON.stringify(user))
+          setLoadedProfile(mapDashboardProfile(user, profile))
+        }
+      })
+      .catch(() => {})
+
+    return () => {
+      mounted = false
+    }
+  }, [profile])
+
+  const dashboardProfile = loadedProfile
 
   return (
     <div className="flex min-h-screen bg-bg-soft">
@@ -19,7 +57,7 @@ export function DashboardLayout({
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
         navItems={navItems}
-        profile={profile}
+        profile={dashboardProfile}
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
@@ -28,7 +66,7 @@ export function DashboardLayout({
           onOpenSidebar={() => setIsSidebarOpen(true)}
           searchPlaceholder={searchPlaceholder}
           notifications={notifications}
-          profile={profile}
+          profile={dashboardProfile}
           profileHref={profileHref}
         />
         <main className="flex-1">{children}</main>

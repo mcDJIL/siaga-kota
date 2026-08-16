@@ -14,9 +14,12 @@ export function AvatarUploader({ value, onChange }) {
       if (!file) return
 
       setIsCompressing(true)
-      const compressed = await compressImage(file)
-      onChange?.(URL.createObjectURL(compressed))
-      setIsCompressing(false)
+      try {
+        const compressed = await compressImage(file)
+        await onChange?.(compressed)
+      } finally {
+        setIsCompressing(false)
+      }
     },
     [onChange]
   )

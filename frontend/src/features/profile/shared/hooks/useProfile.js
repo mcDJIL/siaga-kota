@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { fetchReports, updateProfile, changePassword as changePasswordAPI, deleteAccount as deleteAccountAPI } from '../../../../services/report.service'
+import { uploadAvatar } from '../../../../services/auth.service'
 
 export function useProfile() {
   const [profile, setProfile] = useState(null)
@@ -66,9 +67,27 @@ export function useProfile() {
     }
   }, [])
 
-  function updateAvatar(nextAvatarUrl) {
-    setProfile((current) => ({ ...current, avatar: nextAvatarUrl }))
-    toast.success('Foto profil berhasil diperbarui.')
+  async function updateAvatar(file) {
+    try {
+      const response = await uploadAvatar(file)
+      const user = response?.data?.user
+
+      if (!user) {
+        throw new Error('Data profil setelah upload tidak tersedia.')
+      }
+
+      localStorage.setItem('user', JSON.stringify(user))
+      setProfile((current) => ({
+        ...current,
+        fullName: user.name,
+        email: user.email,
+        phone: user.phone,
+        avatar: user.avatar_url,
+      }))
+      toast.success('Foto profil berhasil diperbarui.')
+    } catch (err) {
+      toast.error(err.message || 'Gagal mengunggah foto profil.')
+    }
   }
 
   async function saveProfile(values) {
