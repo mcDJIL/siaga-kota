@@ -234,8 +234,8 @@ class FloodReportController extends Controller
             $locationText = $report->address ?: $this->parseGeometryPoint($report->location_text ?? '');
 
             return [
-                // Kode laporan human-friendly sesuai PLAN §5.2, bukan potongan ULID.
-                'id' => $report->code,
+                'id' => $report->id,
+                'code' => $report->code,
                 'location' => $locationText,
                 'waterLevel' => (int) ($report->water_level_cm ?? 0),
                 'severity' => $this->determineSeverity($report->water_level_cm ?? 0),

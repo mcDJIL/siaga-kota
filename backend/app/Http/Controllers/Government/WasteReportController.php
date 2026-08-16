@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Government;
 
+use App\Actions\UpdateReportStatus;
+use App\Enums\ReportStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Report;
 use Carbon\Carbon;
@@ -210,6 +212,7 @@ class WasteReportController extends Controller
 
             return [
                 'id' => '#WST-'.substr($report->id, -4),
+                'ulid' => $report->id,
                 'location' => $locationText,
                 'category' => $report->category?->name ?? 'Unknown',
                 'status' => $report->status ?? 'menunggu',
@@ -228,6 +231,37 @@ class WasteReportController extends Controller
                 'completed' => Report::whereHas('category', fn ($q) => $q->where('slug', 'sampah'))
                     ->where('status', 'selesai')
                     ->count(),
+            ],
+        ]);
+    }
+
+    public function verifyReport(Request $request, UpdateReportStatus $updateStatus, string $id): JsonResponse
+    {
+        $report = Report::query()
+            ->whereHas('category', fn ($q) => $q->where('slug', 'sampah'))
+            ->findOrFail($id);
+
+        if ($report->status !== ReportStatus::Menunggu) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Laporan tidak dalam status menunggu verifikasi.',
+            ], 422);
+        }
+
+        $report = $updateStatus->execute(
+            $report,
+            ReportStatus::Diverifikasi->value,
+            $request->user(),
+            'Laporan sampah diverifikasi oleh admin.',
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Laporan sampah berhasil diverifikasi.',
+            'data' => [
+                'id' => $report->id,
+                'status' => $report->status->value,
+                'verified_at' => $report->accepted_at?->format('d M, H:i'),
             ],
         ]);
     }

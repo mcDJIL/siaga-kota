@@ -3,17 +3,12 @@ import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { Select } from '../../../../../components/ui/Select'
-import { MONTH_OPTIONS, REPORT_TYPE_OPTIONS, YEAR_OPTIONS } from '../../data/monthlyTrendData'
+import { REPORT_TYPE_OPTIONS, YEAR_OPTIONS } from '../../data/monthlyTrendData'
 
 export function MonthlyTrendChart({ data = [], selectedYear = 2026, onYearChange = () => {} }) {
-  const [month, setMonth] = useState('Jun')
   const [reportType, setReportType] = useState('all')
 
-  const chartData = useMemo(() => {
-    if (!data || data.length === 0) return []
-    const monthIndex = MONTH_OPTIONS.indexOf(month)
-    return data.slice(0, monthIndex + 1)
-  }, [data, month])
+  const chartData = data
 
   return (
     <motion.div
@@ -25,23 +20,7 @@ export function MonthlyTrendChart({ data = [], selectedYear = 2026, onYearChange
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="text-xl font-semibold text-text-body">Tinjauan Tren Bulanan</h3>
 
-        <div className="grid grid-cols-3 gap-2 sm:flex sm:items-center">
-          <Select
-            aria-label="Pilih bulan"
-            value={month}
-            onChange={(event) => {
-              setMonth(event.target.value)
-              toast.success('Filter berhasil diterapkan.')
-            }}
-            className="py-2 pr-8 pl-3 text-xs"
-          >
-            {MONTH_OPTIONS.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </Select>
-
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
           <Select
             aria-label="Pilih tahun"
             value={selectedYear}

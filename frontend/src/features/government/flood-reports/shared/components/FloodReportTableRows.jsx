@@ -1,10 +1,11 @@
-import { ArrowUpDown } from 'lucide-react'
+import { ArrowUpDown, Loader2 } from 'lucide-react'
 import { cn } from '../../../../../lib/cn'
 import { Button } from '../../../../../components/ui/Button'
 
 export const STATUS_STYLES = {
   menunggu: { label: 'Menunggu', className: 'bg-[#FFDAD6] text-[#93000A]' },
   terverifikasi: { label: 'Terverifikasi', className: 'bg-badge-gold/30 text-[#715C00]' },
+  diverifikasi: { label: 'Terverifikasi', className: 'bg-badge-gold/30 text-[#715C00]' },
   diproses: { label: 'Diproses', className: 'bg-[#B3E5FC] text-[#01579B]' },
   selesai: { label: 'Selesai', className: 'bg-[#C8E6C9] text-[#1B5E20]' },
 }
@@ -17,7 +18,7 @@ const COLUMNS = [
   { key: 'status', label: 'Status' },
 ]
 
-export function FloodReportTableRows({ reports, onSort, onVerify, onOpenDetail }) {
+export function FloodReportTableRows({ reports, onSort, onVerify, onOpenDetail, verifyingReportId = null }) {
   return (
     <table className="w-full min-w-[720px] border-collapse text-left">
       <thead className="bg-bg-blue-soft">
@@ -64,8 +65,15 @@ export function FloodReportTableRows({ reports, onSort, onVerify, onOpenDetail }
                 </td>
                 <td className="px-4 py-4 text-right">
                   {report.status === 'menunggu' ? (
-                    <Button variant="navy" size="sm" className="rounded-md px-4 py-1.5 text-xs" onClick={() => onVerify(report)}>
-                      Verifikasi
+                    <Button
+                      variant="navy"
+                      size="sm"
+                      className="rounded-md px-4 py-1.5 text-xs"
+                      onClick={() => onVerify(report)}
+                      disabled={verifyingReportId === report.id}
+                    >
+                      {verifyingReportId === report.id && <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />}
+                      {verifyingReportId === report.id ? 'Memverifikasi...' : 'Verifikasi'}
                     </Button>
                   ) : (
                     <Button

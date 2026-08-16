@@ -1,6 +1,9 @@
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? ''
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  import.meta.env.VITE_API_BASE_URL_PROD ||
+  ''
 const AUTH_TOKEN_KEY = 'siagakota_auth_token'
 
 function getAuthToken() {
@@ -65,5 +68,18 @@ export async function getRecentWasteReports(district) {
     return data
   } catch (error) {
     throw new Error(error.response?.data?.message ?? error.message ?? 'Gagal mengambil laporan sampah terbaru')
+  }
+}
+
+export async function verifyWasteReport(reportId) {
+  try {
+    const { data } = await axios.patch(
+      `${API_BASE_URL}/api/v1/government/waste-reports/${reportId}/verify`,
+      {},
+      getAuthConfig()
+    )
+    return data
+  } catch (error) {
+    throw new Error(error.response?.data?.message ?? error.message ?? 'Gagal memverifikasi laporan sampah')
   }
 }

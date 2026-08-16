@@ -6,6 +6,7 @@ import { cn } from '../../../../../lib/cn'
 import { SearchInput } from '../../../../reports/shared/components/SearchInput'
 import { Pagination } from '../../../../reports/shared/components/Pagination'
 import { ReportDetailModal } from './ReportDetailModal'
+import { getGovernmentReportDetail } from '../../../../../services/government-dashboard.service'
 
 const PAGE_SIZE = 5
 
@@ -63,9 +64,49 @@ export function RecentReportTable({ reports = [] }) {
     }))
   }
 
-  function handleOpenReport(report) {
+  async function handleOpenReport(report) {
+    if (!report.id) {
+      toast.error('ULID laporan tidak tersedia.')
+      return
+    }
+
     setSelectedReport(report)
-    toast.success('Detail laporan berhasil dimuat.')
+
+    try {
+      const response = await getGovernmentReportDetail(report.id)
+      const detail = response?.data
+
+      if (!detail) {
+        throw new Error('Data detail laporan tidak tersedia.')
+      }
+
+      const histories = Array.isArray(detail.status_histories) ? detail.status_histories : []
+      const attachments = Array.isArray(detail.attachments) ? detail.attachments : []
+      const statusTimeline = histories.map((history) => ({
+        title: history.to_status || 'Status diperbarui',
+        description: history.note || history.created_at || '-',
+        status: history.to_status === detail.status ? 'current' : 'completed',
+      }))
+
+      setSelectedReport({
+        ...report,
+        id: detail.code || report.id,
+        ulid: detail.id || report.ulid,
+        type: detail.category?.slug || report.type,
+        typeLabel: detail.category?.name || report.typeLabel,
+        location: detail.location?.address || report.location || '-',
+        status: detail.status || report.status,
+        reporter: detail.reporter?.name || report.reporter || '-',
+        category: detail.category?.name || report.category || report.typeLabel,
+        description: detail.description || report.description || '-',
+        assignedDepartment: detail.assigned_operator?.name || report.assignedDepartment || 'Not assigned',
+        photos: attachments.length || (detail.photo_url ? 1 : 0),
+        statusTimeline,
+      })
+      toast.success('Detail laporan berhasil dimuat.')
+    } catch (error) {
+      toast.error(error.message || 'Gagal memuat detail laporan.')
+    }
   }
 
   return (
