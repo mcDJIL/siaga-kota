@@ -49,6 +49,7 @@ class MapController extends Controller
         // Reports (laporan warga)
         if (empty($layers) || in_array('reports', $layers)) {
             $reports = Report::query()
+                ->withLocationText()
                 ->with('category')
                 ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
                 ->when($request->filled('category'), fn ($q) => $q->where('category_id', $request->category))

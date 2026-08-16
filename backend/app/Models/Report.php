@@ -8,6 +8,7 @@ use App\Enums\WasteType;
 use App\Services\NotificationService;
 use Database\Factories\ReportFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 
 #[Fillable([
     'code',
@@ -104,6 +106,13 @@ class Report extends Model
         ];
     }
 
+    public function scopeWithLocationText(Builder $query): Builder
+    {
+        return $query
+            ->select('reports.*')
+            ->selectRaw('ST_AsText(reports.location) as location_wkt');
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -152,7 +161,7 @@ class Report extends Model
      */
     private function parsePointCoordinates(): ?array
     {
-        $location = $this->attributes['location'] ?? null;
+        $location = $this->attributes['location_wkt'] ?? $this->attributes['location'] ?? null;
 
         if (! $location) {
             return null;

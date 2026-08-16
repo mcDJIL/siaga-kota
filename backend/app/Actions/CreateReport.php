@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Enums\ReportAttachmentType;
 use App\Enums\ReportStatus;
 use App\Events\ReportCreated;
 use App\Models\Report;
@@ -66,8 +67,8 @@ class CreateReport
                     foreach (array_slice($photos, 1) as $photo) {
                         $path = $this->storePhoto($photo, $report->id);
                         $report->attachments()->create([
-                            'file_path' => $path,
-                            'file_type' => 'image',
+                            'path' => $path,
+                            'type' => ReportAttachmentType::Reporter->value,
                             'uploaded_by' => $user->id,
                         ]);
                     }
@@ -84,7 +85,10 @@ class CreateReport
                 'created_at' => now(),
             ]);
 
-            $report = $report->fresh()->load(['category', 'user']);
+            $report = Report::query()
+                ->withLocationText()
+                ->with(['category', 'user'])
+                ->findOrFail($report->id);
 
             ReportCreated::dispatch($report);
 

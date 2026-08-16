@@ -8,7 +8,7 @@ import { FloodReportForm } from '../components/FloodReportForm'
 import { ReportSuccessDialog } from '../../../shared/components/ReportSuccessDialog'
 import { floodReportSchema } from '../validation/floodReportSchema'
 
-const FLOOD_CATEGORY_ID = '01kyq8sh5rprvjb4jfc8tdhkk7'
+const FLOOD_CATEGORY_ID = '01kywhgx6dwv132vhvdge7xf4a'
 
 const GUIDANCE_CARDS = [
   {
@@ -36,9 +36,9 @@ export function CitizenFloodReportPage() {
     mode: 'onChange',
     defaultValues: {
       title: '',
-      address: 'Jl. Jendral Sudirman No. 12, Jakarta Selatan',
-      latitude: -6.2088,
-      longitude: 106.8229,
+      address: 'Jember, Jawa Timur',
+      latitude: -8.1724,
+      longitude: 113.7006,
       water_level_cm: '',
       description: '',
       agreement: false,

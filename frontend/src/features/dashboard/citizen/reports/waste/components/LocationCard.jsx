@@ -5,7 +5,7 @@ import { LocationPickerMap } from '../../../../shared/map/LocationPickerMap'
 import { MapControlButton } from '../../../../shared/map/MapControlButton'
 import { useLocationPicker } from '../../../../shared/map/hooks/useLocationPicker'
 
-const DEFAULT_POSITION = { lat: -6.1944, lng: 106.8229 }
+const DEFAULT_POSITION = { lat: -8.1724, lng: 113.7006 }
 
 function GpsIcon(props) {
   return (
@@ -23,6 +23,7 @@ export function LocationCard() {
 
   const { position, address, isLocating, setPosition, locate } = useLocationPicker({
     initialPosition: DEFAULT_POSITION,
+    initialAddress: 'Jember, Jawa Timur',
     onChange: (next, newAddress) => {
       setValue('latitude', next.lat, { shouldValidate: true })
       setValue('longitude', next.lng, { shouldValidate: true })

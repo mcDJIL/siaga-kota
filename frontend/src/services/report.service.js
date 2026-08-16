@@ -69,6 +69,15 @@ export async function fetchReport(reportId) {
   }
 }
 
+export async function fetchMapPoints() {
+  try {
+    const response = await axiosClient.get('/api/v1/map/points', attachAuthHeader({ params: { layer: 'reports' } }))
+    return response.data.features ?? []
+  } catch (error) {
+    throw formatAxiosError(error)
+  }
+}
+
 export async function submitReport(formData) {
   try {
     const requestBody = new FormData()
@@ -99,11 +108,7 @@ export async function submitReport(formData) {
       requestBody.append(key, String(value))
     })
 
-    const config = attachAuthHeader()
-    config.headers = config.headers || {}
-    config.headers['Content-Type'] = 'multipart/form-data'
-
-    const response = await axiosClient.post('/api/v1/public/reports', requestBody, config)
+    const response = await axiosClient.post('/api/v1/public/reports', requestBody, attachAuthHeader())
     return response.data
   } catch (error) {
     throw formatAxiosError(error)

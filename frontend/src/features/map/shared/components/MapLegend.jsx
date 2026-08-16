@@ -3,14 +3,17 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Info, ChevronDown } from 'lucide-react'
 
 const LEGEND_ITEMS = [
-  { key: 'waste', label: 'Waste Reports', color: '#006D40', count: 124 },
-  { key: 'flood', label: 'Flood Reports', color: '#455F88', count: 8 },
   { key: 'riskZones', label: 'Flood Risk Zones', color: '#BA1A1A' },
   { key: 'tps', label: 'TPS / Waste Bank', color: '#74777F' },
   { key: 'evacuation', label: 'Evacuation Route', color: '#00522F' },
 ]
 
-export function MapLegend({ className = '' }) {
+export function MapLegend({ className = '', wasteCount = 0, floodCount = 0 }) {
+  const reportLegendItems = [
+    { key: 'waste', label: 'Waste Reports', color: '#006D40', count: wasteCount },
+    { key: 'flood', label: 'Flood Reports', color: '#455F88', count: floodCount },
+  ]
+  const legendItems = [...reportLegendItems, ...LEGEND_ITEMS]
   const [isOpen, setIsOpen] = useState(true)
 
   return (
@@ -43,7 +46,7 @@ export function MapLegend({ className = '' }) {
             className="overflow-hidden"
           >
             <ul className="mt-4 flex flex-col gap-4">
-              {LEGEND_ITEMS.map((item) => (
+              {legendItems.map((item) => (
                 <li key={item.key} className="flex items-center gap-3">
                   <span
                     className="h-3 w-3 shrink-0 rounded-full"

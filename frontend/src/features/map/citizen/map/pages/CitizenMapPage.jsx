@@ -13,35 +13,37 @@ import { useMapSearch } from '../../../shared/hooks/useMapSearch'
 import { useMarkerSelection } from '../../../shared/hooks/useMarkerSelection'
 import { buildSearchIndex, filterMarkersByTab } from '../../../shared/utils/markerHelpers'
 import { focusMapOnPosition } from '../../../shared/utils/mapHelpers'
-import { fetchReports } from '../../../../../services/report.service'
+import { fetchMapPoints } from '../../../../../services/report.service'
 import { tpsMarkers } from '../data/tpsMarkers'
 import { riskZones } from '../data/riskZones'
 import { evacuationRoutes } from '../data/evacuationRoutes'
 
-// Parse location - bisa format POINT atau object dengan latitude/longitude
-function parseLocation(location) {
-  if (!location) return null
+function mapReportFeature(feature) {
+  const [longitude, latitude] = feature.geometry?.coordinates ?? []
+  const properties = feature.properties ?? {}
 
-  // Jika location adalah object dengan latitude/longitude
-  if (typeof location === 'object' && location.latitude && location.longitude) {
-    return {
-      lat: Number(location.latitude),
-      lng: Number(location.longitude),
-    }
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+    return null
   }
 
-  // Jika location adalah string POINT format: POINT(lng lat)
-  if (typeof location === 'string') {
-    const match = String(location).match(/POINT\(([^ ]+)\s+([^ ]+)\)/)
-    if (match) {
-      return {
-        lng: Number(match[1]),
-        lat: Number(match[2]),
-      }
-    }
-  }
+  const createdAt = properties.created_at ? new Date(properties.created_at) : null
+  const hoursAgo = createdAt ? Math.max(0, Math.floor((Date.now() - createdAt.getTime()) / 3600000)) : 0
+  const isWasteReport = properties.category?.slug === 'sampah'
 
-  return null
+  return {
+    id: properties.id,
+    position: { lat: latitude, lng: longitude },
+    title: properties.title ?? properties.name ?? (isWasteReport ? 'Laporan Sampah' : 'Laporan Banjir'),
+    category: isWasteReport ? 'Sampah' : 'Banjir',
+    address: properties.address,
+    status: properties.status,
+    statusLabel: properties.status_label,
+    priority: properties.priority,
+    description: properties.description,
+    waterLevel: properties.water_level_cm,
+    hoursAgo,
+    createdAt: properties.created_at,
+  }
 }
 
 export function CitizenMapPage() {
@@ -60,48 +62,13 @@ export function CitizenMapPage() {
 
     async function loadReports() {
       try {
-        const res = await fetchReports({ page: 1, perPage: 100 })
-        const items = res?.data ?? []
-
-        // Map laporan sampah
-        const wasteData = items
-          .filter((r) => r.category?.slug === 'sampah' && r.location)
-          .map((r) => {
-            const position = parseLocation(r.location)
-
-            return position
-              ? {
-                  id: r.id,
-                  position,
-                  title: r.title,
-                  address: typeof r.location === 'object' ? r.location.address : 'Lokasi Sampah',
-                  status: r.status,
-                  wasteType: r.waste_type,
-                  description: r.description,
-                }
-              : null
-          })
+        const features = await fetchMapPoints()
+        const reports = features
+          .filter((feature) => feature.properties?.layer === 'report')
+          .map(mapReportFeature)
           .filter(Boolean)
-
-        // Map laporan banjir
-        const floodData = items
-          .filter((r) => r.category?.slug === 'banjir' && r.location)
-          .map((r) => {
-            const position = parseLocation(r.location)
-
-            return position
-              ? {
-                  id: r.id,
-                  position,
-                  title: r.title,
-                  address: typeof r.location === 'object' ? r.location.address : 'Lokasi Banjir',
-                  status: r.status,
-                  waterLevel: r.water_level_cm,
-                  description: r.description,
-                }
-              : null
-          })
-          .filter(Boolean)
+        const wasteData = reports.filter((report) => report.category === 'Sampah')
+        const floodData = reports.filter((report) => report.category === 'Banjir')
 
         if (mounted) {
           setApiWasteMarkers(wasteData)
@@ -149,23 +116,25 @@ export function CitizenMapPage() {
       className="relative h-[calc(100vh-4rem)] min-h-[560px] w-full overflow-hidden bg-bg-blue-lighter"
       aria-label="Peta Aktivitas Kota"
     >
+      {!isLoading && (
+        <div className="absolute inset-0 z-0">
+          <SmartMap
+            mapRef={setMap}
+            wasteMarkers={filteredWasteMarkers}
+            floodMarkers={filteredFloodMarkers}
+            tpsMarkers={tpsMarkers}
+            riskZones={riskZones}
+            evacuationRoutes={evacuationRoutes}
+            layers={layers}
+            selectedObject={selectedObject}
+            onSelectMarker={handleSelectMarker}
+          />
+        </div>
+      )}
+
       {isLoading && <MapLoadingSkeleton />}
 
-      <div className="absolute inset-0 z-0">
-        <SmartMap
-          mapRef={setMap}
-          wasteMarkers={filteredWasteMarkers}
-          floodMarkers={filteredFloodMarkers}
-          tpsMarkers={tpsMarkers}
-          riskZones={riskZones}
-          evacuationRoutes={evacuationRoutes}
-          layers={layers}
-          selectedObject={selectedObject}
-          onSelectMarker={handleSelectMarker}
-        />
-      </div>
-
-      <div className="absolute inset-0 z-20 pointer-events-none flex flex-col justify-between">
+      {!isLoading && <div className="absolute inset-0 z-20 pointer-events-none flex flex-col justify-between">
         <div className="flex flex-col gap-3 p-4 sm:p-6 sm:max-w-md pointer-events-none">
           <div className="flex items-start gap-2 pointer-events-auto">
             <div className="min-w-0 flex-1">
@@ -190,7 +159,11 @@ export function CitizenMapPage() {
 
         <div className="flex items-end justify-between p-4 sm:p-6 pointer-events-none">
           <div className="pointer-events-auto">
-            <MapLegend className="w-52 sm:w-64" />
+            <MapLegend
+              className="w-52 sm:w-64"
+              wasteCount={apiWasteMarkers.length}
+              floodCount={apiFloodMarkers.length}
+            />
           </div>
           <div className="pointer-events-auto">
             <MapControlButtons
@@ -201,7 +174,7 @@ export function CitizenMapPage() {
             />
           </div>
         </div>
-      </div>
+      </div>}
     </div>
   )
 }

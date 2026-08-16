@@ -81,6 +81,7 @@ class ReportController extends Controller
     public function show(string $id): JsonResponse
     {
         $report = Report::query()
+            ->withLocationText()
             ->with(['category', 'user', 'assignedOperator', 'statusHistories.actor', 'attachments.uploader'])
             ->findOrFail($id);
 
@@ -340,6 +341,7 @@ class ReportController extends Controller
     private function baseReportQuery(Request $request): Builder
     {
         return Report::query()
+            ->withLocationText()
             ->with(['category', 'user', 'assignedOperator'])
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
             ->when($request->filled('search'), function (Builder $query) use ($request): void {

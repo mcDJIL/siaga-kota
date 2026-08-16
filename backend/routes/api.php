@@ -61,6 +61,14 @@ Route::prefix('v1')->group(function (): void {
                     Route::post('/', 'store');
                     Route::get('/{id}', 'show');
                 });
+
+            // Gamification (M6 - citizen)
+            Route::get('gamification/summary', [\App\Http\Controllers\Public\GamificationController::class, 'summary']);
+            Route::get('gamification/points', [\App\Http\Controllers\Public\GamificationController::class, 'points']);
+            Route::get('gamification/badges', [\App\Http\Controllers\Public\GamificationController::class, 'badges']);
+            Route::get('gamification/rewards', [\App\Http\Controllers\Public\GamificationController::class, 'rewards']);
+            Route::post('gamification/rewards/{id}/redeem', [\App\Http\Controllers\Public\GamificationController::class, 'redeem']);
+            Route::get('gamification/redemptions', [\App\Http\Controllers\Public\GamificationController::class, 'redemptions']);
         });
 
     Route::middleware(['auth:sanctum', 'role:petugas,sanctum', 'throttle:petugas'])
