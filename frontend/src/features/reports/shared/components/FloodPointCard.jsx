@@ -9,6 +9,8 @@ const SEVERITY_STYLES = {
 }
 
 export function FloodPointCard({ marker, isSelected, onSelect }) {
+  const reporter = typeof marker.reporter === 'string' ? marker.reporter : marker.reporter?.name || 'Warga'
+
   return (
     <button
       type="button"
@@ -32,9 +34,9 @@ export function FloodPointCard({ marker, isSelected, onSelect }) {
       </div>
       <div className="flex items-center gap-1.5 pt-1">
         <span className="flex h-4 w-4 items-center justify-center rounded-full bg-bg-blue-light text-[8px] font-bold text-navy">
-          {marker.reporter.charAt(0)}
+          {reporter.charAt(0)}
         </span>
-        <span className="text-text-muted">{marker.reporter}</span>
+        <span className="text-text-muted">{reporter}</span>
       </div>
     </button>
   )

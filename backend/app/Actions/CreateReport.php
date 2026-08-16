@@ -11,6 +11,7 @@ use App\Models\ReportStatusHistory;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use RuntimeException;
 
 class CreateReport
 {
@@ -100,14 +101,14 @@ class CreateReport
     {
         // Strip EXIF bisa pakai Intervention Image nanti
         // Untuk M1, langsung upload tanpa processing
-        $filename = sprintf(
-            'reports/%s/%s.%s',
-            $reportId,
-            uniqid('photo_'),
-            $photo->getClientOriginalExtension()
-        );
+        $extension = $photo->extension() ?: 'jpg';
+        $filename = sprintf('photo_%s.%s', uniqid(), $extension);
 
         $path = $photo->storeAs('reports/'.$reportId, basename($filename), 'public');
+
+        if (! is_string($path) || $path === '') {
+            throw new RuntimeException('Foto laporan gagal disimpan ke storage.');
+        }
 
         return $path;
     }

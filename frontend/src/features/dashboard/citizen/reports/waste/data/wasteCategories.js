@@ -1,9 +1,7 @@
 export const WASTE_CATEGORIES = [
   { value: 'plastik', label: 'Plastik' },
   { value: 'organik', label: 'Organik' },
-  { value: 'konstruksi', label: 'Konstruksi' },
-  { value: 'rumah_tangga', label: 'Rumah Tangga' },
-  { value: 'industri', label: 'Industri' },
+  { value: 'b3', label: 'B3' },
   { value: 'lainnya', label: 'Lainnya' },
 ]
 

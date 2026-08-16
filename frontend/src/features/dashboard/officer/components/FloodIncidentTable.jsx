@@ -55,7 +55,8 @@ export function FloodIncidentTable({
   const navigate = useNavigate()
   
   const handleViewDetail = (reportId) => {
-    navigate(`/officer/reports/flood/${reportId}`)
+    const normalizedReportId = typeof reportId === 'object' ? reportId?.id : reportId
+    navigate(`/officer/reports/flood/${normalizedReportId}`)
   }
 
   const columns = getColumns(handleViewDetail)

@@ -62,7 +62,7 @@ export function OfficerFloodReportDetailPage() {
 
   useEffect(() => {
     if (apiReport?.attachments && photos.length === 0) {
-      setPhotos(apiReport.attachments.map(a => ({ url: a.url, id: a.id })))
+      setPhotos(apiReport.attachments.map((attachment) => attachment.url).filter(Boolean))
     }
   }, [apiReport, photos.length])
 

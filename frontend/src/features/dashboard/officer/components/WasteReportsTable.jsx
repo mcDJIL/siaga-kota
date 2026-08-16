@@ -107,14 +107,15 @@ const COLUMNS = [
 
 function ActionButton({ reportId }) {
   const navigate = useNavigate()
+  const normalizedReportId = typeof reportId === 'object' ? reportId?.id : reportId
 
   return (
     <motion.button
       type="button"
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
-      onClick={() => navigate(`/officer/reports/waste/${reportId}`)}
-      aria-label={`Lihat detail laporan ${reportId}`}
+      onClick={() => navigate(`/officer/reports/waste/${normalizedReportId}`)}
+      aria-label={`Lihat detail laporan ${normalizedReportId}`}
       className="rounded-full p-2 text-navy hover:bg-bg-blue-soft"
     >
       <Eye className="h-4 w-4" aria-hidden="true" />

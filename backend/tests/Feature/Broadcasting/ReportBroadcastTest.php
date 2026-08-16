@@ -150,8 +150,8 @@ class ReportBroadcastTest extends TestCase
                 'latitude' => -8.1706,
                 'longitude' => 113.7004,
                 'photos' => [
-                    UploadedFile::fake()->image('primary.jpg'),
-                    UploadedFile::fake()->image('additional.jpg'),
+                    UploadedFile::fake()->image('primary'),
+                    UploadedFile::fake()->image('additional'),
                 ],
             ])
             ->assertCreated();
@@ -164,6 +164,11 @@ class ReportBroadcastTest extends TestCase
         $this->assertSame('reporter', $attachment->type->value);
         $this->assertNotNull($attachment->path);
         Storage::disk('public')->assertExists($attachment->path);
+
+        $this->actingAs($citizen, 'sanctum')
+            ->getJson("/api/v1/public/reports/{$report->id}")
+            ->assertOk()
+            ->assertJsonPath('data.attachments.0.url', Storage::disk('public')->url($attachment->path));
     }
 
     public function test_updating_status_dispatches_status_changed_event(): void
